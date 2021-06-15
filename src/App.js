@@ -34,7 +34,7 @@ function App() {
 
   function startVideo() {
     navigator.mediaDevices
-      .getUserMedia({ width: 1280, height: 720 })
+      .getUserMedia({ audio: true, video: { width: 1280, height: 720 } })
       .then((stream) => {
         setMediaStream(stream);
         videoRef.current.srcObject = stream;
