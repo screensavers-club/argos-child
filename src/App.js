@@ -51,6 +51,8 @@ function App() {
       port: process.env.REACT_APP_PEER_SERVER_PORT,
       debug: 2,
       path: "/peerjs/myapp",
+      iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
+      sdpSemantics: "unified-plan",
     });
     setPeer(_peer);
 
