@@ -1,111 +1,181 @@
 import { useEffect, useRef, useState } from "react";
-import "./App.css";
 import Peer from "peerjs";
+import AppFrame from "./components/app-frame";
+import StatusBar from "./components/status-bar";
+import VideoFrame from "./components/video-frame";
+import TabBar from "./components/tab-bar";
+import PeerList from "./components/peers";
+import { People } from "react-ikonate";
+import styled from "styled-components";
+import RoomStart from "./pages/room_start";
+import Error from "./pages/error";
+import SelectRooms from "./pages/select_room";
+import EnterPassword from "./pages/enter_password";
+import RoomJoined from "./pages/room_joined";
+
+import _ from "lodash";
+
+import { useMachine } from "@xstate/react";
+import argosChildMachine from "./argos-child-machine.js";
+import { inspect } from "@xstate/inspect";
+import Button from "./components/button";
+
+inspect({
+  // options
+  // url: 'https://statecharts.io/inspect', // (default)
+  iframe: false, // open in new window
+});
+
+// const Button = styled.div`
+
+// background: red;
+
+// :hover{
+//   cursor: pointer;
+// }
+
+// `
 
 function App() {
-  let [peer, setPeer] = useState(false);
-  let [conn, setConn] = useState();
-  let [mediaStream, setMediaStream] = useState(false);
-  let [connectedToPeer, setConnectedToPeer] = useState();
-  let [connectedToParent, setConnectedToParent] = useState(false);
-  let videoRef = useRef();
+  let peer;
 
-  function callParent() {
-    if (!peer) {
-      return;
-    }
+  let [state, send] = useMachine(argosChildMachine, {
+    devTools:
+      process.env.NODE_ENV === "development" && typeof window !== "undefined",
+  });
 
-    peer.call("parent", mediaStream);
-  }
-
-  function connectToParent() {
-    let _conn = peer.connect("parent");
-    setConn(_conn);
-
-    _conn.on("open", () => {
-      console.log("connected");
-      setConnectedToParent(true);
-    });
-
-    _conn.on("close", () => {
-      setConnectedToParent(false);
-    });
-  }
-
-  function startVideo() {
-    navigator.mediaDevices
-      .getUserMedia({ audio: false, video: { width: 1280, height: 720 } })
-      .then((stream) => {
-        setMediaStream(stream);
-        videoRef.current.srcObject = stream;
-        // videoRef.current.play();
-      })
-      .catch((err) => {
-        alert(err);
-      });
-  }
-
-  useEffect(() => {
-    let _peer = new Peer({
-      host: process.env.REACT_APP_PEER_SERVER,
-      port: process.env.REACT_APP_PEER_SERVER_PORT,
-      debug: 2,
-      path: "/peerjs/myapp",
-      iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
-      sdpSemantics: "unified-plan",
-    });
-    setPeer(_peer);
-
-    _peer.on("open", (id) => {
-      // console.log("my id is " + id);
-      setConnectedToPeer(true);
-    });
-
-    _peer.on("close", () => {
-      setConnectedToPeer(false);
-    });
-
-    _peer.on("disconnected", () => {
-      setConnectedToPeer(false);
-    });
-
-    return function cleanup() {
-      _peer.disconnect();
-    };
-  }, []);
-
+  let [pw, setPw] = useState("");
+  let [number, setNumber] = useState();
+  console.log(number);
   return (
     <div className="App">
-      {mediaStream ? (
-        <video ref={videoRef} autoPlay={true} muted={true} />
-      ) : (
-        <>
-          <button onClick={startVideo}>Start Video</button>
-        </>
-      )}
-      <br />
-
-      {connectedToPeer ? (
-        connectedToParent ? (
-          mediaStream && connectedToParent ? (
-            <button onClick={callParent}>Start Transmitting</button>
-          ) : (
-            <></>
-          )
+      <AppFrame>
+        <StatusBar room={_.get(state, "context.room.name")} />
+        <Screen state={state.value} context={state.context} />
+        {state.value === "start" ? (
+          <RoomStart
+            joinRoomInput={() => {
+              send("JOIN_ROOM");
+            }}
+          />
         ) : (
-          <button onClick={connectToParent}>Connect To Parent Node</button>
-        )
-      ) : (
-        <button
-          onClick={() => {
-            peer.reconnect();
-          }}
-        >
-          Reconnect
-        </button>
-      )}
+          <></>
+        )}
+
+        {state.value === "error" ? (
+          <>
+            <Error
+              resetClick={() => {
+                send("RESET");
+              }}
+              error={_.get(state, "context.error.message")}
+            />
+          </>
+        ) : (
+          <></>
+        )}
+
+        {state.value === "select_room" ? (
+          <SelectRooms
+            roomName={_.get(state, "context.room.name")}
+            resetClick={() => {
+              send("RESET");
+            }}
+            gotoEnterPassword={() => {
+              send("ROOM_SELECTED");
+            }}
+          />
+        ) : (
+          <></>
+        )}
+
+        {state.value === "enter_password" ? (
+          <EnterPassword
+            roomName={_.get(state, "context.room.name")}
+            resetClick={() => {
+              send("RESET");
+            }}
+            joinRoom={() => {
+              send("JOIN_ROOM");
+            }}
+          />
+        ) : (
+          <></>
+        )}
+
+        {state.value === "room_joined" ? (
+          <RoomJoined
+            roomName={_.get(state, "context.room.name")}
+            resetClick={() => {
+              send("RESET");
+            }}
+          />
+        ) : (
+          <></>
+        )}
+
+        {state.value === "error" ? (
+          <>
+            <Error
+              resetClick={() => {
+                send("RESET");
+              }}
+              error={_.get(state, "context.error.message")}
+            />
+          </>
+        ) : (
+          <></>
+        )}
+        {/* {state.value === "assigned_room_name" ? (
+          <>
+            <input
+              type="text"
+              onChange={(e) => setPw(e.target.value)}
+              value={pw}
+              room={pw}
+            />
+            <button
+              onClick={() => {
+                send("SET_PASSWORD", { password: pw });
+              }}
+            >
+              Create Room
+            </button>
+          </>
+        ) : (
+          <></>
+        )}*/}
+      </AppFrame>
+    </div>
+  );
+}
+
+function IncomingVideo({ stream }) {
+  let ref = useRef();
+  useEffect(() => {
+    if (ref.current) {
+      ref.current.srcObject = stream;
+      ref.current.play();
+    }
+  }, [ref, stream]);
+  return (
+    <div>
+      <video ref={ref} autoPlay={true} width="400" />
     </div>
   );
 }
 
 export default App;
+
+function Screen({ context, state }) {
+  console.log(state);
+  switch (state) {
+    case "start":
+      return <CreateRoomScreen />;
+  }
+  return <div></div>;
+}
+
+function CreateRoomScreen() {
+  return <div></div>;
+}
