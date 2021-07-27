@@ -42,9 +42,9 @@ const StyledPage = styled.div`
     display: block;
     margin: auto;
     padding: auto;
-    height: 100px;
+    height: 50px;
     width: 200px;
-    margin-bottom: 25px;
+    margin: 25px auto;
   }
 
   div.roomName ~ h3 {
@@ -77,7 +77,7 @@ const StyledPage = styled.div`
 
   input,
   select {
-    font-size: 3em;
+    font-size: 2em;
     border-style: none;
     width: 45%;
     height: auto;
@@ -101,7 +101,7 @@ const StyledPage = styled.div`
   div.key {
     width: auto;
     border: 1px solid black;
-    padding: 25px;
+    padding: 20px;
     text-align: center;
 
     &:hover {
@@ -110,27 +110,33 @@ const StyledPage = styled.div`
       border: 1px solid black;
     }
   }
+
+  p {
+    padding: 0;
+    margin: 0;
+  }
+
+  h3 {
+    padding: 0;
+    margin: 0;
+  }
 `;
 
 export default function EnterPassword({ roomName, resetClick, joinRoom }) {
   let [input, setInput] = useState("");
   return (
     <StyledPage>
-      <div className="room">
-        <h3>{roomName}</h3>
-      </div>
-      <h3>Enter password</h3>
       <div className="password">
         <input
           className="passInput"
-          type="password"
+          type="text"
           pattern="[0-9]*"
           inputmode="numeric"
-          value={input}
+          value={input.length > 0 ? input : "enter password"}
           onChange={(e) => {
             setInput(e.target.value);
           }}
-        />
+        ></input>
       </div>
 
       <div className="keyboard">
@@ -172,7 +178,6 @@ export default function EnterPassword({ roomName, resetClick, joinRoom }) {
       </div>
 
       <div className="buttonBox">
-        <Button onClick={joinRoom}>Go</Button>
         <Button onClick={resetClick}>Back</Button>
       </div>
     </StyledPage>
