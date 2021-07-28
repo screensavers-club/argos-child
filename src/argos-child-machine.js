@@ -84,15 +84,15 @@ let argosChildMachine = createMachine(
         },
         on: {
           JOIN_ROOM: {
-            target: "room_joined",
+            target: "stream_room",
           },
         },
       },
 
-      room_joined: {
+      stream_room: {
         context: {
-          room: "room_joined",
-          id: "room_joined",
+          room: "stream_room",
+          id: "stream_room",
         },
       },
     },

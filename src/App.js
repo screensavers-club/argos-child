@@ -11,7 +11,7 @@ import RoomStart from "./pages/room_start";
 import Error from "./pages/error";
 import SelectRooms from "./pages/select_room";
 import EnterPassword from "./pages/enter_password";
-import RoomJoined from "./pages/room_joined";
+import StreamRoom from "./pages/stream_room";
 
 import _ from "lodash";
 
@@ -103,8 +103,8 @@ function App() {
           <></>
         )}
 
-        {state.value === "room_joined" ? (
-          <RoomJoined
+        {state.value === "stream_room" ? (
+          <StreamRoom
             roomName={_.get(state, "context.room.name")}
             resetClick={() => {
               send("RESET");
