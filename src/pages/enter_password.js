@@ -82,6 +82,9 @@ const StyledPage = styled.div`
     width: 45%;
     height: auto;
     border: 1px solid black;
+    &::placeholder {
+      color: grey;
+    }
   }
 
   div.buttonBox {
@@ -129,10 +132,11 @@ export default function EnterPassword({ roomName, resetClick, joinRoom }) {
       <div className="password">
         <input
           className="passInput"
-          type="text"
+          type="password"
           pattern="[0-9]*"
           inputmode="numeric"
-          value={input.length > 0 ? input : "enter password"}
+          value={input}
+          placeholder="enter password"
           onChange={(e) => {
             setInput(e.target.value);
           }}
