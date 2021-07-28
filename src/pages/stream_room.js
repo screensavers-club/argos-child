@@ -100,9 +100,27 @@ const StyledPage = styled.div`
     object-fit: cover;
     border: 1px solid red;
   }
+
+  div.connectionStatus {
+    position: absolute;
+    top: 0;
+    right: 0;
+    display: flex;
+    padding: 5px;
+  }
+
+  .dot {
+    height: 10px;
+    width: 10px;
+    background-color: #bbb;
+    border-radius: 50%;
+    display: inline-block;
+    background: limegreen;
+    margin: 2px;
+  }
 `;
 
-export default function StreamRoom({ roomName, resetClick }) {
+export default function StreamRoom({ resetClick }) {
   return (
     <StyledPage>
       <div className="stream">
@@ -112,7 +130,9 @@ export default function StreamRoom({ roomName, resetClick }) {
         <div className="userVideoWrapper">
           <div className="userVideo">
             <div className="connectionStatus">
-              {/* three coloured circle */}
+              <span class="dot"></span>
+              <span class="dot"></span>
+              <span class="dot"></span>
             </div>
           </div>
         </div>
