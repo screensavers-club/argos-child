@@ -8,6 +8,21 @@ const StageDiv = styled.div`
   height: 100%;
 `;
 
+const VideoGrid = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+
+  > div {
+    width: 30%;
+    height: 50vh;
+    video {
+      object-fit: cover;
+      width: 100%;
+      height: 100%;
+    }
+  }
+`;
+
 export default function Stage({ send, context, state }) {
   const { connect, isConnecting, room, error, participants, audioTracks } =
     useRoom();
@@ -32,16 +47,23 @@ export default function Stage({ send, context, state }) {
       >
         Test
       </button>
-      <div>
-        {localVideoTrack?.track && (
-          <VideoRenderer track={localVideoTrack.track} />
-        )}
-      </div>
-      <div style={{ display: "flex" }}>
-        {participants.map((participant) => {
-          return <Participant participant={participant} />;
-        })}
-      </div>
+      <VideoGrid>
+        <div>
+          {localVideoTrack?.track && (
+            <VideoRenderer track={localVideoTrack.track} />
+          )}
+        </div>
+        {participants
+          .reduce((p, c) => {
+            if (!p.find((_p) => _p.identity === c.identity)) {
+              p.push(c);
+            }
+            return p;
+          }, [])
+          .map((participant) => {
+            return <Participant participant={participant} />;
+          })}
+      </VideoGrid>
       <br />
     </StageDiv>
   );
@@ -67,9 +89,13 @@ function Participant({ participant }) {
     }
   }, [videoPub]);
 
-  return (
-    <div style={{ width: "50%" }}>
-      {videoPub?.track && <VideoRenderer track={videoPub.track} />}
+  return videoPub?.track ? (
+    <div>
+      <VideoRenderer track={videoPub.track} />
+      <br />
+      {participant.identity}
     </div>
+  ) : (
+    <></>
   );
 }
