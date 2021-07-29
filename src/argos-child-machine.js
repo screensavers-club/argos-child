@@ -1,89 +1,59 @@
-import { createMachine, assign, send } from "xstate";
+import { createMachine, assign } from "xstate";
 import axios from "axios";
-import { result } from "lodash";
-
-function newPromise() {
-  return new Promise(function (resolve, reject) {
-    if (Math.random() > 0.5) {
-      window.setTimeout(() => {
-        resolve("success");
-      }, 1000);
-    } else {
-      window.setTimeout(() => {
-        reject("failure");
-      }, 1000);
-    }
-  });
-}
 
 let argosChildMachine = createMachine(
   {
     id: "ArgosChild",
-    initial: "start",
-    context: { room: {}, roomName: {}, children: [], error: {} },
+    initial: "get_identity",
+
+    context: { room: {}, joining_room: null, error: {}, identity: null },
+
     states: {
-      start: {
-        on: {
-          JOIN_ROOM: { target: "select_room" },
-        },
-      },
-
-      error: {
-        context: {
-          room: "error",
-          id: "error",
-          error: (context, event) => {
-            return { ...context.error, message: event.data.message };
-          },
-        },
-      },
-
-      select_room: {
-        context: {
-          room: "select_room",
-          id: "select_room",
-        },
-
+      get_identity: {
         invoke: {
-          id: "fetch_room_name",
+          id: "generate_new_identity",
           src: (context, event) => {
-            return axios.get(
-              `${process.env.REACT_APP_PEER_SERVER}:${process.env.REACT_APP_PEER_SERVER_PORT}`
+            return axios.post(
+              `${process.env.REACT_APP_PEER_SERVER}/session/new`
             );
           },
-
           onDone: {
+            target: "list_rooms",
             actions: assign({
-              room: (context, event) => {
-                console.log(event);
-                return { name: event.data.data.roomName };
+              identity: (context, event) => {
+                return event.data.data.identity;
               },
             }),
           },
           onError: {
+            target: "show_error",
             actions: assign({
               error: (context, event) => {
-                console.log(event.data.message);
-                return { message: event.data.message };
+                return { message: "cannot connect to server" };
               },
             }),
           },
         },
+      },
 
+      list_rooms: {
         on: {
-          ROOM_SELECTED: {
+          REQUEST_JOIN_ROOM: {
             target: "enter_password",
+            actions: assign({
+              joining_room: (context, event) => {
+                return event.name;
+              },
+            }),
           },
         },
       },
 
+      show_error: {},
+
       enter_password: {
-        context: {
-          room: "enter_password",
-          id: "enter_password",
-        },
         on: {
-          JOIN_ROOM: {
+          list_rooms: {
             target: "stream_room",
           },
         },
@@ -103,7 +73,7 @@ let argosChildMachine = createMachine(
           return { ...context.room, name: event.data.room };
         },
       }),
-      RESET: { target: "start", room: "Not Connected" },
+      RESET: { target: "list_rooms", room: "Not Connected" },
     },
   },
   {
