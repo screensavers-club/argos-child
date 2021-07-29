@@ -3,6 +3,7 @@ import Button from "../components/button";
 import React, { useRef, useState } from "react";
 import axios from "axios";
 import "../animate.min.css";
+import { set } from "lodash";
 
 const StyledPage = styled.div`
   display: block;
@@ -27,26 +28,6 @@ const StyledPage = styled.div`
     padding: 25px;
     margin: auto;
     font-size: 1.5rem;
-
-    > Button {
-      position: absolute;
-      right: 0;
-      height: 100%;
-      box-shadow: none;
-      border: none;
-      border-radius: 0;
-      width: 50px;
-      margin-bottom: 0;
-    }
-  }
-
-  Button {
-    display: block;
-    margin: auto;
-    padding: auto;
-    height: 50px;
-    width: 200px;
-    margin: 25px auto;
   }
 
   div.roomName ~ h3 {
@@ -96,7 +77,7 @@ const StyledPage = styled.div`
   }
 
   div.keyboard {
-    margin: auto;
+    margin: 0 auto 10px auto;
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
     width: 50%;
@@ -146,14 +127,13 @@ export default function EnterPassword({ send, context, state }) {
         passcode: passcode,
       })
       .then((result) => {
-        console.log(result);
+        send("JOIN_ROOM_WITH_TOKEN", {
+          token: result.data.token,
+          room: { name: context.joining_room },
+        });
       })
       .catch((err) => {
-        console.log(err.response.data);
-        if (
-          err.response.data.err ==
-          "Wrong passcode provided for room banana-citrus"
-        ) {
+        if (err.response.data.err.indexOf("Wrong passcode provided") > -1) {
           shakePasswordScreen();
         }
       });

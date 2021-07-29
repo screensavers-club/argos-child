@@ -4,12 +4,13 @@ import StatusBar from "./components/status-bar";
 // screen components
 import ListRooms from "./pages/list-rooms";
 import EnterPassword from "./pages/enter-password";
-
-import _ from "lodash";
+import Stage from "./pages/stage";
 
 import { useMachine } from "@xstate/react";
 import argosChildMachine from "./argos-child-machine.js";
 import { inspect } from "@xstate/inspect";
+
+import _ from "lodash";
 
 if (process.env.NODE_ENV === "development") {
   inspect({
@@ -44,6 +45,9 @@ function Screen({ context, state, send }) {
 
     case "enter_password":
       return <EnterPassword send={send} context={context} />;
+
+    case "stage":
+      return <Stage send={send} context={context} />;
   }
   return <div></div>;
 }
