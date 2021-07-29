@@ -13,8 +13,8 @@ const VideoGrid = styled.div`
   flex-wrap: wrap;
 
   > div {
-    width: 30%;
-    height: 50vh;
+    width: 33%;
+    height: 35vh;
     video {
       object-fit: cover;
       width: 100%;
