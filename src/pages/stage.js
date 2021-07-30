@@ -36,7 +36,6 @@ export default function Stage({ send, context, state }) {
 
   return (
     <StageDiv>
-      stage
       {isConnecting ? "connecting" : "-"}
       <button
         onClick={async () => {
@@ -45,7 +44,7 @@ export default function Stage({ send, context, state }) {
           setLocalVideoTrack(videoTrack);
         }}
       >
-        Test
+        Start Video
       </button>
       <VideoGrid>
         <div>

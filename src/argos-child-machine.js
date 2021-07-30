@@ -1,5 +1,4 @@
 import { createMachine, assign } from "xstate";
-import axios from "axios";
 
 let argosChildMachine = createMachine({
   id: "ArgosChild",
@@ -9,24 +8,13 @@ let argosChildMachine = createMachine({
 
   states: {
     get_identity: {
-      invoke: {
-        id: "generate_new_identity",
-        src: (context, event) => {
-          return axios.post(`${process.env.REACT_APP_PEER_SERVER}/session/new`);
-        },
-        onDone: {
+      on: {
+        IDENTITY: {
           target: "list_rooms",
           actions: assign({
             identity: (context, event) => {
-              return event.data.data.identity;
-            },
-          }),
-        },
-        onError: {
-          target: "show_error",
-          actions: assign({
-            error: (context, event) => {
-              return { message: "cannot connect to server" };
+              console.log(event);
+              return event.identity;
             },
           }),
         },
