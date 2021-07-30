@@ -146,6 +146,7 @@ export default function EnterPassword({ send, context, state, icon }) {
         if (err.response.data.err.indexOf("Wrong passcode provided") > -1) {
           shakePasswordScreen();
         }
+        console.log(err.response);
       });
   }
 
@@ -212,8 +213,6 @@ export default function EnterPassword({ send, context, state, icon }) {
               onClick={() => {
                 if (k === "del") {
                   setPasscode(passcode.slice(0, -1));
-                } else if (k === "enter") {
-                  tryJoinRoom();
                 } else {
                   if (passcode.length < 5) {
                     setPasscode(`${passcode}${k}`);

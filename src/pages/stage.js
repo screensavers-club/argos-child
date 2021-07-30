@@ -6,15 +6,53 @@ import { useEffect, useRef, useState } from "react";
 const StageDiv = styled.div`
   width: 100%;
   height: 100%;
+  padding: 0.3em;
+
+  > button {
+    display: block;
+    margin: auto;
+    padding: auto;
+    margin-bottom: 0.3em;
+  }
 `;
 
 const VideoGrid = styled.div`
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  height: 80%;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  grid-template-rows: 1fr 1fr 1fr;
+
+  grid-gap: 0.3em;
 
   > div {
-    width: 33%;
-    height: 35vh;
+    position: relative;
+    display: block;
+    justify-self: stretch;
+    align-self: stretch;
+
+    span {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      background: #000;
+      font-size: 7px;
+      color: white;
+    }
+  }
+
+  > div.remote-participant {
+    video {
+      position: absolute;
+      object-fit: cover;
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  > div.local-participant {
+    width: 100%;
+    grid-column: 1 / span 2;
+    grid-row: 1 / span 3;
     video {
       object-fit: cover;
       width: 100%;
@@ -32,11 +70,14 @@ export default function Stage({ send, context, state }) {
   useEffect(async () => {
     connect(process.env.REACT_APP_LIVEKIT_SERVER, context.token);
     // _room.on(RoomEvent.TrackPublished, handleNewTrack);
+    return () => {
+      console.log("disconnecting");
+      room.disconnect();
+    };
   }, []);
 
   return (
     <StageDiv>
-      {isConnecting ? "connecting" : "-"}
       <button
         onClick={async () => {
           const videoTrack = await createLocalVideoTrack();
@@ -47,11 +88,11 @@ export default function Stage({ send, context, state }) {
         Start Video
       </button>
       <VideoGrid>
-        <div>
+        {/* <div className="localVideo">
           {localVideoTrack?.track && (
             <VideoRenderer track={localVideoTrack.track} />
           )}
-        </div>
+        </div> */}
         {participants
           .reduce((p, c) => {
             if (!p.find((_p) => _p.identity === c.identity)) {
@@ -60,6 +101,7 @@ export default function Stage({ send, context, state }) {
             return p;
           }, [])
           .map((participant) => {
+            console.log(typeof participant);
             return <Participant participant={participant} />;
           })}
       </VideoGrid>
@@ -69,7 +111,7 @@ export default function Stage({ send, context, state }) {
 }
 
 function Participant({ participant }) {
-  const { subscribedTracks } = useParticipant(participant);
+  const { subscribedTracks, isLocal } = useParticipant(participant);
 
   const [videoPub, setVideoPub] = useState();
   useEffect(() => {
@@ -89,10 +131,10 @@ function Participant({ participant }) {
   }, [videoPub]);
 
   return videoPub?.track ? (
-    <div>
+    <div className={isLocal ? "local-participant" : "remote-participant"}>
       <VideoRenderer track={videoPub.track} />
       <br />
-      {participant.identity}
+      <span>{participant.identity}</span>
     </div>
   ) : (
     <></>
