@@ -5,6 +5,11 @@ import axios from "axios";
 import "../animate.min.css";
 import { set } from "lodash";
 
+import { ArrowRightCircle } from "react-ikonate";
+import { ArrowLeftCircle } from "react-ikonate";
+import { Delete } from "react-ikonate";
+import { Cancel } from "react-ikonate";
+
 const StyledPage = styled.div`
   display: block;
   margin: auto;
@@ -74,6 +79,10 @@ const StyledPage = styled.div`
     display: block;
     margin: auto;
     padding: auto;
+
+    > button {
+      margin: 0 0.8em;
+    }
   }
 
   div.keyboard {
@@ -86,9 +95,10 @@ const StyledPage = styled.div`
 
   div.key {
     width: auto;
-    border: 1px solid black;
-    padding: 20px;
+    padding: 15px;
     text-align: center;
+    font-size: 1.5em;
+    border: 1px solid black;
 
     &:hover {
       background: #ddd;
@@ -108,7 +118,7 @@ const StyledPage = styled.div`
   }
 `;
 
-export default function EnterPassword({ send, context, state }) {
+export default function EnterPassword({ send, context, state, icon }) {
   const [passcode, setPasscode] = useState("");
   const inputRef = useRef();
 
@@ -166,12 +176,35 @@ export default function EnterPassword({ send, context, state }) {
           { k: "7" },
           { k: "8" },
           { k: "9" },
-          { k: "del" },
+          { k: "cancel" },
           { k: "0" },
-          { k: "enter" },
+          { k: "del" },
         ].map(function ({ k }, i) {
           let key = "key_" + i;
-
+          if (k === "del") {
+            return (
+              <div
+                className="key"
+                onClick={() => {
+                  setPasscode(passcode.slice(0, -1));
+                }}
+              >
+                <Delete />
+              </div>
+            );
+          }
+          if (k === "cancel") {
+            return (
+              <div
+                className="key"
+                onClick={() => {
+                  setPasscode(passcode.slice(0, -5));
+                }}
+              >
+                <Cancel />
+              </div>
+            );
+          }
           return (
             <div
               className="key"
@@ -196,11 +229,20 @@ export default function EnterPassword({ send, context, state }) {
 
       <div className="buttonBox">
         <Button
+          icon={<ArrowLeftCircle />}
           onClick={() => {
             send("RESET");
           }}
         >
           Back
+        </Button>
+        <Button
+          icon={<ArrowRightCircle />}
+          onClick={() => {
+            tryJoinRoom();
+          }}
+        >
+          Enter
         </Button>
       </div>
     </StyledPage>
