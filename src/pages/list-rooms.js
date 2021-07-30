@@ -17,12 +17,8 @@ const StyledPage = styled.div`
     margin-top: 7%;
     padding: auto;
 
-    > Button {
-      box-shadow: none;
-      border: 1px solid black;
-      border-radius: 0;
-      margin-bottom: 25px;
-      width: 45%;
+    > button {
+      margin: 0.5em 0;
     }
   }
 `;
@@ -53,11 +49,17 @@ export default function ListRooms({ context, send, state }) {
       </div>
       <div className="buttonBox">
         <Button
+          icon={<Refresh />}
           onClick={() => {
-            // send("RESET");
+            axios
+              .get(`${process.env.REACT_APP_PEER_SERVER}/rooms`)
+              .then((result) => {
+                setRoomList(result.data);
+                console.log(result);
+              });
           }}
         >
-          <Refresh /> Refresh rooms
+          Refresh rooms
         </Button>
       </div>
     </StyledPage>
