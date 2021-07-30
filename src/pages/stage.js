@@ -39,17 +39,20 @@ const StageDiv = styled.div`
       padding: 0.5em 0;
       appearance: none;
       border: none;
-      background: none;
       border-right: 1px solid black;
       font-size: 1.5em;
+
+      &:hover {
+        background: #ddd;
+      }
+
+      &.active {
+        background: #aaa;
+      }
 
       svg {
         stroke-linecap: round;
         stroke-width: 1.5;
-      }
-
-      &:hover {
-        background: #ddd;
       }
 
       &:first-child {
@@ -116,7 +119,7 @@ export default function Stage({ send, context, state, tabs }) {
     useRoom();
 
   const [localVideoTrack, setLocalVideoTrack] = useState();
-
+  console.log(localVideoTrack);
   useEffect(async () => {
     connect(process.env.REACT_APP_LIVEKIT_SERVER, context.token);
     // _room.on(RoomEvent.TrackPublished, handleNewTrack);
@@ -128,15 +131,6 @@ export default function Stage({ send, context, state, tabs }) {
 
   return (
     <StageDiv>
-      <button
-        onClick={async () => {
-          const videoTrack = await createLocalVideoTrack();
-          room.localParticipant.publishTrack(videoTrack);
-          setLocalVideoTrack(videoTrack);
-        }}
-      >
-        Start Video
-      </button>
       <VideoGrid>
         {/* <div className="localVideo">
           {localVideoTrack?.track && (
@@ -161,13 +155,31 @@ export default function Stage({ send, context, state, tabs }) {
         {(tabs = [
           { tab: "mic", icon: <Microphone /> },
           { tab: "volume", icon: <VolumeOff /> },
-          { tab: "video", icon: <Film /> },
+          {
+            tab: "video",
+            icon: (
+              <Film
+                onClick={async () => {
+                  const videoTrack = await createLocalVideoTrack();
+                  room.localParticipant.publishTrack(videoTrack);
+                  setLocalVideoTrack(videoTrack);
+                }}
+              />
+            ),
+            classes: {
+              className: `${localVideoTrack ? "active" : "normal"}`,
+            },
+          },
           { tab: "end", icon: <Exit /> },
           { tab: "call", icon: <Phone /> },
           { tab: "controls", icon: <Controls /> },
-        ]).map(function ({ tab, icon }, i) {
+        ]).map(function ({ tab, icon, classes }, i) {
           let key = `key_${i}`;
-          return <button key={key}>{icon}</button>;
+          return (
+            <button key={key} {...classes}>
+              {icon}
+            </button>
+          );
         })}
       </div>
     </StageDiv>
