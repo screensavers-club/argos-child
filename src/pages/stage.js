@@ -44,6 +44,10 @@ const StageDiv = styled.div`
 
       &:hover {
         background: #ddd;
+
+        &.active {
+          background: #888;
+        }
       }
 
       &.active {
