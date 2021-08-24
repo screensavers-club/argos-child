@@ -39,6 +39,22 @@ let argosChildMachine = createMachine({
     enter_password: {
       on: {
         JOIN_ROOM_WITH_TOKEN: {
+          target: "test_camera",
+          actions: assign({
+            room: (context, event) => {
+              return event.room;
+            },
+            token: (context, event) => {
+              return event.token;
+            },
+          }),
+        },
+      },
+    },
+
+    test_camera: {
+      on: {
+        TEST_COMPLETE: {
           target: "stage",
           actions: assign({
             room: (context, event) => {
