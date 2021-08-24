@@ -1,6 +1,15 @@
 import styled from "styled-components";
-import { useRoom, useParticipant, VideoRenderer } from "livekit-react";
-import { createLocalVideoTrack, RoomEvent } from "livekit-client";
+import {
+  useRoom,
+  useParticipant,
+  VideoRenderer,
+  AudioRenderer,
+} from "livekit-react";
+import {
+  createLocalAudioTrack,
+  createLocalVideoTrack,
+  RoomEvent,
+} from "livekit-client";
 import { useEffect, useRef, useState } from "react";
 import { Microphone } from "react-ikonate";
 import { Exit } from "react-ikonate";
@@ -117,6 +126,8 @@ export default function Stage({ send, context, state, tabs }) {
 
   const [localVideoTrack, setLocalVideoTrack] = useState();
 
+  console.log(audioTracks);
+
   useEffect(async () => {
     connect(process.env.REACT_APP_LIVEKIT_SERVER, context.token);
     // _room.on(RoomEvent.TrackPublished, handleNewTrack);
@@ -128,21 +139,12 @@ export default function Stage({ send, context, state, tabs }) {
 
   return (
     <StageDiv>
-      <button
-        onClick={async () => {
-          const videoTrack = await createLocalVideoTrack();
-          room.localParticipant.publishTrack(videoTrack);
-          setLocalVideoTrack(videoTrack);
-        }}
-      >
-        Start Video
-      </button>
+      <button onClick={async () => {}}>Start Video</button>
+      {audioTracks.forEach((audioTrack) => {
+        console.log(audioTrack);
+        return <AudioRenderer track={audioTrack.track} />;
+      })}
       <VideoGrid>
-        {/* <div className="localVideo">
-          {localVideoTrack?.track && (
-            <VideoRenderer track={localVideoTrack.track} />
-          )}
-        </div> */}
         {participants
           .reduce((p, c) => {
             if (!p.find((_p) => _p.identity === c.identity)) {
@@ -151,7 +153,6 @@ export default function Stage({ send, context, state, tabs }) {
             return p;
           }, [])
           .map((participant) => {
-            console.log(typeof participant);
             return <Participant participant={participant} />;
           })}
       </VideoGrid>
@@ -160,14 +161,36 @@ export default function Stage({ send, context, state, tabs }) {
       <div className="streamTabs">
         {(tabs = [
           { tab: "mic", icon: <Microphone /> },
-          { tab: "volume", icon: <VolumeOff /> },
-          { tab: "video", icon: <Film /> },
+          {
+            tab: "volume",
+            icon: <VolumeOff />,
+            onClick: async () => {
+              const audioTrack = await createLocalAudioTrack();
+              room.localParticipant.publishTrack(audioTrack);
+
+              // setLocalVideoTrack(videoTrack);
+            },
+          },
+          {
+            tab: "video",
+            icon: <Film />,
+            onClick: async () => {
+              const videoTrack = await createLocalVideoTrack();
+              room.localParticipant.publishTrack(videoTrack);
+
+              setLocalVideoTrack(videoTrack);
+            },
+          },
           { tab: "end", icon: <Exit /> },
           { tab: "call", icon: <Phone /> },
           { tab: "controls", icon: <Controls /> },
-        ]).map(function ({ tab, icon }, i) {
+        ]).map(function ({ tab, icon, onClick }, i) {
           let key = `key_${i}`;
-          return <button key={key}>{icon}</button>;
+          return (
+            <button key={key} onClick={onClick}>
+              {icon}
+            </button>
+          );
         })}
       </div>
     </StageDiv>
@@ -178,6 +201,7 @@ function Participant({ participant }) {
   const { subscribedTracks, isLocal } = useParticipant(participant);
 
   const [videoPub, setVideoPub] = useState();
+
   useEffect(() => {
     let _pub;
     subscribedTracks.forEach((pub) => {
@@ -198,6 +222,7 @@ function Participant({ participant }) {
     <div className={isLocal ? "local-participant" : "remote-participant"}>
       <VideoRenderer track={videoPub.track} />
       <br />
+
       <span>{participant.identity}</span>
     </div>
   ) : (
