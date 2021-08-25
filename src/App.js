@@ -5,7 +5,6 @@ import StatusBar from "./components/status-bar";
 import GetIdentity from "./components/get-identity";
 import ListRooms from "./pages/list-rooms";
 import EnterPassword from "./pages/enter-password";
-import TestCamera from "./pages/test-camera";
 import Stage from "./pages/stage";
 
 import { useMachine } from "@xstate/react";
@@ -48,9 +47,6 @@ function Screen({ context, state, send }) {
 
     case "enter_password":
       return <EnterPassword send={send} context={context} />;
-
-    case "test_camera":
-      return <TestCamera send={send} context={context} />;
 
     case "stage":
       return <Stage send={send} context={context} />;
