@@ -76,6 +76,18 @@ function MicTest() {
   let raf = useRef();
   let audioSourceNode = useRef();
 
+  // High pass filter
+  let hpf = useRef();
+  let lpf = useRef();
+  let lsf = useRef();
+  let hsf = useRef();
+  let band1 = useRef();
+  let band2 = useRef();
+  let band3 = useRef();
+
+  const chain = [hpf, lsf, band1, band2, band3, hsf, lpf];
+  const [showFilters, setShowFilters] = useState(chain.map((x) => false));
+
   let [audioStream, setAudioStream] = useState(null);
 
   useEffect(() => {
@@ -86,37 +98,68 @@ function MicTest() {
       audioSourceNode.current =
         audioCtx.current.createMediaStreamSource(audioStream);
       audioSourceNode.current.connect(audioCtx.current.destination);
-      analyzer.current = new AnalyserNode(audioCtx.current, {
-        fftSize: 32,
-        maxDecibels: 0,
-        minDecibels: -60,
-        smoothingTimeConstant: 0.6,
-      });
+      // analyzer.current = new AnalyserNode(audioCtx.current, {
+      //   fftSize: 32,
+      //   maxDecibels: 0,
+      //   minDecibels: -60,
+      //   smoothingTimeConstant: 0.6,
+      // });
 
-      audioSourceNode.current.connect(analyzer.current);
-      var bufferLength = analyzer.current.frequencyBinCount;
-      analyzerDataArray.current = new Uint8Array(bufferLength);
+      // audioSourceNode.current.connect(analyzer.current);
+      // var bufferLength = analyzer.current.frequencyBinCount;
+      // analyzerDataArray.current = new Uint8Array(bufferLength);
 
-      function step() {
-        analyzer.current.getByteFrequencyData(analyzerDataArray.current);
-        let sum = analyzerDataArray.current.reduce((p, c) => {
-          return p + c;
-        }, 0);
-        let l = Math.max(0, Math.min(1, sum / 256));
-        if (volBarRef.current) {
-          volBarRef.current.style.width = l * 200 + "px";
-        }
+      // function step() {
+      //   analyzer.current.getByteFrequencyData(analyzerDataArray.current);
+      //   let sum = analyzerDataArray.current.reduce((p, c) => {
+      //     return p + c;
+      //   }, 0);
+      //   let l = Math.max(0, Math.min(1, sum / 256));
+      //   if (volBarRef.current) {
+      //     volBarRef.current.style.width = l * 200 + "px";
+      //   }
 
-        requestAnimationFrame(step);
-      }
-      step();
+      //   requestAnimationFrame(step);
+      // }
+      // step();
     }
   }, [audioStream]);
+
+  function updateNodeConnections() {
+    chain.forEach((node) => {
+      if (typeof node.disconnect === "function") {
+        node.disconnect();
+      }
+    });
+    let activeNodes = chain.filter((c) => !!c.current);
+    if (activeNodes.length > 0) {
+      activeNodes.forEach((_, i) => {
+        if (i == 0) {
+          audioSourceNode.current.connect(activeNodes[i].current);
+        } else {
+          activeNodes[i - 0].current.connect(activeNodes[i].current);
+        }
+      });
+      activeNodes[activeNodes.length - 1].current.connect(
+        audioCtx.current.destination
+      );
+    } else {
+      audioSourceNode.current.connect(audioCtx.current.destination);
+    }
+    console.log(activeNodes);
+
+    setShowFilters(chain.map((c) => !!c.current));
+  }
 
   async function getMic() {
     try {
       let stream = await navigator.mediaDevices.getUserMedia({
-        audio: true,
+        audio: {
+          channelCount: 1,
+          sampleRate: 16000,
+          sampleSize: 16,
+          echoCancellation: false,
+        },
         video: false,
       });
       setAudioStream(stream);
@@ -124,6 +167,45 @@ function MicTest() {
       console.log(err);
     }
   }
+
+  function toggleHPF() {
+    if (!audioCtx.current || !audioStream) {
+      return;
+    }
+    if (!hpf.current) {
+      hpf.current = new BiquadFilterNode(audioCtx.current, {
+        frequency: 2000,
+        type: "highpass",
+      });
+    } else {
+      // set reference to null so the BiquadFilterNode will be destroyed by JavaScript
+      hpf.current.disconnect();
+      hpf.current = null;
+    }
+    updateNodeConnections();
+  }
+
+  function toggleHSF() {}
+  function toggleBand1() {}
+  function toggleBand2() {}
+  function toggleBand3() {}
+  function toggleLPF() {
+    if (!audioCtx.current || !audioStream) {
+      return;
+    }
+    if (!lpf.current) {
+      lpf.current = new BiquadFilterNode(audioCtx.current, {
+        frequency: 300,
+        type: "lowpass",
+      });
+    } else {
+      // set reference to null so the BiquadFilterNode will be destroyed by JavaScript
+      lpf.current.disconnect();
+      lpf.current = null;
+    }
+    updateNodeConnections();
+  }
+  function toggleLSF() {}
 
   return (
     <>
@@ -143,12 +225,27 @@ function MicTest() {
             ></div>
           </div>
           <button onClick={getMic}>Get Mic</button>
-          <button>Toggle HPF</button>
-          <button>Toggle LPF</button>
-          <button>Toggle BAND 1</button>
-          <button>Toggle HPF</button>
-          <button>Toggle HPF</button>
-          <button>Toggle HPF</button>
+          <button onClick={toggleHPF}>
+            Toggle HPF ({showFilters[0] ? "on" : "off"})
+          </button>
+          <button onClick={toggleLSF}>
+            Toggle LSF ({showFilters[1] ? "on" : "off"})
+          </button>
+          <button onClick={toggleBand1}>
+            Toggle BAND 1 ({showFilters[2] ? "on" : "off"})
+          </button>
+          <button onClick={toggleBand2}>
+            Toggle BAND 2 ({showFilters[3] ? "on" : "off"})
+          </button>
+          <button onClick={toggleBand3}>
+            Toggle BAND 3 ({showFilters[4] ? "on" : "off"})
+          </button>
+          <button onClick={toggleHSF}>
+            Toggle HSF ({showFilters[5] ? "on" : "off"})
+          </button>
+          <button onClick={toggleLPF}>
+            Toggle LPF ({showFilters[6] ? "on" : "off"})
+          </button>
         </MicTestModal>
       )}
     </>
