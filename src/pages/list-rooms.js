@@ -185,10 +185,77 @@ function MicTest() {
     updateNodeConnections();
   }
 
-  function toggleHSF() {}
-  function toggleBand1() {}
-  function toggleBand2() {}
-  function toggleBand3() {}
+  function toggleHSF() {
+    if (!audioCtx.current || !audioStream) {
+      return;
+    }
+    if (!hsf.current) {
+      hsf.current = new BiquadFilterNode(audioCtx.current, {
+        frequency: 8000,
+        type: "highshelf",
+        gain: 3,
+      });
+    } else {
+      // set reference to null so the BiquadFilterNode will be destroyed by JavaScript
+      hsf.current.disconnect();
+      hsf.current = null;
+    }
+    updateNodeConnections();
+  }
+  function toggleBand1() {
+    if (!audioCtx.current || !audioStream) {
+      return;
+    }
+    if (!band1.current) {
+      band1.current = new BiquadFilterNode(audioCtx.current, {
+        frequency: 200,
+        type: "peaking",
+        gain: 3,
+        q: 1,
+      });
+    } else {
+      // set reference to null so the BiquadFilterNode will be destroyed by JavaScript
+      band1.current.disconnect();
+      band1.current = null;
+    }
+    updateNodeConnections();
+  }
+  function toggleBand2() {
+    if (!audioCtx.current || !audioStream) {
+      return;
+    }
+    if (!band2.current) {
+      band2.current = new BiquadFilterNode(audioCtx.current, {
+        frequency: 500,
+        type: "peaking",
+        gain: 3,
+        q: 1,
+      });
+    } else {
+      // set reference to null so the BiquadFilterNode will be destroyed by JavaScript
+      band2.current.disconnect();
+      band2.current = null;
+    }
+    updateNodeConnections();
+  }
+  function toggleBand3() {
+    if (!audioCtx.current || !audioStream) {
+      return;
+    }
+    if (!band3.current) {
+      band3.current = new BiquadFilterNode(audioCtx.current, {
+        frequency: 1000,
+        type: "peaking",
+        gain: 3,
+        q: 1,
+      });
+    } else {
+      // set reference to null so the BiquadFilterNode will be destroyed by JavaScript
+      band3.current.disconnect();
+      band3.current = null;
+    }
+    updateNodeConnections();
+  }
   function toggleLPF() {
     if (!audioCtx.current || !audioStream) {
       return;
@@ -205,7 +272,23 @@ function MicTest() {
     }
     updateNodeConnections();
   }
-  function toggleLSF() {}
+  function toggleLSF() {
+    if (!audioCtx.current || !audioStream) {
+      return;
+    }
+    if (!lsf.current) {
+      lsf.current = new BiquadFilterNode(audioCtx.current, {
+        frequency: 100,
+        type: "lowshelf",
+        gain: 3,
+      });
+    } else {
+      // set reference to null so the BiquadFilterNode will be destroyed by JavaScript
+      lsf.current.disconnect();
+      lsf.current = null;
+    }
+    updateNodeConnections();
+  }
 
   return (
     <>
