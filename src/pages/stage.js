@@ -135,6 +135,7 @@ export default function Stage({ send, context, state, tabs }) {
   const [renderState, setRenderState] = useState(0);
 
   const localAudioTrackRef = useRef(null);
+  const localVideoTrackRef = useRef(null);
 
   useEffect(async () => {
     connect(process.env.REACT_APP_LIVEKIT_SERVER, context.token);
@@ -194,19 +195,33 @@ export default function Stage({ send, context, state, tabs }) {
           },
           {
             tab: "video",
-            icon: <Film />,
+            icon: localVideoTrackRef.current ? <Film /> : <>No video</>,
             onClick: async () => {
-              const videoTrack = await createLocalVideoTrack();
-              room.localParticipant.publishTrack(videoTrack);
-
-              setLocalVideoTrack(videoTrack);
+              console.log(localVideoTrackRef.current);
+              if (localVideoTrackRef.current) {
+                room.localParticipant.unpublishTrack(
+                  localVideoTrackRef.current
+                );
+                localVideoTrackRef.current = null;
+              } else {
+                localVideoTrackRef.current =
+                  await createLocalVideoTrack().catch((err) => {
+                    alert(err);
+                  });
+                if (localVideoTrackRef.current) {
+                  room.localParticipant.publishTrack(
+                    localVideoTrackRef.current
+                  );
+                }
+              }
+              setLocalVideoTrack(localVideoTrackRef.current);
             },
           },
           {
             tab: "end",
             icon: <Exit />,
             onClick: () => {
-              room.disconnect();
+              room?.disconnect();
               send("DISCONNECT");
             },
           },
