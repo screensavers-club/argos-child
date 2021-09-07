@@ -131,7 +131,7 @@ export default function EnterPassword({ send, context, state, icon }) {
 
   function tryJoinRoom() {
     return axios
-      .post(`${process.env.REACT_APP_PEER_SERVER}/parent/room/join`, {
+      .post(`${process.env.REACT_APP_PEER_SERVER}/child/room/join`, {
         room: context.joining_room,
         identity: context.identity,
         passcode: passcode,

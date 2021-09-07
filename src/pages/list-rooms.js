@@ -1,14 +1,11 @@
 import styled from "styled-components";
 import Button from "../components/button";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Webcam from "react-webcam";
-
 
 import { Refresh, Camera } from "react-ikonate";
 import axios from "axios";
-
-const WebcamComponent = () => <Webcam />;
 
 const StyledPage = styled.div`
   display: block;
@@ -65,7 +62,6 @@ export default function ListRooms({ context, send, state }) {
     });
   }, []);
 
-
   return (
     <StyledPage>
       <div className="availableRooms">
@@ -82,7 +78,6 @@ export default function ListRooms({ context, send, state }) {
           </Button>
         ))}
       </div>
-
 
       <Button
         icon={<Refresh />}
@@ -109,7 +104,7 @@ export default function ListRooms({ context, send, state }) {
       >
         Test Webcam
       </Button>
-            <MicTest />
+      <MicTest />
 
       {webcam === true ? (
         <div className="webcamDiv">
@@ -139,7 +134,6 @@ export default function ListRooms({ context, send, state }) {
       ) : (
         <div style={{ background: "#fff", opacity: "1", zIndex: "0" }}></div>
       )}
-
     </StyledPage>
   );
 }
@@ -223,7 +217,6 @@ function MicTest() {
     } else {
       audioSourceNode.current.connect(audioCtx.current.destination);
     }
-    console.log(activeNodes);
 
     setShowFilters(chain.map((c) => !!c.current));
   }
