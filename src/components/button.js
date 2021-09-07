@@ -3,13 +3,18 @@ import styled from "styled-components";
 export default function Button({ style, children, onClick, variant, icon }) {
   return (
     <StyledButton {...style} onClick={onClick} variant={variant} icon={icon}>
-      {icon}
-      {children}
+      <div>
+        {icon}
+        {children}
+      </div>
     </StyledButton>
   );
 }
 
 const StyledButton = styled.button`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   appearance: none;
   border: 1px solid #000;
   background: #fff;
@@ -28,22 +33,23 @@ const StyledButton = styled.button`
   border-radius: 8px;
   box-shadow: 0 3px black;
   font-family: "Work Sans";
-  padding: ${(p) => {
-    if (p.icon) {
-      return ".8em 2em .8em 1.2em";
-    } else {
-      return ".8em 2em";
-    }
-  }};
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  padding: 0.8em 2em;
 
   &:hover {
     background: #ddd;
   }
 
   svg {
-    margin-right: 0.8em;
+    position: relative;
+    padding: 0 0.5em 0em 0;
+  }
+
+  > div {
+    width: 100%;
+    margin: auto;
+    padding: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
 `;

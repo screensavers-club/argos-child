@@ -11,17 +11,22 @@ import {
   RoomEvent,
 } from "livekit-client";
 import { useEffect, useRef, useState } from "react";
-import { Microphone } from "react-ikonate";
-import { Exit } from "react-ikonate";
-import { Film } from "react-ikonate";
-import { Phone } from "react-ikonate";
-import { VolumeOff } from "react-ikonate";
-import { Controls } from "react-ikonate";
+import {
+  Microphone,
+  Mute,
+  Exit,
+  Film,
+  Phone,
+  VolumeOff,
+  Controls,
+  EyeCrossed,
+} from "react-ikonate";
 
 const StageDiv = styled.div`
+  position: fixed;
+  display: block;
   width: 100%;
   height: 100%;
-  padding: 0.3em;
 
   div.streamTabs {
     display: flex;
@@ -29,7 +34,7 @@ const StageDiv = styled.div`
     width: 80%;
     height: 3em;
     position: absolute;
-    bottom: 1em;
+    bottom: 5em;
     left: 50%;
     transform: translate(-50%, 0);
     border: 1px solid black;
@@ -43,6 +48,8 @@ const StageDiv = styled.div`
       border: none;
       border-right: 1px solid black;
       font-size: 1.5em;
+
+      /* background:${(p) => (!p.selected ? "black" : "white")} */
 
       &:hover {
         background: #ddd;
@@ -76,12 +83,16 @@ const StageDiv = styled.div`
 `;
 
 const VideoGrid = styled.div`
-  display: grid;
+  display: flex;
   height: 70%;
-  grid-template-columns: 1fr 1fr 1fr 1fr;
-  grid-template-rows: 1fr 1fr 1fr;
 
-  grid-gap: 0.3em;
+  label.participantNumber {
+    position: absolute;
+    font-size: 5em;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
 
   > div {
     position: relative;
@@ -94,28 +105,43 @@ const VideoGrid = styled.div`
       bottom: 0;
       right: 0;
       background: #000;
-      font-size: 7px;
+      font-size: 0.5em;
       color: white;
     }
   }
 
   > div.remote-participant {
+    display: flex;
+    width: ${(p) => {
+      let COL_COUNT = [
+        1, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5,
+        5, 6, 6, 6, 6, 6,
+      ];
+      let numP = p.participants.filter((p) => !p.isLocal).length;
+      return 100 / COL_COUNT[numP - 1];
+    }}%;
+
     video {
       position: absolute;
-      object-fit: cover;
+      object-fit: contain;
       width: 100%;
       height: 100%;
     }
   }
 
+  div.participants {
+    border: 1px solid black;
+  }
+
   > div.local-participant {
-    width: 100%;
-    grid-column: 1 / span 2;
-    grid-row: 1 / span 3;
+    width: 50%;
+    order: 1;
+
     video {
-      object-fit: cover;
+      object-fit: contain;
       width: 100%;
       height: 100%;
+      border: 1px solid black;
     }
   }
 `;
@@ -125,27 +151,30 @@ export default function Stage({ send, context, state, tabs }) {
     useRoom();
 
   // console.log(connect);
-  console.log(room);
+  // console.log(room);
 
   const [localVideoTrack, setLocalVideoTrack] = useState();
 
   const [renderState, setRenderState] = useState(0);
 
   const localAudioTrackRef = useRef(null);
+  const localVideoTrackRef = useRef(null);
+
+  // room.localParticipant.publishTrack(localVideoTrackRef.current);
 
   useEffect(async () => {
     connect(process.env.REACT_APP_LIVEKIT_SERVER, context.token);
     // _room.on(RoomEvent.TrackPublished, handleNewTrack);
     return () => {
-      console.log("disconnecting");
+      // console.log("disconnecting");
       room.disconnect();
+      room.localParticipant.publishTrack(localVideoTrackRef.current);
     };
   }, []);
 
   return (
-    <StageDiv>
-      <VideoGrid>
-        {/*  if no local participant, render an empty rect */}
+    <StageDiv selected={localVideoTrackRef.current}>
+      <VideoGrid participants={participants}>
         {participants
           .reduce((p, c) => {
             if (!p.find((_p) => _p.identity === c.identity)) {
@@ -153,8 +182,14 @@ export default function Stage({ send, context, state, tabs }) {
             }
             return p;
           }, [])
-          .map((participant) => {
-            return <Participant participant={participant} />;
+          .map((participant, i, arr) => {
+            return (
+              <Participant
+                participant={participant}
+                participantNumber={i}
+                totalParticipants={arr.length}
+              />
+            );
           })}
       </VideoGrid>
       <br />
@@ -163,7 +198,7 @@ export default function Stage({ send, context, state, tabs }) {
         {(tabs = [
           {
             tab: "mic",
-            icon: !localAudioTrackRef.current ? <Microphone /> : <>Mute</>,
+            icon: !localAudioTrackRef.current ? <Microphone /> : <Mute />,
             onClick: async () => {
               if (localAudioTrackRef.current) {
                 room.localParticipant.unpublishTrack(
@@ -191,19 +226,33 @@ export default function Stage({ send, context, state, tabs }) {
           },
           {
             tab: "video",
-            icon: <Film />,
+            icon: localVideoTrackRef.current ? <Film /> : <EyeCrossed />,
             onClick: async () => {
-              const videoTrack = await createLocalVideoTrack();
-              room.localParticipant.publishTrack(videoTrack);
-
-              setLocalVideoTrack(videoTrack);
+              // console.log(localVideoTrackRef.current);
+              if (localVideoTrackRef.current) {
+                room.localParticipant.unpublishTrack(
+                  localVideoTrackRef.current
+                );
+                localVideoTrackRef.current = null;
+              } else {
+                localVideoTrackRef.current =
+                  await createLocalVideoTrack().catch((err) => {
+                    alert(err);
+                  });
+                if (localVideoTrackRef.current) {
+                  room.localParticipant.publishTrack(
+                    localVideoTrackRef.current
+                  );
+                }
+              }
+              setLocalVideoTrack(localVideoTrackRef.current);
             },
           },
           {
             tab: "end",
             icon: <Exit />,
             onClick: () => {
-              room.disconnect();
+              room?.disconnect();
               send("DISCONNECT");
             },
           },
@@ -222,10 +271,13 @@ export default function Stage({ send, context, state, tabs }) {
   );
 }
 
-function Participant({ participant }) {
+function Participant({ participant, participantNumber, totalParticipants }) {
   const { subscribedTracks, isLocal } = useParticipant(participant);
 
   const [videoPub, setVideoPub] = useState();
+
+  // const currentGridLayout = videoGridLayout[totalParticipants];
+  // console.log(currentGridLayout);
 
   useEffect(() => {
     let _pub;
@@ -242,15 +294,26 @@ function Participant({ participant }) {
       videoPub?.setEnabled(true);
     }
   }, [videoPub]);
-
   return videoPub?.track ? (
-    <div className={isLocal ? "local-participant" : "remote-participant"}>
+    <div
+      className={`participants ${
+        isLocal ? "local-participant" : "remote-participant"
+      }`}
+    >
       <VideoRenderer track={videoPub.track} />
       <br />
-
       <span>{participant.identity}</span>
     </div>
   ) : (
-    <></>
+    <div
+      className={`participants ${
+        isLocal ? "local-participant" : "remote-participant"
+      }`}
+    >
+      <br />
+
+      <label className="participantNumber">{participantNumber}</label>
+      <span>{participant.identity}</span>
+    </div>
   );
 }

@@ -4,7 +4,7 @@ import Button from "../components/button";
 import React, { useEffect, useState, useRef } from "react";
 import Webcam from "react-webcam";
 
-import { Refresh, Camera } from "react-ikonate";
+import { Refresh, Camera, Microphone } from "react-ikonate";
 import axios from "axios";
 
 const StyledPage = styled.div`
@@ -13,14 +13,23 @@ const StyledPage = styled.div`
   padding: auto;
   text-align: center;
 
+  h3 {
+    margin: 1.5em;
+  }
+
   div.availableRooms {
     display: block;
     margin: auto;
-    margin-top: 7%;
     padding: auto;
 
     > button {
-      margin: 0.5em 0;
+      display: block;
+      padding: auto;
+      margin: 0.3em auto;
+      width: 100%;
+      :hover {
+        background: lightgrey;
+      }
     }
   }
 
@@ -362,16 +371,22 @@ function MicTest() {
 
   return (
     <>
-      <MicTestButton
+      <Button
+        icon={<Microphone />}
         onClick={() => {
           setShowModal(!showModal);
         }}
       >
-        mic
-      </MicTestButton>
+        Test Mic
+      </Button>
       {showModal && (
         <MicTestModal>
-          <div style={{ border: "1px solid #ccc", width: "200px" }}>
+          <div
+            style={{
+              border: "1px solid #ccc",
+              width: "200px",
+            }}
+          >
             <div
               ref={volBarRef}
               style={{ height: "20px", background: "green", width: "0" }}
@@ -399,6 +414,13 @@ function MicTest() {
           <button onClick={toggleLPF}>
             Toggle LPF ({showFilters[6] ? "on" : "off"})
           </button>
+          <button
+            onClick={() => {
+              setShowModal(!showModal);
+            }}
+          >
+            Close
+          </button>
         </MicTestModal>
       )}
     </>
@@ -417,6 +439,7 @@ const MicTestModal = styled.div`
   top: 50%;
   left: 50%;
   transform: translate3d(-50%, -50%, 0);
+  background: white;
   button {
     margin: 3px 0;
   }

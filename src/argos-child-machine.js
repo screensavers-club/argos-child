@@ -60,7 +60,7 @@ let argosChildMachine = createMachine({
   },
 
   on: {
-    RESET: { target: "list_rooms", room: "Not Connected" },
+    BACK: { target: "list_rooms", room: "Not Connected" },
   },
 });
 
