@@ -156,16 +156,20 @@ export default function Stage({ send, context, state, tabs }) {
 
       <div className="streamTabs">
         {(tabs = [
-          { tab: "mic", icon: <Microphone /> },
+          {
+            tab: "mic",
+            icon: <Microphone />,
+            onClick: async () => {
+              const audioTrack = await createLocalAudioTrack();
+              console.log(audioTrack);
+              room.localParticipant.publishTrack(audioTrack);
+              // setLocalVideoTrack(videoTrack);
+            },
+          },
 
           {
             tab: "volume",
             icon: <VolumeOff />,
-            onClick: async () => {
-              const audioTrack = await createLocalAudioTrack();
-              room.localParticipant.publishTrack(audioTrack);
-              // setLocalVideoTrack(videoTrack);
-            },
           },
           {
             tab: "video",
