@@ -52,7 +52,11 @@ let argosChildMachine = createMachine({
       },
     },
 
-    stage: {},
+    stage: {
+      on: {
+        DISCONNECT: { target: "list_rooms", room: "Not Connected" },
+      },
+    },
   },
 
   on: {

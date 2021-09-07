@@ -23,13 +23,6 @@ const StageDiv = styled.div`
   height: 100%;
   padding: 0.3em;
 
-  > button {
-    display: block;
-    margin: auto;
-    padding: auto;
-    margin-bottom: 0.3em;
-  }
-
   div.streamTabs {
     display: flex;
     justify-content: space-around;
@@ -131,6 +124,9 @@ export default function Stage({ send, context, state, tabs }) {
   const { connect, isConnecting, room, error, participants, audioTracks } =
     useRoom();
 
+  // console.log(connect);
+  console.log(room);
+
   const [localVideoTrack, setLocalVideoTrack] = useState();
 
   useEffect(async () => {
@@ -144,14 +140,6 @@ export default function Stage({ send, context, state, tabs }) {
 
   return (
     <StageDiv>
-
-
-      <button onClick={async () => {}}>Start Video</button>
-      {audioTracks.forEach((audioTrack) => {
-        console.log(audioTrack);
-        return <AudioRenderer track={audioTrack.track} />;
-      })}
-
       <VideoGrid>
         {participants
           .reduce((p, c) => {
@@ -176,7 +164,6 @@ export default function Stage({ send, context, state, tabs }) {
             onClick: async () => {
               const audioTrack = await createLocalAudioTrack();
               room.localParticipant.publishTrack(audioTrack);
-
               // setLocalVideoTrack(videoTrack);
             },
           },
@@ -188,13 +175,18 @@ export default function Stage({ send, context, state, tabs }) {
               room.localParticipant.publishTrack(videoTrack);
 
               setLocalVideoTrack(videoTrack);
-
             },
           },
-          { tab: "end", icon: <Exit /> },
+          {
+            tab: "end",
+            icon: <Exit />,
+            onClick: () => {
+              room.disconnect();
+              send("DISCONNECT");
+            },
+          },
           { tab: "call", icon: <Phone /> },
           { tab: "controls", icon: <Controls /> },
-
         ]).map(function ({ tab, icon, onClick }, i) {
           let key = `key_${i}`;
           return (
