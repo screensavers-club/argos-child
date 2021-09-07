@@ -48,17 +48,24 @@ const StageDiv = styled.div`
       padding: 0.5em 0;
       appearance: none;
       border: none;
-      background: none;
       border-right: 1px solid black;
       font-size: 1.5em;
+
+      &:hover {
+        background: #ddd;
+
+        &.active {
+          background: #888;
+        }
+      }
+
+      &.active {
+        background: #aaa;
+      }
 
       svg {
         stroke-linecap: round;
         stroke-width: 1.5;
-      }
-
-      &:hover {
-        background: #ddd;
       }
 
       &:first-child {
@@ -126,8 +133,6 @@ export default function Stage({ send, context, state, tabs }) {
 
   const [localVideoTrack, setLocalVideoTrack] = useState();
 
-  console.log(audioTracks);
-
   useEffect(async () => {
     connect(process.env.REACT_APP_LIVEKIT_SERVER, context.token);
     // _room.on(RoomEvent.TrackPublished, handleNewTrack);
@@ -139,11 +144,14 @@ export default function Stage({ send, context, state, tabs }) {
 
   return (
     <StageDiv>
+
+
       <button onClick={async () => {}}>Start Video</button>
       {audioTracks.forEach((audioTrack) => {
         console.log(audioTrack);
         return <AudioRenderer track={audioTrack.track} />;
       })}
+
       <VideoGrid>
         {participants
           .reduce((p, c) => {
@@ -161,6 +169,7 @@ export default function Stage({ send, context, state, tabs }) {
       <div className="streamTabs">
         {(tabs = [
           { tab: "mic", icon: <Microphone /> },
+
           {
             tab: "volume",
             icon: <VolumeOff />,
@@ -179,11 +188,13 @@ export default function Stage({ send, context, state, tabs }) {
               room.localParticipant.publishTrack(videoTrack);
 
               setLocalVideoTrack(videoTrack);
+
             },
           },
           { tab: "end", icon: <Exit /> },
           { tab: "call", icon: <Phone /> },
           { tab: "controls", icon: <Controls /> },
+
         ]).map(function ({ tab, icon, onClick }, i) {
           let key = `key_${i}`;
           return (
