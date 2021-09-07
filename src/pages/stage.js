@@ -23,6 +23,7 @@ import {
 } from "react-ikonate";
 
 const StageDiv = styled.div`
+  position: fixed;
   width: 100%;
   height: 100%;
   padding: 0.3em;
@@ -33,7 +34,7 @@ const StageDiv = styled.div`
     width: 80%;
     height: 3em;
     position: absolute;
-    bottom: 1em;
+    bottom: 5em;
     left: 50%;
     transform: translate(-50%, 0);
     border: 1px solid black;
