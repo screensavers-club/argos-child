@@ -129,6 +129,10 @@ export default function Stage({ send, context, state, tabs }) {
 
   const [localVideoTrack, setLocalVideoTrack] = useState();
 
+  const [renderState, setRenderState] = useState(0);
+
+  const localAudioTrackRef = useRef(null);
+
   useEffect(async () => {
     connect(process.env.REACT_APP_LIVEKIT_SERVER, context.token);
     // _room.on(RoomEvent.TrackPublished, handleNewTrack);
@@ -141,6 +145,7 @@ export default function Stage({ send, context, state, tabs }) {
   return (
     <StageDiv>
       <VideoGrid>
+        {/*  if no local participant, render an empty rect */}
         {participants
           .reduce((p, c) => {
             if (!p.find((_p) => _p.identity === c.identity)) {
@@ -158,12 +163,25 @@ export default function Stage({ send, context, state, tabs }) {
         {(tabs = [
           {
             tab: "mic",
-            icon: <Microphone />,
+            icon: !localAudioTrackRef.current ? <Microphone /> : <>Mute</>,
             onClick: async () => {
-              const audioTrack = await createLocalAudioTrack();
-              console.log(audioTrack);
-              room.localParticipant.publishTrack(audioTrack);
-              // setLocalVideoTrack(videoTrack);
+              if (localAudioTrackRef.current) {
+                room.localParticipant.unpublishTrack(
+                  localAudioTrackRef.current
+                );
+                localAudioTrackRef.current = null;
+              } else {
+                localAudioTrackRef.current =
+                  await createLocalAudioTrack().catch((err) => {
+                    alert(err);
+                  });
+                if (localAudioTrackRef.current) {
+                  room.localParticipant.publishTrack(
+                    localAudioTrackRef.current
+                  );
+                }
+              }
+              setRenderState(renderState + 1);
             },
           },
 
