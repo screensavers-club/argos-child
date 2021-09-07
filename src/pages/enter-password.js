@@ -230,7 +230,7 @@ export default function EnterPassword({ send, context, state, icon }) {
         <Button
           icon={<ArrowLeftCircle />}
           onClick={() => {
-            send("RESET");
+            send("BACK");
           }}
         >
           Back
