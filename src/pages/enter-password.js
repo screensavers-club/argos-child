@@ -65,7 +65,7 @@ const StyledPage = styled.div`
 
   input,
   select {
-    font-size: 2em;
+    font-size: 3em;
     border-style: none;
     width: 45%;
     height: auto;

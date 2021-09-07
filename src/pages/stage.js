@@ -24,9 +24,9 @@ import {
 
 const StageDiv = styled.div`
   position: fixed;
+  display: block;
   width: 100%;
   height: 100%;
-  padding: 0.3em;
 
   div.streamTabs {
     display: flex;
@@ -48,6 +48,8 @@ const StageDiv = styled.div`
       border: none;
       border-right: 1px solid black;
       font-size: 1.5em;
+
+      /* background:${(p) => (!p.selected ? "black" : "white")} */
 
       &:hover {
         background: #ddd;
@@ -81,12 +83,16 @@ const StageDiv = styled.div`
 `;
 
 const VideoGrid = styled.div`
-  display: grid;
+  display: flex;
   height: 70%;
-  grid-template-columns: 1fr 1fr 1fr 1fr;
-  grid-template-rows: 1fr 1fr 1fr;
 
-  grid-gap: 0.3em;
+  label.participantNumber {
+    position: absolute;
+    font-size: 5em;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
 
   > div {
     position: relative;
@@ -99,15 +105,25 @@ const VideoGrid = styled.div`
       bottom: 0;
       right: 0;
       background: #000;
-      font-size: 7px;
+      font-size: 0.5em;
       color: white;
     }
   }
 
   > div.remote-participant {
+    display: flex;
+    width: ${(p) => {
+      let COL_COUNT = [
+        1, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5,
+        5, 6, 6, 6, 6, 6,
+      ];
+      let numP = p.participants.filter((p) => !p.isLocal).length;
+      return 100 / COL_COUNT[numP - 1];
+    }}%;
+
     video {
       position: absolute;
-      object-fit: cover;
+      object-fit: contain;
       width: 100%;
       height: 100%;
     }
@@ -118,11 +134,11 @@ const VideoGrid = styled.div`
   }
 
   > div.local-participant {
-    width: 100%;
-    grid-column: 1 / span 2;
-    grid-row: 1 / span 3;
+    width: 50%;
+    order: 1;
+
     video {
-      object-fit: cover;
+      object-fit: contain;
       width: 100%;
       height: 100%;
       border: 1px solid black;
@@ -135,7 +151,7 @@ export default function Stage({ send, context, state, tabs }) {
     useRoom();
 
   // console.log(connect);
-  console.log(room);
+  // console.log(room);
 
   const [localVideoTrack, setLocalVideoTrack] = useState();
 
@@ -150,16 +166,15 @@ export default function Stage({ send, context, state, tabs }) {
     connect(process.env.REACT_APP_LIVEKIT_SERVER, context.token);
     // _room.on(RoomEvent.TrackPublished, handleNewTrack);
     return () => {
-      console.log("disconnecting");
+      // console.log("disconnecting");
       room.disconnect();
       room.localParticipant.publishTrack(localVideoTrackRef.current);
     };
   }, []);
 
   return (
-    <StageDiv>
-      <VideoGrid>
-        {/*  if no local participant, render an empty rect */}
+    <StageDiv selected={localVideoTrackRef.current}>
+      <VideoGrid participants={participants}>
         {participants
           .reduce((p, c) => {
             if (!p.find((_p) => _p.identity === c.identity)) {
@@ -167,8 +182,14 @@ export default function Stage({ send, context, state, tabs }) {
             }
             return p;
           }, [])
-          .map((participant) => {
-            return <Participant participant={participant} />;
+          .map((participant, i, arr) => {
+            return (
+              <Participant
+                participant={participant}
+                participantNumber={i}
+                totalParticipants={arr.length}
+              />
+            );
           })}
       </VideoGrid>
       <br />
@@ -207,7 +228,7 @@ export default function Stage({ send, context, state, tabs }) {
             tab: "video",
             icon: localVideoTrackRef.current ? <Film /> : <EyeCrossed />,
             onClick: async () => {
-              console.log(localVideoTrackRef.current);
+              // console.log(localVideoTrackRef.current);
               if (localVideoTrackRef.current) {
                 room.localParticipant.unpublishTrack(
                   localVideoTrackRef.current
@@ -250,10 +271,13 @@ export default function Stage({ send, context, state, tabs }) {
   );
 }
 
-function Participant({ participant }) {
+function Participant({ participant, participantNumber, totalParticipants }) {
   const { subscribedTracks, isLocal } = useParticipant(participant);
 
   const [videoPub, setVideoPub] = useState();
+
+  // const currentGridLayout = videoGridLayout[totalParticipants];
+  // console.log(currentGridLayout);
 
   useEffect(() => {
     let _pub;
@@ -270,7 +294,6 @@ function Participant({ participant }) {
       videoPub?.setEnabled(true);
     }
   }, [videoPub]);
-
   return videoPub?.track ? (
     <div
       className={`participants ${
@@ -279,7 +302,6 @@ function Participant({ participant }) {
     >
       <VideoRenderer track={videoPub.track} />
       <br />
-
       <span>{participant.identity}</span>
     </div>
   ) : (
@@ -289,6 +311,8 @@ function Participant({ participant }) {
       }`}
     >
       <br />
+
+      <label className="participantNumber">{participantNumber}</label>
       <span>{participant.identity}</span>
     </div>
   );
