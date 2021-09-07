@@ -11,12 +11,15 @@ import {
   RoomEvent,
 } from "livekit-client";
 import { useEffect, useRef, useState } from "react";
-import { Microphone } from "react-ikonate";
-import { Exit } from "react-ikonate";
-import { Film } from "react-ikonate";
-import { Phone } from "react-ikonate";
-import { VolumeOff } from "react-ikonate";
-import { Controls } from "react-ikonate";
+import {
+  Microphone,
+  Mute,
+  Exit,
+  Film,
+  Phone,
+  VolumeOff,
+  Controls,
+} from "react-ikonate";
 
 const StageDiv = styled.div`
   width: 100%;
@@ -163,7 +166,7 @@ export default function Stage({ send, context, state, tabs }) {
         {(tabs = [
           {
             tab: "mic",
-            icon: !localAudioTrackRef.current ? <Microphone /> : <>Mute</>,
+            icon: !localAudioTrackRef.current ? <Microphone /> : <Mute />,
             onClick: async () => {
               if (localAudioTrackRef.current) {
                 room.localParticipant.unpublishTrack(
