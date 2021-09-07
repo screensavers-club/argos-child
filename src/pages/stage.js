@@ -19,6 +19,7 @@ import {
   Phone,
   VolumeOff,
   Controls,
+  EyeCrossed,
 } from "react-ikonate";
 
 const StageDiv = styled.div`
@@ -111,6 +112,10 @@ const VideoGrid = styled.div`
     }
   }
 
+  div.participants {
+    border: 1px solid black;
+  }
+
   > div.local-participant {
     width: 100%;
     grid-column: 1 / span 2;
@@ -119,6 +124,7 @@ const VideoGrid = styled.div`
       object-fit: cover;
       width: 100%;
       height: 100%;
+      border: 1px solid black;
     }
   }
 `;
@@ -137,12 +143,15 @@ export default function Stage({ send, context, state, tabs }) {
   const localAudioTrackRef = useRef(null);
   const localVideoTrackRef = useRef(null);
 
+  // room.localParticipant.publishTrack(localVideoTrackRef.current);
+
   useEffect(async () => {
     connect(process.env.REACT_APP_LIVEKIT_SERVER, context.token);
     // _room.on(RoomEvent.TrackPublished, handleNewTrack);
     return () => {
       console.log("disconnecting");
       room.disconnect();
+      room.localParticipant.publishTrack(localVideoTrackRef.current);
     };
   }, []);
 
@@ -195,7 +204,7 @@ export default function Stage({ send, context, state, tabs }) {
           },
           {
             tab: "video",
-            icon: localVideoTrackRef.current ? <Film /> : <>No video</>,
+            icon: localVideoTrackRef.current ? <Film /> : <EyeCrossed />,
             onClick: async () => {
               console.log(localVideoTrackRef.current);
               if (localVideoTrackRef.current) {
@@ -262,13 +271,24 @@ function Participant({ participant }) {
   }, [videoPub]);
 
   return videoPub?.track ? (
-    <div className={isLocal ? "local-participant" : "remote-participant"}>
+    <div
+      className={`participants ${
+        isLocal ? "local-participant" : "remote-participant"
+      }`}
+    >
       <VideoRenderer track={videoPub.track} />
       <br />
 
       <span>{participant.identity}</span>
     </div>
   ) : (
-    <></>
+    <div
+      className={`participants ${
+        isLocal ? "local-participant" : "remote-participant"
+      }`}
+    >
+      <br />
+      <span>{participant.identity}</span>
+    </div>
   );
 }
