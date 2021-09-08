@@ -121,13 +121,7 @@ const VideoGrid = styled.div`
       let numP = p.participants.filter((p) => !p.isLocal).length;
       return 100 / COL_COUNT[numP - 1];
     }}%;
-    order: ${(p) => {
-      return p.participants.forEach((p, i) => {
-        if (!p.isLocal) {
-          return i + 2;
-        }
-      });
-    }};
+    order: 2;
 
     video {
       position: absolute;
@@ -142,10 +136,11 @@ const VideoGrid = styled.div`
   }
 
   > div.local-participant {
-    position: absolute;
+    position: fixed;
     width: 50%;
-    top: 0;
+    top: 50%;
     left: 0;
+    transform: translate(0, -50%);
 
     video {
       object-fit: contain;
