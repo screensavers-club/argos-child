@@ -111,6 +111,7 @@ const VideoGrid = styled.div`
   }
 
   > div.remote-participant {
+    position: relative;
     display: flex;
     width: ${(p) => {
       let COL_COUNT = [
@@ -120,6 +121,7 @@ const VideoGrid = styled.div`
       let numP = p.participants.filter((p) => !p.isLocal).length;
       return 100 / COL_COUNT[numP - 1];
     }}%;
+    order: 2;
 
     video {
       position: absolute;
@@ -134,8 +136,11 @@ const VideoGrid = styled.div`
   }
 
   > div.local-participant {
+    position: fixed;
     width: 50%;
-    order: 1;
+    top: 50%;
+    left: 0;
+    transform: translate(0, -50%);
 
     video {
       object-fit: contain;
@@ -294,6 +299,7 @@ function Participant({ participant, participantNumber, totalParticipants }) {
       videoPub?.setEnabled(true);
     }
   }, [videoPub]);
+
   return videoPub?.track ? (
     <div
       className={`participants ${
