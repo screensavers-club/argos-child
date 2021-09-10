@@ -168,12 +168,23 @@ export default function Stage({ send, context, state, tabs }) {
   // room.localParticipant.publishTrack(localVideoTrackRef.current);
 
   useEffect(async () => {
-    connect(process.env.REACT_APP_LIVEKIT_SERVER, context.token);
+    connect(process.env.REACT_APP_LIVEKIT_SERVER, context.token).then(
+      (_room) => {
+        const encoder = new TextEncoder();
+        const decoder = new TextDecoder();
+
+        _room.on(RoomEvent.DataReceived, (payload, participant) => {
+          const payloadStr = decoder.decode(payload);
+          const payloadObj = JSON.parse(payloadStr);
+          console.log({ payloadObj, participant });
+        });
+      }
+    );
     // _room.on(RoomEvent.TrackPublished, handleNewTrack);
     return () => {
       // console.log("disconnecting");
       room.disconnect();
-      room.localParticipant.publishTrack(localVideoTrackRef.current);
+      // room.localParticipant.publishTrack(localVideoTrackRef.current);
     };
   }, []);
 
