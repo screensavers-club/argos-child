@@ -4,40 +4,40 @@ import Button from "../components/button";
 import React, { useEffect, useState, useRef } from "react";
 import Webcam from "react-webcam";
 
-import { Refresh, Camera, Microphone } from "react-ikonate";
+import { Refresh, Camera, Microphone, Maximise } from "react-ikonate";
 import axios from "axios";
 
 const StyledPage = styled.div`
-  display: block;
-  margin: auto;
-  padding: auto;
+  display: flex;
   text-align: center;
-
-  h3 {
-    margin: 1.5em;
-  }
+  height: calc(100% - 35px);
+  background: white;
 
   div.availableRooms {
+    border: 1px solid black;
+    position: relative;
+    left: 0;
     display: block;
-    margin: auto;
-    padding: auto;
+    padding: 25px;
+    margin: 25px 0 25px 25px;
+    width: 100%;
+    height: calc(100% - 50px);
+    overflow: scroll;
+    box-sizing: border-box;
+
+    > h3 {
+      margin: 0;
+    }
 
     > button {
       display: block;
       padding: auto;
-      margin: 0.3em auto;
+      margin: 0.5em auto;
       width: 100%;
       :hover {
         background: lightgrey;
       }
     }
-  }
-
-  > button {
-    display: block;
-    padding: auto;
-    margin: 0.5em auto;
-    width: 40%;
   }
 
   div.webcamDiv {
@@ -57,6 +57,25 @@ const StyledPage = styled.div`
       width: 25em;
       height: calc((9 / 16) * 25em);
       object-fit: cover;
+    }
+  }
+
+  div.functionPanel {
+    margin: 25px;
+    padding: 25px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-content: center;
+    border: 1px solid black;
+    width: ${(1 / 3) * 100}%;
+    height: calc(100% - 102px);
+
+    > button {
+      display: block;
+      padding: 0.5em;
+      margin: 0.5em;
     }
   }
 `;
@@ -88,61 +107,96 @@ export default function ListRooms({ context, send, state }) {
         ))}
       </div>
 
-      <Button
-        icon={<Refresh />}
-        onClick={() => {
-          axios
-            .get(`${process.env.REACT_APP_PEER_SERVER}/rooms`)
-            .then((result) => {
-              setRoomList(result.data);
-            });
-        }}
-      >
-        Refresh rooms
-      </Button>
+      {/* function toggleFullscreen() {
+            let elem = document.querySelector("div");
 
-      <Button
-        icon={<Camera />}
-        onClick={() => {
-          if (webcam === false) {
-            setWebcam(true);
-          } else if (webcam === true) {
-            setWebcam(false);
-          }
-        }}
-      >
-        Test Webcam
-      </Button>
-      <MicTest />
+            if (!document.fullscreenElement) {
+              elem.requestFullscreen().catch((err) => {
+                alert(
+                  `Error attempting to enable full-screen mode: ${err.message} (${err.name})`
+                );
+              });
+            } else {
+              document.exitFullscreen();
+            }
+          } */}
 
-      {webcam === true ? (
-        <div className="webcamDiv">
-          <div
-            className="emptyBG"
-            style={{
-              background: "#000",
-              opacity: "0.5",
-              position: "fixed",
-              top: "0",
-              left: "0",
-              width: "100%",
-              height: "100%",
-              zIndex: "0",
-            }}
-          ></div>
-          <Webcam />
+      <div className="functionPanel">
+        <Button
+          icon={<Maximise />}
+          onClick={function toggleFullscreen() {
+            let elem = document.getElementById("App");
 
-          <Button
-            onClick={() => {
+            if (!document.fullscreenElement) {
+              elem.requestFullscreen().catch((err) => {
+                alert(
+                  `Error attempting to enable full-screen mode: ${err.message} (${err.name})`
+                );
+              });
+            } else {
+              document.exitFullscreen();
+            }
+          }}
+        >
+          Fullscreen
+        </Button>
+
+        <Button
+          icon={<Refresh />}
+          onClick={() => {
+            axios
+              .get(`${process.env.REACT_APP_PEER_SERVER}/rooms`)
+              .then((result) => {
+                setRoomList(result.data);
+              });
+          }}
+        >
+          Refresh
+        </Button>
+
+        <Button
+          icon={<Camera />}
+          onClick={() => {
+            if (webcam === false) {
+              setWebcam(true);
+            } else if (webcam === true) {
               setWebcam(false);
-            }}
-          >
-            Close
-          </Button>
-        </div>
-      ) : (
-        <div style={{ background: "#fff", opacity: "1", zIndex: "0" }}></div>
-      )}
+            }
+          }}
+        >
+          Test Cam
+        </Button>
+        <MicTest />
+
+        {webcam === true ? (
+          <div className="webcamDiv">
+            <div
+              className="emptyBG"
+              style={{
+                background: "#000",
+                opacity: "0.5",
+                position: "fixed",
+                top: "0",
+                left: "0",
+                width: "100%",
+                height: "100%",
+                zIndex: "0",
+              }}
+            ></div>
+            <Webcam />
+
+            <Button
+              onClick={() => {
+                setWebcam(false);
+              }}
+            >
+              Close
+            </Button>
+          </div>
+        ) : (
+          <div style={{ background: "#fff", opacity: "1", zIndex: "0" }}></div>
+        )}
+      </div>
     </StyledPage>
   );
 }
