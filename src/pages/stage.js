@@ -80,6 +80,26 @@ const StageDiv = styled.div`
         border-bottom-right-radius: 0.3em;
       }
     }
+
+    button.end {
+      svg {
+        stroke: red;
+      }
+    }
+
+    button.activated {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      > span {
+        width: 15px;
+        height: 15px;
+        background: #3df536;
+        border-radius: 50%;
+        display: block;
+        margin-right: 0.1em;
+      }
+    }
   }
 `;
 
@@ -166,6 +186,7 @@ export default function Stage({ send, context, state, tabs }) {
   const [localVideoTrack, setLocalVideoTrack] = useState();
 
   const [renderState, setRenderState] = useState(0);
+  const [active, setActive] = useState([false, false, false]);
 
   const localAudioTrackRef = useRef(null);
   const localVideoTrackRef = useRef(null);
@@ -239,8 +260,19 @@ export default function Stage({ send, context, state, tabs }) {
         {(tabs = [
           {
             tab: "mic",
-            icon: !localAudioTrackRef.current ? <Microphone /> : <Mute />,
+            tabActive: active[0],
+            icon: !localAudioTrackRef.current ? (
+              <Microphone />
+            ) : (
+              <>
+                <span></span>
+                <Microphone />
+              </>
+            ),
             onClick: async () => {
+              active[0] = !active[0];
+              setActive(active);
+
               if (localAudioTrackRef.current) {
                 room.localParticipant.unpublishTrack(
                   localAudioTrackRef.current
@@ -260,16 +292,21 @@ export default function Stage({ send, context, state, tabs }) {
               setRenderState(renderState + 1);
             },
           },
-
-          {
-            tab: "volume",
-            icon: <VolumeOff />,
-          },
           {
             tab: "video",
-            icon: localVideoTrackRef.current ? <Film /> : <EyeCrossed />,
+            tabActive: active[1],
+            icon: !localVideoTrackRef.current ? (
+              <Film />
+            ) : (
+              <>
+                <span></span>
+                <Film />
+              </>
+            ),
             onClick: async () => {
-              // console.log(localVideoTrackRef.current);
+              active[1] = !active[1];
+              setActive(active);
+
               if (localVideoTrackRef.current) {
                 room.localParticipant.unpublishTrack(
                   localVideoTrackRef.current
@@ -297,12 +334,16 @@ export default function Stage({ send, context, state, tabs }) {
               send("DISCONNECT");
             },
           },
-          { tab: "call", icon: <Phone /> },
-          { tab: "controls", icon: <Controls /> },
-        ]).map(function ({ tab, icon, onClick }, i) {
+        ]).map(function ({ tab, icon, onClick, tabActive }, i) {
           let key = `key_${i}`;
           return (
-            <button key={key} onClick={onClick}>
+            <button
+              key={key}
+              onClick={() => {
+                onClick();
+              }}
+              className={`${tab} ${tabActive === true ? "activated" : ""}`}
+            >
               {icon}
             </button>
           );
