@@ -9,6 +9,7 @@ import {
   createLocalAudioTrack,
   createLocalVideoTrack,
   RoomEvent,
+  DataPacket_Kind,
 } from "livekit-client";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -155,6 +156,10 @@ export default function Stage({ send, context, state, tabs }) {
   const { connect, isConnecting, room, error, participants, audioTracks } =
     useRoom();
 
+  function getCurrentLayout() {
+    return context.current_layout;
+  }
+
   // console.log(connect);
   // console.log(room);
 
@@ -168,12 +173,43 @@ export default function Stage({ send, context, state, tabs }) {
   // room.localParticipant.publishTrack(localVideoTrackRef.current);
 
   useEffect(async () => {
-    connect(process.env.REACT_APP_LIVEKIT_SERVER, context.token);
+    connect(process.env.REACT_APP_LIVEKIT_SERVER, context.token).then(
+      (_room) => {
+        const encoder = new TextEncoder();
+        const decoder = new TextDecoder();
+        console.log(context);
+        send("INIT_LAYOUT_WITH_SELF", { sid: _room.localParticipant.sid });
+
+        console.log(context);
+        _room.on(RoomEvent.DataReceived, (payload, participant) => {
+          const payloadStr = decoder.decode(payload);
+          const payloadObj = JSON.parse(payloadStr);
+
+          const requesterSid = participant.sid;
+
+          switch (payloadObj.action) {
+            case "REQUEST_CURRENT_LAYOUT":
+              const strData = JSON.stringify({
+                current_layout: getCurrentLayout(),
+              });
+              const data = encoder.encode(strData);
+              _room.localParticipant.publishData(
+                data,
+                DataPacket_Kind.RELIABLE,
+                [requesterSid]
+              );
+              break;
+            default:
+              break;
+          }
+        });
+      }
+    );
     // _room.on(RoomEvent.TrackPublished, handleNewTrack);
     return () => {
       // console.log("disconnecting");
       room.disconnect();
-      room.localParticipant.publishTrack(localVideoTrackRef.current);
+      // room.localParticipant.publishTrack(localVideoTrackRef.current);
     };
   }, []);
 

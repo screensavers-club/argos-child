@@ -4,7 +4,16 @@ let argosChildMachine = createMachine({
   id: "ArgosChild",
   initial: "get_identity",
 
-  context: { room: {}, joining_room: null, error: {}, identity: null },
+  context: {
+    room: {},
+    joining_room: null,
+    error: {},
+    identity: null,
+    current_layout: {
+      type: "D",
+      slots: [null, null, null],
+    },
+  },
 
   states: {
     get_identity: {
@@ -54,6 +63,16 @@ let argosChildMachine = createMachine({
 
     stage: {
       on: {
+        INIT_LAYOUT_WITH_SELF: {
+          actions: assign({
+            current_layout: (context, event) => {
+              return {
+                type: "D",
+                slots: [event.sid, null, null],
+              };
+            },
+          }),
+        },
         DISCONNECT: { target: "list_rooms", room: "Not Connected" },
       },
     },
