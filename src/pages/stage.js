@@ -1,10 +1,5 @@
 import styled from "styled-components";
-import {
-	useRoom,
-	useParticipant,
-	VideoRenderer,
-	AudioRenderer,
-} from "livekit-react";
+import { useRoom, useParticipant, VideoRenderer } from "livekit-react";
 import {
 	createLocalAudioTrack,
 	createLocalVideoTrack,
@@ -12,16 +7,7 @@ import {
 	DataPacket_Kind,
 } from "livekit-client";
 import { useEffect, useRef, useState } from "react";
-import {
-	Microphone,
-	Mute,
-	Exit,
-	Film,
-	Phone,
-	VolumeOff,
-	Controls,
-	EyeCrossed,
-} from "react-ikonate";
+import { Microphone, Exit, Film } from "react-ikonate";
 
 const StageDiv = styled.div`
 	position: fixed;
@@ -78,6 +64,26 @@ const StageDiv = styled.div`
 				border: none;
 				border-top-right-radius: 0.3em;
 				border-bottom-right-radius: 0.3em;
+			}
+		}
+
+		button.end {
+			svg {
+				stroke: red;
+			}
+		}
+
+		button.activated {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			> span {
+				width: 15px;
+				height: 15px;
+				background: #3df536;
+				border-radius: 50%;
+				display: block;
+				margin-right: 0.1em;
 			}
 		}
 	}
@@ -153,17 +159,12 @@ const VideoGrid = styled.div`
 `;
 
 export default function Stage({ send, context, state, tabs }) {
-	const { connect, isConnecting, room, error, participants, audioTracks } =
-		useRoom();
-
-	function getCurrentLayout() {
-		return context.current_layout;
-	}
+	const { connect, room, participants, audioTracks } = useRoom();
 
 	const encoder = new TextEncoder();
 	const decoder = new TextDecoder();
 
-	const [localVideoTrack, setLocalVideoTrack] = useState();
+	const [active, setActive] = useState([false, false]);
 
 	const [renderState, setRenderState] = useState(0);
 
@@ -202,7 +203,7 @@ export default function Stage({ send, context, state, tabs }) {
 			}
 		);
 		return () => {
-			room.disconnect();
+			room?.disconnect();
 		};
 	}, []);
 
@@ -232,8 +233,20 @@ export default function Stage({ send, context, state, tabs }) {
 				{(tabs = [
 					{
 						tab: "mic",
-						icon: !localAudioTrackRef.current ? <Microphone /> : <Mute />,
+						tabActive: active[0],
+						icon: !localAudioTrackRef.current ? (
+							<Microphone />
+						) : (
+							<>
+								<span></span>
+								<Microphone />
+							</>
+						),
 						onClick: async () => {
+							let _active = [...active];
+							_active[0] = !active[0];
+							setActive(_active);
+
 							if (localAudioTrackRef.current) {
 								room.localParticipant.unpublishTrack(
 									localAudioTrackRef.current
@@ -253,16 +266,22 @@ export default function Stage({ send, context, state, tabs }) {
 							setRenderState(renderState + 1);
 						},
 					},
-
-					{
-						tab: "volume",
-						icon: <VolumeOff />,
-					},
 					{
 						tab: "video",
-						icon: localVideoTrackRef.current ? <Film /> : <EyeCrossed />,
+						tabActive: active[1],
+						icon: !localVideoTrackRef.current ? (
+							<Film />
+						) : (
+							<>
+								<span></span>
+								<Film />
+							</>
+						),
 						onClick: async () => {
-							// console.log(localVideoTrackRef.current);
+							let _active = [...active];
+							_active[1] = !active[1];
+							setActive(_active);
+
 							if (localVideoTrackRef.current) {
 								room.localParticipant.unpublishTrack(
 									localVideoTrackRef.current
@@ -278,8 +297,9 @@ export default function Stage({ send, context, state, tabs }) {
 										localVideoTrackRef.current
 									);
 								}
+								console.log(localVideoTrackRef.current);
 							}
-							setLocalVideoTrack(localVideoTrackRef.current);
+							setRenderState(renderState + 1);
 						},
 					},
 					{
@@ -290,12 +310,16 @@ export default function Stage({ send, context, state, tabs }) {
 							send("DISCONNECT");
 						},
 					},
-					{ tab: "call", icon: <Phone /> },
-					{ tab: "controls", icon: <Controls /> },
-				]).map(function ({ tab, icon, onClick }, i) {
+				]).map(function ({ tab, icon, onClick, tabActive }, i) {
 					let key = `key_${i}`;
 					return (
-						<button key={key} onClick={onClick}>
+						<button
+							key={key}
+							onClick={() => {
+								onClick();
+							}}
+							className={`${tab} ${tabActive === true ? "activated" : ""}`}
+						>
 							{icon}
 						</button>
 					);
