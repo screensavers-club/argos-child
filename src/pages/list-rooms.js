@@ -71,7 +71,8 @@ const StyledPage = styled.div`
     align-content: center;
     border: 1px solid black;
     width: ${(1 / 3) * 100}%;
-    height: calc(100% - 102px);
+    height: calc(100% - 50px);
+    box-sizing: border-box;
 
     > button {
       display: block;
