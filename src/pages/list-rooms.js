@@ -22,7 +22,8 @@ const StyledPage = styled.div`
     margin: 25px 0 25px 25px;
     width: 100%;
     height: calc(100% - 50px);
-    overflow: scroll;
+    overflow-y: scroll;
+    overflow-x: hidden;
     box-sizing: border-box;
 
     > h3 {
