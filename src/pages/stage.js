@@ -176,6 +176,9 @@ export default function Stage({ send, context, state, tabs }) {
         current_layout: context.current_layout,
       });
       const data = encoder.encode(strData);
+      console.log({
+        current_layout: context.current_layout,
+      });
       room.localParticipant.publishData(data, DataPacket_Kind.RELIABLE, [
         recipient,
       ]);
@@ -185,18 +188,17 @@ export default function Stage({ send, context, state, tabs }) {
   useEffect(() => {
     console.log("room changed");
     if (room) {
-      if (room.listenerCount(RoomEvent.DataReceived) == 0) {
-        room.on(RoomEvent.DataReceived, (payload, participant) => {
-          const payloadStr = decoder.decode(payload);
-          const payloadObj = JSON.parse(payloadStr);
+      room.removeAllListeners(RoomEvent.DataReceived);
+      room.on(RoomEvent.DataReceived, (payload, participant) => {
+        const payloadStr = decoder.decode(payload);
+        const payloadObj = JSON.parse(payloadStr);
 
-          const requesterSid = participant.sid;
+        const requesterSid = participant.sid;
 
-          if (payloadObj.action === "REQUEST_CURRENT_LAYOUT") {
-            sendCurrentLayout(requesterSid);
-          }
-        });
-      }
+        if (payloadObj.action === "REQUEST_CURRENT_LAYOUT") {
+          sendCurrentLayout(requesterSid);
+        }
+      });
     }
   }, [room, context]);
 

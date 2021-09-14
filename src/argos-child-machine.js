@@ -10,7 +10,7 @@ let argosChildMachine = createMachine({
     error: {},
     identity: null,
     current_layout: {
-      type: "D",
+      type: "E",
       slots: [null, null, null],
     },
   },
@@ -67,7 +67,7 @@ let argosChildMachine = createMachine({
           actions: assign({
             current_layout: (context, event) => {
               return {
-                type: "D",
+                type: "E",
                 slots: [event.sid, null, null],
               };
             },
