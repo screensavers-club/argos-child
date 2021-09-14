@@ -8,6 +8,7 @@ import {
 } from "livekit-client";
 import { useEffect, useRef, useState } from "react";
 import { Microphone, Exit, Film } from "react-ikonate";
+import { __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED } from "react-dom";
 
 const StageDiv = styled.div`
   position: fixed;
@@ -203,11 +204,7 @@ export default function Stage({ send, context, state, tabs }) {
   }, [room, context]);
 
   useEffect(() => {
-    connect(process.env.REACT_APP_LIVEKIT_SERVER, context.token).then(
-      (_room) => {
-        send("INIT_LAYOUT_WITH_SELF", { sid: _room.localParticipant.sid });
-      }
-    );
+    connect(process.env.REACT_APP_LIVEKIT_SERVER, context.token);
     return () => {
       room?.disconnect();
     };
@@ -299,11 +296,13 @@ export default function Stage({ send, context, state, tabs }) {
                     alert(err);
                   });
                 if (localVideoTrackRef.current) {
-                  room.localParticipant.publishTrack(
-                    localVideoTrackRef.current
-                  );
+                  room.localParticipant
+                    .publishTrack(localVideoTrackRef.current)
+                    .then((track) => {
+                      console.log(track.trackSid);
+                      send("INIT_LAYOUT_WITH_SELF", { sid: track.trackSid });
+                    });
                 }
-                console.log(localVideoTrackRef.current);
               }
               setRenderState(renderState + 1);
             },
