@@ -183,18 +183,23 @@ export default function Stage({ send, context, state, tabs }) {
 		}
 	}
 
-	if (room) {
-		room.on(RoomEvent.DataReceived, (payload, participant) => {
-			const payloadStr = decoder.decode(payload);
-			const payloadObj = JSON.parse(payloadStr);
+	useEffect(() => {
+		console.log("room changed");
+		if (room) {
+			if (room.listenerCount(RoomEvent.DataReceived) == 0) {
+				room.on(RoomEvent.DataReceived, (payload, participant) => {
+					const payloadStr = decoder.decode(payload);
+					const payloadObj = JSON.parse(payloadStr);
 
-			const requesterSid = participant.sid;
+					const requesterSid = participant.sid;
 
-			if (payloadObj.action === "REQUEST_CURRENT_LAYOUT") {
-				sendCurrentLayout(requesterSid);
+					if (payloadObj.action === "REQUEST_CURRENT_LAYOUT") {
+						sendCurrentLayout(requesterSid);
+					}
+				});
 			}
-		});
-	}
+		}
+	}, [room, context]);
 
 	useEffect(() => {
 		connect(process.env.REACT_APP_LIVEKIT_SERVER, context.token).then(
