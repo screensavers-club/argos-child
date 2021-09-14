@@ -83,7 +83,7 @@ let argosChildMachine = createMachine({
         UPDATE_LAYOUT: {
           actions: assign({
             current_layout: (context, event) => {
-              console.log(event.layout);
+              console.log("updateLayout", event.layout);
               return event.layout;
             },
           }),

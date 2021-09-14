@@ -134,9 +134,6 @@ export default function Stage({ send, context, state, tabs }) {
         current_layout: context.current_layout,
       });
       const data = encoder.encode(strData);
-      console.log({
-        current_layout: context.current_layout,
-      });
       room.localParticipant.publishData(data, DataPacket_Kind.RELIABLE, [
         recipient,
       ]);
