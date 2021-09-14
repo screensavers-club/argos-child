@@ -8,7 +8,6 @@ import {
 } from "livekit-client";
 import { useEffect, useRef, useState } from "react";
 import { Microphone, Exit, Film } from "react-ikonate";
-import { __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED } from "react-dom";
 
 const StageDiv = styled.div`
   position: fixed;
@@ -90,8 +89,11 @@ const StageDiv = styled.div`
 `;
 
 const VideoGrid = styled.div`
-  display: flex;
-  height: 70%;
+  position: relative;
+  height: 0;
+  width: 100%;
+  padding-top: ${(9 / 16) * 100}%;
+  box-sizing: border-box;
 
   label.participantNumber {
     position: absolute;
@@ -101,59 +103,16 @@ const VideoGrid = styled.div`
     transform: translate(-50%, -50%);
   }
 
-  > div {
-    position: relative;
-    display: block;
-    justify-self: stretch;
-    align-self: stretch;
-
-    span {
-      position: absolute;
-      bottom: 0;
-      right: 0;
-      background: #000;
-      font-size: 0.5em;
-      color: white;
-    }
-  }
-
-  > div.remote-participant {
-    position: relative;
-    display: flex;
-    width: ${(p) => {
-      let COL_COUNT = [
-        1, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5,
-        5, 6, 6, 6, 6, 6,
-      ];
-      let numP = p.participants.filter((p) => !p.isLocal).length;
-      return 100 / COL_COUNT[numP - 1];
-    }}%;
-    order: 2;
+  .videoSlot {
+    border: 1px solid #aaa;
+    position: absolute;
 
     video {
+      background: #fefefe;
+      width: 100%;
+      height: 100%;
       position: absolute;
-      object-fit: contain;
-      width: 100%;
-      height: 100%;
-    }
-  }
-
-  div.participants {
-    border: 1px solid black;
-  }
-
-  > div.local-participant {
-    position: fixed;
-    width: 50%;
-    top: 50%;
-    left: 0;
-    transform: translate(0, -50%);
-
-    video {
-      object-fit: contain;
-      width: 100%;
-      height: 100%;
-      border: 1px solid black;
+      object-fit: cover;
     }
   }
 `;
@@ -163,11 +122,9 @@ export default function Stage({ send, context, state, tabs }) {
 
   const encoder = new TextEncoder();
   const decoder = new TextDecoder();
-
   const [active, setActive] = useState([false, false]);
-
   const [renderState, setRenderState] = useState(0);
-
+  const [availableVideoTracks, setAvailableVideoTracks] = useState([]);
   const localAudioTrackRef = useRef(null);
   const localVideoTrackRef = useRef(null);
 
@@ -187,7 +144,19 @@ export default function Stage({ send, context, state, tabs }) {
   }
 
   useEffect(() => {
-    console.log("room changed");
+    let _tracks = participants.map((p) => {
+      let track = null;
+      p?.videoTracks.forEach((thisTrack) => {
+        if (!track) {
+          track = thisTrack;
+        }
+      });
+      return track;
+    });
+    setAvailableVideoTracks(_tracks);
+  }, [participants, room, renderState]);
+
+  useEffect(() => {
     if (room) {
       room.removeAllListeners(RoomEvent.DataReceived);
       room.on(RoomEvent.DataReceived, (payload, participant) => {
@@ -198,6 +167,10 @@ export default function Stage({ send, context, state, tabs }) {
 
         if (payloadObj.action === "REQUEST_CURRENT_LAYOUT") {
           sendCurrentLayout(requesterSid);
+        }
+
+        if (payloadObj.action === "UPDATE_LAYOUT") {
+          send("UPDATE_LAYOUT", { layout: payloadObj.layout });
         }
       });
     }
@@ -211,26 +184,18 @@ export default function Stage({ send, context, state, tabs }) {
   }, []);
 
   return (
-    <StageDiv selected={localVideoTrackRef.current}>
-      <VideoGrid participants={participants}>
-        {participants
-          .reduce((p, c) => {
-            if (!p.find((_p) => _p.identity === c.identity)) {
-              p.push(c);
-            }
-            return p;
-          }, [])
-          .map((participant, i, arr) => {
-            return (
-              <Participant
-                participant={participant}
-                participantNumber={i}
-                totalParticipants={arr.length}
-              />
-            );
-          })}
+    <StageDiv>
+      <VideoGrid>
+        {context.current_layout.slots.map((slot, i) => {
+          return (
+            <VideoSlot
+              key={`slot_${i}_${slot?.track}`}
+              slot={slot}
+              availableVideoTracks={availableVideoTracks}
+            />
+          );
+        })}
       </VideoGrid>
-      <br />
 
       <div className="streamTabs">
         {(tabs = [
@@ -299,12 +264,17 @@ export default function Stage({ send, context, state, tabs }) {
                   room.localParticipant
                     .publishTrack(localVideoTrackRef.current)
                     .then((track) => {
-                      console.log(track.trackSid);
-                      send("INIT_LAYOUT_WITH_SELF", { sid: track.trackSid });
+                      if (
+                        !context.current_layout.slots.reduce((p, c) => {
+                          return p || c.track;
+                        }, null)
+                      ) {
+                        send("INIT_LAYOUT_WITH_SELF", { sid: track.trackSid });
+                      }
+                      setRenderState(renderState + 1);
                     });
                 }
               }
-              setRenderState(renderState + 1);
             },
           },
           {
@@ -334,50 +304,36 @@ export default function Stage({ send, context, state, tabs }) {
   );
 }
 
-function Participant({ participant, participantNumber, totalParticipants }) {
-  const { subscribedTracks, isLocal } = useParticipant(participant);
+function VideoSlot({ slot, availableVideoTracks }) {
+  const videoRef = useRef(null);
 
-  const [videoPub, setVideoPub] = useState();
-
-  // const currentGridLayout = videoGridLayout[totalParticipants];
-  // console.log(currentGridLayout);
+  const trackSid = slot?.track;
 
   useEffect(() => {
-    let _pub;
-    subscribedTracks.forEach((pub) => {
-      if (pub.kind === "video") {
-        _pub = pub;
-      }
-      setVideoPub(_pub);
+    let track = availableVideoTracks.find((t) => {
+      return t?.track?.sid === trackSid;
     });
-  }, [subscribedTracks]);
-
-  useEffect(() => {
-    if (videoPub?.setEnabled) {
-      videoPub?.setEnabled(true);
+    if (videoRef.current && track?.track) {
+      let el = videoRef.current;
+      if (typeof track.track.attach === "function") {
+        track.track.attach(el);
+        console.log("x");
+      }
+      el.muted = true;
+      el.play();
     }
-  }, [videoPub]);
-
-  return videoPub?.track ? (
+  }, [trackSid, availableVideoTracks]);
+  return (
     <div
-      className={`participants ${
-        isLocal ? "local-participant" : "remote-participant"
-      }`}
+      className="videoSlot"
+      style={{
+        width: `${slot.size[0]}%`,
+        height: `${slot.size[1]}%`,
+        top: `${slot.position[1]}%`,
+        left: `${slot.position[0]}%`,
+      }}
     >
-      <VideoRenderer track={videoPub.track} />
-      <br />
-      <span>{participant.identity}</span>
-    </div>
-  ) : (
-    <div
-      className={`participants ${
-        isLocal ? "local-participant" : "remote-participant"
-      }`}
-    >
-      <br />
-
-      <label className="participantNumber">{participantNumber}</label>
-      <span>{participant.identity}</span>
+      <video ref={videoRef} muted autoPlay key={trackSid} />
     </div>
   );
 }

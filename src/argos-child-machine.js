@@ -10,7 +10,7 @@ let argosChildMachine = createMachine({
     error: {},
     identity: null,
     current_layout: {
-      type: "E",
+      type: "D",
       slots: [
         { size: [50, 100], position: [0, 0], track: null },
         { size: [50, 50], position: [50, 0], track: null },
@@ -26,7 +26,6 @@ let argosChildMachine = createMachine({
           target: "list_rooms",
           actions: assign({
             identity: (context, event) => {
-              console.log(event);
               return event.identity;
             },
           }),
@@ -71,9 +70,21 @@ let argosChildMachine = createMachine({
           actions: assign({
             current_layout: (context, event) => {
               return {
-                type: "E",
-                slots: [event.sid, null, null],
+                type: "D",
+                slots: [
+                  { size: [50, 100], position: [0, 0], track: event.sid },
+                  { size: [50, 50], position: [50, 0], track: null },
+                  { size: [50, 50], position: [50, 50], track: null },
+                ],
               };
+            },
+          }),
+        },
+        UPDATE_LAYOUT: {
+          actions: assign({
+            current_layout: (context, event) => {
+              console.log(event.layout);
+              return event.layout;
             },
           }),
         },
