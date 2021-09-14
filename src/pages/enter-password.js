@@ -186,6 +186,7 @@ export default function EnterPassword({ send, context, state, icon }) {
             return (
               <div
                 className="key"
+                key={k}
                 onClick={() => {
                   setPasscode(passcode.slice(0, -1));
                 }}
@@ -201,6 +202,7 @@ export default function EnterPassword({ send, context, state, icon }) {
                 onClick={() => {
                   setPasscode(passcode.slice(0, -5));
                 }}
+                key={k}
               >
                 <Cancel />
               </div>
@@ -209,7 +211,7 @@ export default function EnterPassword({ send, context, state, icon }) {
           return (
             <div
               className="key"
-              key={key}
+              key={k}
               onClick={() => {
                 if (k === "del") {
                   setPasscode(passcode.slice(0, -1));
