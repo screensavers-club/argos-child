@@ -11,7 +11,11 @@ let argosChildMachine = createMachine({
     identity: null,
     current_layout: {
       type: "E",
-      slots: [null, null, null],
+      slots: [
+        { size: [50, 100], position: [0, 0], track: null },
+        { size: [50, 50], position: [50, 0], track: null },
+        { size: [50, 50], position: [50, 50], track: null },
+      ],
     },
   },
 
@@ -66,7 +70,6 @@ let argosChildMachine = createMachine({
         INIT_LAYOUT_WITH_SELF: {
           actions: assign({
             current_layout: (context, event) => {
-              console.log(event);
               return {
                 type: "E",
                 slots: [event.sid, null, null],
