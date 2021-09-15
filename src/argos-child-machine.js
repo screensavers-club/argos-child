@@ -6,6 +6,7 @@ let argosChildMachine = createMachine({
 
   context: {
     room: {},
+    nickname: "",
     joining_room: null,
     error: {},
     identity: null,
@@ -74,6 +75,9 @@ let argosChildMachine = createMachine({
             },
             token: (context, event) => {
               return event.token;
+            },
+            nickname: (context, event) => {
+              return event.nickname;
             },
           }),
         },

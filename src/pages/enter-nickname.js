@@ -95,7 +95,6 @@ export default function EnterNickname({ send, context }) {
           type="text"
           value={nickname}
           onChange={(e) => {
-            console.log(e.target.value);
             setNickname(e.target.value.slice(0, 5));
           }}
         />
@@ -103,19 +102,22 @@ export default function EnterNickname({ send, context }) {
 
       <Keyboard>
         {keys.map((key, i) => {
+          let _key = `key_+${i}`;
           return (
             <div
+              key={_key}
               className={`keys ${
                 key === "clr" ? "clr" : key === "ent" ? "ent" : ""
               } `}
               onClick={() => {
-                console.log(key);
                 if (key === "bsp") {
                   setNickname(nickname.slice(0, -1));
                 } else if (key === "clr") {
                   setNickname(nickname.slice(0, -5));
                 } else if (key === "ent") {
-                  send("ENTER_STAGE");
+                  send("ENTER_STAGE", {
+                    nickname: nickname,
+                  });
                 } else {
                   setNickname((nickname + key).slice(0, 5));
                 }
