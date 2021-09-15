@@ -1,28 +1,79 @@
 import styled from "styled-components";
 import { useRef, useState } from "react";
+import Button from "../components/button";
+import {
+  ArrowLeftCircle,
+  Delete,
+  Cancel,
+  ArrowRightCircle,
+} from "react-ikonate";
 
 const Page = styled.div`
+  margin-top: 1.7em;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
+
+  div.nick_input {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    margin-bottom: 1em;
+
+    label {
+      margin-bottom: 1em;
+    }
+
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+      width: 10px;
+      position: absolute;
+      text-align: center;
+      font-size: 1em;
+    }
+
+    input {
+      font-size: 2em;
+      border-style: none;
+      width: 100%;
+      height: auto;
+      border: 1px solid black;
+      &::placeholder {
+        color: grey;
+      }
+    }
+  }
 `;
 
 const Keyboard = styled.div`
   display: flex;
-  width: 560px;
+  width: 740px;
   flex-wrap: wrap;
-  justify-content: space-around;
+  justify-content: center;
+  margin-bottom: 1em;
+
   div.keys {
+    display: flex;
+    font-size: 1.5em;
     border: 1px solid black;
     width: 2em;
     height: 1em;
-    padding: 0.5em;
-    margin: 0.15em;
+    padding: 0.3em;
+    margin: 0.1em;
+    justify-content: center;
+    align-items: center;
     text-align: center;
 
-    ~ .long {
-      width: 4em;
+    ~ .clr,
+    ~ .ent {
+      width: 3.45em;
+    }
+
+    ~ .ent {
+      background: black;
     }
   }
 `;
@@ -37,13 +88,14 @@ export default function EnterNickname({ send, context }) {
 
   return (
     <Page>
-      <div className="nick_input">
+      <div className={`nick_input`}>
+        <label for="nickname_box">Enter Your Initials</label>
         <input
+          id="nickname_box"
           type="text"
-          // ref={inputRef}
           value={nickname}
-          placeholder="enter your initials"
           onChange={(e) => {
+            console.log(e.target.value);
             setNickname(e.target.value.slice(0, 5));
           }}
         />
@@ -54,7 +106,7 @@ export default function EnterNickname({ send, context }) {
           return (
             <div
               className={`keys ${
-                key === "clr" || key === "ent" ? "long" : ""
+                key === "clr" ? "clr" : key === "ent" ? "ent" : ""
               } `}
               onClick={() => {
                 console.log(key);
@@ -65,15 +117,32 @@ export default function EnterNickname({ send, context }) {
                 } else if (key === "ent") {
                   send("ENTER_STAGE");
                 } else {
-                  setNickname(nickname + key);
+                  setNickname((nickname + key).slice(0, 5));
                 }
               }}
             >
-              {key}
+              {key === "bsp" ? (
+                <Delete />
+              ) : key === "clr" ? (
+                <Cancel style={{ stroke: "red" }} />
+              ) : key === "ent" ? (
+                <ArrowRightCircle style={{ stroke: "white" }} />
+              ) : (
+                key
+              )}
             </div>
           );
         })}
       </Keyboard>
+
+      <Button
+        icon={<ArrowLeftCircle />}
+        onClick={() => {
+          send("BACK");
+        }}
+      >
+        Back To Rooms
+      </Button>
     </Page>
   );
 }
