@@ -1,6 +1,7 @@
 import styled from "styled-components";
 import { useRef, useState } from "react";
 import Button from "../components/button";
+import "../animate.min.css";
 import {
   ArrowLeftCircle,
   Delete,
@@ -81,12 +82,19 @@ const Keyboard = styled.div`
 
 export default function EnterNickname({ send, context }) {
   let keys_string =
-    "1 2 3 4 5 6 7 8 9 0 Q W E R T Y U I O P A S D F G H J K L Z X C V B N M clr ent";
+    "1 2 3 4 5 6 7 8 9 0 Q W E R T Y U I O P A S D F G H J K L bsp Z X C V B N M clr ent";
 
   const keys = keys_string.split(" ");
 
   let [nickname, setNickname] = useState("");
   const inputRef = useRef();
+
+  function shakeNicknameScreen() {
+    inputRef.current.classList.add("animate__animated", "animate__shakeX");
+    window.setTimeout(() => {
+      inputRef.current.classList.remove("animate__animated", "animate__shakeX");
+    }, 2000);
+  }
 
   return (
     <Page>
@@ -94,10 +102,16 @@ export default function EnterNickname({ send, context }) {
         <label for="nickname_box">Enter Your Initials</label>
         <input
           id="nickname_box"
+          ref={inputRef}
           type="text"
           value={nickname}
           onChange={(e) => {
             setNickname(e.target.value.slice(0, 5));
+          }}
+          style={{
+            border: `${
+              nickname.length < 1 ? "1px solid red" : "1px solid black"
+            }`,
           }}
         />
       </div>
@@ -117,9 +131,11 @@ export default function EnterNickname({ send, context }) {
                 } else if (key === "clr") {
                   setNickname(nickname.slice(0, -5));
                 } else if (key === "ent") {
-                  send("ENTER_STAGE", {
-                    nickname: nickname,
-                  });
+                  nickname.length < 1
+                    ? shakeNicknameScreen()
+                    : send("ENTER_STAGE", {
+                        nickname: nickname,
+                      });
                 } else {
                   setNickname((nickname + key).slice(0, 5));
                 }
