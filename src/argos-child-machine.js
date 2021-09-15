@@ -70,12 +70,6 @@ let argosChildMachine = createMachine({
         ENTER_STAGE: {
           target: "stage",
           actions: assign({
-            room: (context, event) => {
-              return event.room;
-            },
-            token: (context, event) => {
-              return event.token;
-            },
             nickname: (context, event) => {
               return event.nickname;
             },
