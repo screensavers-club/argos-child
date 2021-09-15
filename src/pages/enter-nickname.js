@@ -69,6 +69,11 @@ const Keyboard = styled.div`
     text-align: center;
     text-transform: uppercase;
 
+    :hover {
+      cursor: pointer;
+      background: #ddd;
+    }
+
     ~ .clr,
     ~ .ent {
       width: 3.45em;
@@ -92,7 +97,10 @@ export default function EnterNickname({ send, context }) {
   function shakeNicknameScreen() {
     inputRef.current.classList.add("animate__animated", "animate__shakeX");
     window.setTimeout(() => {
-      inputRef.current.classList.remove("animate__animated", "animate__shakeX");
+      inputRef.current?.classList?.remove(
+        "animate__animated",
+        "animate__shakeX"
+      );
     }, 2000);
   }
 

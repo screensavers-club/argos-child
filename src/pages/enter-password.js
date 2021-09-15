@@ -125,7 +125,10 @@ export default function EnterPassword({ send, context, state, icon }) {
   function shakePasswordScreen() {
     inputRef.current.classList.add("animate__animated", "animate__shakeX");
     window.setTimeout(() => {
-      inputRef.current.classList.remove("animate__animated", "animate__shakeX");
+      inputRef.current?.classList?.remove(
+        "animate__animated",
+        "animate__shakeX"
+      );
     }, 2000);
   }
 

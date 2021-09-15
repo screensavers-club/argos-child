@@ -7,7 +7,7 @@ import {
   DataPacket_Kind,
 } from "livekit-client";
 import { useEffect, useRef, useState } from "react";
-import { Microphone, Exit, Film } from "react-ikonate";
+import { Microphone, Exit, Film, ArrowUp, ArrowDown } from "react-ikonate";
 
 const StageDiv = styled.div`
   position: fixed;
@@ -16,7 +16,7 @@ const StageDiv = styled.div`
   height: 100%;
 
   div.streamTabs {
-    display: flex;
+    display: ${(p) => (p.drawerActive === true ? "none" : "flex")};
     justify-content: space-around;
     width: 80%;
     height: 3em;
@@ -86,6 +86,17 @@ const StageDiv = styled.div`
       }
     }
   }
+
+  div.drawer {
+    position: fixed;
+    display: flex;
+    bottom: 0;
+    right: 0;
+    border: 1px solid black;
+    font-size: 1.5em;
+    padding: 0.2em 0.4em;
+    background: white;
+  }
 `;
 
 const VideoGrid = styled.div`
@@ -119,6 +130,7 @@ const VideoGrid = styled.div`
 
 export default function Stage({ send, context, state, tabs }) {
   const { connect, room, participants, audioTracks } = useRoom();
+  let [drawerActive, setDrawerActive] = useState(false);
 
   const encoder = new TextEncoder();
   const decoder = new TextDecoder();
@@ -181,7 +193,7 @@ export default function Stage({ send, context, state, tabs }) {
   }, []);
 
   return (
-    <StageDiv>
+    <StageDiv drawerActive={drawerActive}>
       <VideoGrid>
         {context.current_layout.slots.map((slot, i) => {
           return (
@@ -296,6 +308,17 @@ export default function Stage({ send, context, state, tabs }) {
             </button>
           );
         })}
+      </div>
+
+      <div
+        className="drawer"
+        onClick={() => {
+          drawerActive === false
+            ? setDrawerActive(true)
+            : setDrawerActive(false);
+        }}
+      >
+        {drawerActive === false ? <ArrowDown /> : <ArrowUp />}
       </div>
     </StageDiv>
   );
