@@ -96,6 +96,11 @@ const StageDiv = styled.div`
     font-size: 1.5em;
     padding: 0.2em 0.4em;
     background: white;
+
+    :hover {
+      background: #ddd;
+      cursor: pointer;
+    }
   }
 `;
 
