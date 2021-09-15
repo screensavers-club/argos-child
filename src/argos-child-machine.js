@@ -66,7 +66,7 @@ let argosChildMachine = createMachine({
 
     enter_nickname: {
       on: {
-        NICKNAME_CHOSEN: {
+        ENTER_STAGE: {
           target: "stage",
           actions: assign({
             room: (context, event) => {
