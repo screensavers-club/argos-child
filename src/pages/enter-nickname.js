@@ -99,12 +99,12 @@ export default function EnterNickname({ send, context }) {
   return (
     <Page>
       <div className={`nick_input`}>
-        <label for="nickname_box">Enter Your Initials</label>
+        <label>Enter Your Initials</label>
         <input
           id="nickname_box"
           ref={inputRef}
           type="text"
-          value={nickname}
+          value={nickname.toUpperCase()}
           onChange={(e) => {
             setNickname(e.target.value.slice(0, 5));
           }}
