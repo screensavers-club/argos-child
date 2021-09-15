@@ -109,20 +109,6 @@ export default function ListRooms({ context, send, state }) {
         ))}
       </div>
 
-      {/* function toggleFullscreen() {
-            let elem = document.querySelector("div");
-
-            if (!document.fullscreenElement) {
-              elem.requestFullscreen().catch((err) => {
-                alert(
-                  `Error attempting to enable full-screen mode: ${err.message} (${err.name})`
-                );
-              });
-            } else {
-              document.exitFullscreen();
-            }
-          } */}
-
       <div className="functionPanel">
         <Button
           icon={<Maximise />}
