@@ -87,53 +87,55 @@ const StageDiv = styled.div`
       }
     }
   }
-
-  > div.exitBG {
+  div.exitModal {
     display: none;
+  }
 
-    div.exitModal {
-      display: none;
-    }
+  div.active {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid black;
+    background: white;
+    position: fixed;
+    width: 50%;
+    height: 30%;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
 
-    div.active {
-      display: flex;
-      flex-direction: column;
+    div {
+      width: 100%;
+      margin-top: 25px;
+      display: inline-flex;
       justify-content: center;
-      align-items: center;
-      border: 1px solid black;
-      background: white;
-      position: fixed;
-      width: 50%;
-      height: 30%;
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%, -50%);
 
-      div {
-        width: 100%;
-        margin-top: 25px;
-        display: inline-flex;
+      > button {
+        padding: 5px;
+        display: flex;
         justify-content: center;
+        align-content: center;
+        margin: 5px;
 
-        > button {
-          padding: 5px;
+        ~ .no {
+          background: #f25555;
+          color: white;
+        }
+
+        > div {
           display: flex;
           justify-content: center;
-          align-content: center;
-          margin: 5px;
-
-          > div {
-            display: flex;
-            justify-content: center;
-            margin: 0;
-            text-align: center;
-          }
+          margin: 0;
+          text-align: center;
         }
       }
     }
   }
-
-  > div.active {
+  > div.exitBG {
+    display: none;
+  }
+  > div.activeBG {
     position: fixed;
     display: block;
     background: rgba(0, 0, 0, 0.3);
@@ -372,35 +374,32 @@ export default function Stage({ send, context, state, tabs }) {
       </div>
 
       <div
-        className={`exitBG ${exit === true ? "active" : ""}`}
+        className={`exitBG ${exit === true ? "activeBG" : ""}`}
         onClick={() => {
           setExit(false);
         }}
-      >
-        <div
-          className={`exitModal ${exit === true ? "active" : ""}`}
-          // onEsc={() => setExit(false)}
-          // onClickOutside={() => setExit(false)}
-        >
-          Are you sure you want to exit?
-          <div>
-            <Button
-              onClick={() => {
-                room?.disconnect();
-                send("DISCONNECT");
-                setExit(false);
-              }}
-            >
-              yes
-            </Button>
-            <Button
-              onClick={() => {
-                setExit(false);
-              }}
-            >
-              no
-            </Button>
-          </div>
+      ></div>
+      <div className={`exitModal ${exit === true ? "active" : ""}`}>
+        Are you sure you want to exit?
+        <div>
+          <Button
+            className="yes"
+            onClick={() => {
+              room?.disconnect();
+              send("DISCONNECT");
+              setExit(false);
+            }}
+          >
+            yes
+          </Button>
+          <Button
+            className="no"
+            onClick={() => {
+              setExit(false);
+            }}
+          >
+            no
+          </Button>
         </div>
       </div>
       <div
