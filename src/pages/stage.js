@@ -222,7 +222,6 @@ export default function Stage({ send, context, state, tabs }) {
 
   const handleClick = (e) => {
     if (exitingModalRef.current.contains(e.target)) {
-      console.log(e.target);
       return;
     }
     setExiting(false);
