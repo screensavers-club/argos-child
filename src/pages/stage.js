@@ -85,6 +85,21 @@ const StageDiv = styled.div`
         margin-right: 0.1em;
       }
     }
+
+    > div.exitModal {
+      display: none;
+      background: blue;
+      position: fixed;
+      width: 50%;
+      height: 50%;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    > div.active {
+      display: block;
+    }
   }
 
   div.drawer {
@@ -140,6 +155,7 @@ export default function Stage({ send, context, state, tabs }) {
   const encoder = new TextEncoder();
   const decoder = new TextDecoder();
   const [active, setActive] = useState([false, false]);
+  const [exit, setExit] = useState(false);
   const [renderState, setRenderState] = useState(0);
   const [availableVideoTracks, setAvailableVideoTracks] = useState([]);
   const localAudioTrackRef = useRef(null);
@@ -295,8 +311,7 @@ export default function Stage({ send, context, state, tabs }) {
             tab: "end",
             icon: <Exit />,
             onClick: () => {
-              room?.disconnect();
-              send("DISCONNECT");
+              setExit(true);
             },
           },
         ]).map(function ({ tab, icon, onClick, tabActive }, i) {
@@ -313,6 +328,31 @@ export default function Stage({ send, context, state, tabs }) {
             </button>
           );
         })}
+        <div
+          className={`exitModal ${exit === true ? "active" : ""}`}
+          // onEsc={() => setExit(false)}
+          // onClickOutside={() => setExit(false)}
+        >
+          Are you sure you want to exit?
+          <button
+            onClick={() => {
+              room?.disconnect();
+              send("DISCONNECT");
+              let _active = [...active];
+              _active[2] = false;
+              setActive(_active);
+            }}
+          >
+            yes
+          </button>
+          <button
+            onClick={() => {
+              setExit(false);
+            }}
+          >
+            no
+          </button>
+        </div>
       </div>
 
       <div
