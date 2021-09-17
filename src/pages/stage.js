@@ -67,6 +67,13 @@ const StageDiv = styled.div`
       }
     }
 
+    button {
+      :hover {
+        background: white;
+        cursor: pointer;
+      }
+    }
+
     button.end {
       svg {
         stroke: red;
@@ -118,9 +125,19 @@ const StageDiv = styled.div`
         align-content: center;
         margin: 5px;
 
+        :hover {
+          cursor: pointer;
+          background: #ddd;
+        }
+
         ~ .no {
           background: #f25555;
           color: white;
+
+          :hover {
+            cursor: pointer;
+            background: #f22222;
+          }
         }
 
         > div {
