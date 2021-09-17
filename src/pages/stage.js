@@ -338,9 +338,7 @@ export default function Stage({ send, context, state, tabs }) {
             onClick={() => {
               room?.disconnect();
               send("DISCONNECT");
-              let _active = [...active];
-              _active[2] = false;
-              setActive(_active);
+              setExit(false);
             }}
           >
             yes
