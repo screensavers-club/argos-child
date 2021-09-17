@@ -87,7 +87,7 @@ const StageDiv = styled.div`
       }
     }
   }
-  div.exitModal {
+  div.exitingModal {
     display: none;
   }
 
@@ -132,7 +132,7 @@ const StageDiv = styled.div`
       }
     }
   }
-  > div.exitBG {
+  > div.exitingBG {
     display: none;
   }
   > div.activeBG {
@@ -198,7 +198,7 @@ export default function Stage({ send, context, state, tabs }) {
   const encoder = new TextEncoder();
   const decoder = new TextDecoder();
   const [active, setActive] = useState([false, false]);
-  const [exit, setExit] = useState(false);
+  const [exiting, setExiting] = useState(false);
   const [renderState, setRenderState] = useState(0);
   const [availableVideoTracks, setAvailableVideoTracks] = useState([]);
   const localAudioTrackRef = useRef(null);
@@ -354,7 +354,7 @@ export default function Stage({ send, context, state, tabs }) {
             tab: "end",
             icon: <Exit />,
             onClick: () => {
-              setExit(true);
+              setExiting(true);
             },
           },
         ]).map(function ({ tab, icon, onClick, tabActive }, i) {
@@ -374,12 +374,12 @@ export default function Stage({ send, context, state, tabs }) {
       </div>
 
       <div
-        className={`exitBG ${exit === true ? "activeBG" : ""}`}
+        className={`exitingBG ${exiting === true ? "activeBG" : ""}`}
         onClick={() => {
-          setExit(false);
+          setExiting(false);
         }}
       ></div>
-      <div className={`exitModal ${exit === true ? "active" : ""}`}>
+      <div className={`exitingModal ${exiting === true ? "active" : ""}`}>
         Are you sure you want to exit?
         <div>
           <Button
@@ -387,7 +387,7 @@ export default function Stage({ send, context, state, tabs }) {
             onClick={() => {
               room?.disconnect();
               send("DISCONNECT");
-              setExit(false);
+              setExiting(false);
             }}
           >
             yes
@@ -395,7 +395,7 @@ export default function Stage({ send, context, state, tabs }) {
           <Button
             className="no"
             onClick={() => {
-              setExit(false);
+              setExiting(false);
             }}
           >
             no
