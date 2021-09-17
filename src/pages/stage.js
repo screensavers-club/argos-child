@@ -8,6 +8,7 @@ import {
 } from "livekit-client";
 import { useEffect, useRef, useState } from "react";
 import { Microphone, Exit, Film, ArrowUp, ArrowDown } from "react-ikonate";
+import Button from "../components/button";
 
 const StageDiv = styled.div`
   position: fixed;
@@ -85,21 +86,61 @@ const StageDiv = styled.div`
         margin-right: 0.1em;
       }
     }
+  }
 
-    > div.exitModal {
+  > div.exitBG {
+    display: none;
+
+    div.exitModal {
       display: none;
-      background: blue;
+    }
+
+    div.active {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      border: 1px solid black;
+      background: white;
       position: fixed;
       width: 50%;
-      height: 50%;
+      height: 30%;
       left: 50%;
       top: 50%;
       transform: translate(-50%, -50%);
-    }
 
-    > div.active {
-      display: block;
+      div {
+        width: 100%;
+        margin-top: 25px;
+        display: inline-flex;
+        justify-content: center;
+
+        > button {
+          padding: 5px;
+          display: flex;
+          justify-content: center;
+          align-content: center;
+          margin: 5px;
+
+          > div {
+            display: flex;
+            justify-content: center;
+            margin: 0;
+            text-align: center;
+          }
+        }
+      }
     }
+  }
+
+  > div.active {
+    position: fixed;
+    display: block;
+    background: rgba(0, 0, 0, 0.3);
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
   }
 
   div.drawer {
@@ -328,31 +369,40 @@ export default function Stage({ send, context, state, tabs }) {
             </button>
           );
         })}
+      </div>
+
+      <div
+        className={`exitBG ${exit === true ? "active" : ""}`}
+        onClick={() => {
+          setExit(false);
+        }}
+      >
         <div
           className={`exitModal ${exit === true ? "active" : ""}`}
           // onEsc={() => setExit(false)}
           // onClickOutside={() => setExit(false)}
         >
           Are you sure you want to exit?
-          <button
-            onClick={() => {
-              room?.disconnect();
-              send("DISCONNECT");
-              setExit(false);
-            }}
-          >
-            yes
-          </button>
-          <button
-            onClick={() => {
-              setExit(false);
-            }}
-          >
-            no
-          </button>
+          <div>
+            <Button
+              onClick={() => {
+                room?.disconnect();
+                send("DISCONNECT");
+                setExit(false);
+              }}
+            >
+              yes
+            </Button>
+            <Button
+              onClick={() => {
+                setExit(false);
+              }}
+            >
+              no
+            </Button>
+          </div>
         </div>
       </div>
-
       <div
         className="drawer"
         onClick={() => {
