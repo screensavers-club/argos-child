@@ -149,18 +149,6 @@ const StageDiv = styled.div`
       }
     }
   }
-  > div.exitingBG {
-    display: none;
-  }
-  > div.activeBG {
-    position: fixed;
-    display: block;
-    background: rgba(0, 0, 0, 0.3);
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-  }
 
   div.drawer {
     position: fixed;
@@ -220,6 +208,31 @@ export default function Stage({ send, context, state, tabs }) {
   const [availableVideoTracks, setAvailableVideoTracks] = useState([]);
   const localAudioTrackRef = useRef(null);
   const localVideoTrackRef = useRef(null);
+
+  const exitingModalRef = useRef();
+
+  useEffect(() => {
+    document.addEventListener("mousedown", handleClick);
+    document.addEventListener("keyup", handleEsc);
+    return () => {
+      document.removeEventListener("mousedown", handleClick);
+      document.removeEventListener("keyup", handleEsc);
+    };
+  }, []);
+
+  const handleClick = (e) => {
+    if (exitingModalRef.current.contains(e.target)) {
+      console.log(e.target);
+      return;
+    }
+    setExiting(false);
+  };
+
+  const handleEsc = (e) => {
+    if (e.key === "Escape") {
+      setExiting(false);
+    } else return;
+  };
 
   function sendCurrentLayout(recipient) {
     if (room) {
@@ -391,12 +404,9 @@ export default function Stage({ send, context, state, tabs }) {
       </div>
 
       <div
-        className={`exitingBG ${exiting === true ? "activeBG" : ""}`}
-        onClick={() => {
-          setExiting(false);
-        }}
-      ></div>
-      <div className={`exitingModal ${exiting === true ? "active" : ""}`}>
+        className={`exitingModal ${exiting === true ? "active" : ""}`}
+        ref={exitingModalRef}
+      >
         Are you sure you want to exit?
         <div>
           <Button
