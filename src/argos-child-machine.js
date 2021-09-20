@@ -14,6 +14,10 @@ let argosChildMachine = createMachine({
 			type: "A",
 			slots: [{ size: [100, 100], position: [0, 0], track: null }],
 		},
+		cue_mix: {
+			mute: [],
+			source: "peers", // peers || parent
+		},
 	},
 
 	states: {

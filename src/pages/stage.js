@@ -211,7 +211,7 @@ export default function Stage({ send, context, state, tabs }) {
 	const [availableVideoTracks, setAvailableVideoTracks] = useState([]);
 	const localAudioTrackRef = useRef(null);
 	const localVideoTrackRef = useRef(null);
-
+	const audioMonitorDomRef = useRef();
 	const exitingModalRef = useRef();
 
 	useEffect(() => {
@@ -282,6 +282,25 @@ export default function Stage({ send, context, state, tabs }) {
 	}, [room, context]);
 
 	useEffect(() => {
+		Array.from(audioMonitorDomRef.current.children).forEach((elem) => {
+			elem.remove();
+		});
+		audioTracks.forEach((track) => {
+			let trackSid = track.sid;
+			let _p = participants.find((participant) => {
+				console.log(participant.getTracks());
+				return participant.getTracks().find((_track) => {
+					return _track.audioTrack && _track.audioTrack.sid === trackSid;
+				});
+			});
+			let a = track?.attach();
+			a.setAttribute("identity", _p?.identity);
+			a.setAttribute("nickname", JSON.parse(_p?.metadata || "false")?.nickname);
+			audioMonitorDomRef.current.append(a);
+		});
+	}, [audioTracks, participants]);
+
+	useEffect(() => {
 		connect(process.env.REACT_APP_LIVEKIT_SERVER, context.token).then(() => {
 			axios.post(
 				`${process.env.REACT_APP_PEER_SERVER}/child/participant/set-nickname`,
@@ -310,6 +329,7 @@ export default function Stage({ send, context, state, tabs }) {
 					);
 				})}
 			</VideoGrid>
+			<div ref={audioMonitorDomRef}></div>
 
 			<div className="streamTabs">
 				{(tabs = [
@@ -335,10 +355,12 @@ export default function Stage({ send, context, state, tabs }) {
 								);
 								localAudioTrackRef.current = null;
 							} else {
-								localAudioTrackRef.current =
-									await createLocalAudioTrack().catch((err) => {
-										alert(err);
-									});
+								localAudioTrackRef.current = await createLocalAudioTrack({
+									echoCancellation: false,
+									noiseSuppression: false,
+								}).catch((err) => {
+									alert(err);
+								});
 								if (localAudioTrackRef.current) {
 									room.localParticipant.publishTrack(
 										localAudioTrackRef.current
@@ -370,10 +392,14 @@ export default function Stage({ send, context, state, tabs }) {
 								);
 								localVideoTrackRef.current = null;
 							} else {
-								localVideoTrackRef.current =
-									await createLocalVideoTrack().catch((err) => {
-										alert(err);
-									});
+								localVideoTrackRef.current = await createLocalVideoTrack({
+									width: { min: 640, ideal: 1280, max: 1920 },
+									height: { min: 360, ideal: 720, max: 1080 },
+									facingMode: "environment",
+								}).catch((err) => {
+									console.log(err);
+									alert("Error");
+								});
 								if (localVideoTrackRef.current) {
 									room.localParticipant
 										.publishTrack(localVideoTrackRef.current)
