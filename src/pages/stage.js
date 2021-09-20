@@ -9,6 +9,7 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { Microphone, Exit, Film, ArrowUp, ArrowDown } from "react-ikonate";
 import Button from "../components/button";
+import axios from "axios";
 
 const StageDiv = styled.div`
 	position: fixed;
@@ -281,7 +282,16 @@ export default function Stage({ send, context, state, tabs }) {
 	}, [room, context]);
 
 	useEffect(() => {
-		connect(process.env.REACT_APP_LIVEKIT_SERVER, context.token);
+		connect(process.env.REACT_APP_LIVEKIT_SERVER, context.token).then(() => {
+			axios.post(
+				`${process.env.REACT_APP_PEER_SERVER}/child/participant/set-nickname`,
+				{
+					identity: context.identity,
+					room: context.room.name,
+					nickname: context.nickname,
+				}
+			);
+		});
 		return () => {
 			room?.disconnect();
 		};
