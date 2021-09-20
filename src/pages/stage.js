@@ -104,13 +104,15 @@ const StageDiv = styled.div`
     justify-content: center;
     align-items: center;
     border: 1px solid black;
-    background: white;
+    background: #333;
+    color: white;
     position: fixed;
     width: 50%;
     height: 30%;
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
+    border-radius: 25px;
 
     div {
       width: 100%;
@@ -130,7 +132,7 @@ const StageDiv = styled.div`
           background: #ddd;
         }
 
-        ~ .no {
+        ~ .yes {
           background: #f25555;
           color: white;
 
@@ -409,6 +411,14 @@ export default function Stage({ send, context, state, tabs }) {
         Are you sure you want to exit?
         <div>
           <Button
+            className="no"
+            onClick={() => {
+              setExiting(false);
+            }}
+          >
+            no
+          </Button>
+          <Button
             className="yes"
             onClick={() => {
               room?.disconnect();
@@ -417,14 +427,6 @@ export default function Stage({ send, context, state, tabs }) {
             }}
           >
             yes
-          </Button>
-          <Button
-            className="no"
-            onClick={() => {
-              setExiting(false);
-            }}
-          >
-            no
           </Button>
         </div>
       </div>
