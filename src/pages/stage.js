@@ -8,6 +8,7 @@ import {
 } from "livekit-client";
 import { useEffect, useRef, useState } from "react";
 import { Microphone, Exit, Film, ArrowUp, ArrowDown } from "react-ikonate";
+import Button from "../components/button";
 
 const StageDiv = styled.div`
   position: fixed;
@@ -66,6 +67,13 @@ const StageDiv = styled.div`
       }
     }
 
+    button {
+      :hover {
+        background: white;
+        cursor: pointer;
+      }
+    }
+
     button.end {
       svg {
         stroke: red;
@@ -83,6 +91,61 @@ const StageDiv = styled.div`
         border-radius: 50%;
         display: block;
         margin-right: 0.1em;
+      }
+    }
+  }
+  div.exitingModal {
+    display: none;
+  }
+
+  div.active {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid black;
+    background: white;
+    position: fixed;
+    width: 50%;
+    height: 30%;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+
+    div {
+      width: 100%;
+      margin-top: 25px;
+      display: inline-flex;
+      justify-content: center;
+
+      > button {
+        padding: 5px;
+        display: flex;
+        justify-content: center;
+        align-content: center;
+        margin: 5px;
+
+        :hover {
+          cursor: pointer;
+          background: #ddd;
+        }
+
+        ~ .no {
+          background: #f25555;
+          color: white;
+
+          :hover {
+            cursor: pointer;
+            background: #f22222;
+          }
+        }
+
+        > div {
+          display: flex;
+          justify-content: center;
+          margin: 0;
+          text-align: center;
+        }
       }
     }
   }
@@ -140,10 +203,35 @@ export default function Stage({ send, context, state, tabs }) {
   const encoder = new TextEncoder();
   const decoder = new TextDecoder();
   const [active, setActive] = useState([false, false]);
+  const [exiting, setExiting] = useState(false);
   const [renderState, setRenderState] = useState(0);
   const [availableVideoTracks, setAvailableVideoTracks] = useState([]);
   const localAudioTrackRef = useRef(null);
   const localVideoTrackRef = useRef(null);
+
+  const exitingModalRef = useRef();
+
+  useEffect(() => {
+    document.addEventListener("mousedown", handleClick);
+    document.addEventListener("keyup", handleEsc);
+    return () => {
+      document.removeEventListener("mousedown", handleClick);
+      document.removeEventListener("keyup", handleEsc);
+    };
+  }, []);
+
+  const handleClick = (e) => {
+    if (exitingModalRef.current.contains(e.target)) {
+      return;
+    }
+    setExiting(false);
+  };
+
+  const handleEsc = (e) => {
+    if (e.key === "Escape") {
+      setExiting(false);
+    } else return;
+  };
 
   function sendCurrentLayout(recipient) {
     if (room) {
@@ -295,8 +383,7 @@ export default function Stage({ send, context, state, tabs }) {
             tab: "end",
             icon: <Exit />,
             onClick: () => {
-              room?.disconnect();
-              send("DISCONNECT");
+              setExiting(true);
             },
           },
         ]).map(function ({ tab, icon, onClick, tabActive }, i) {
@@ -315,6 +402,32 @@ export default function Stage({ send, context, state, tabs }) {
         })}
       </div>
 
+      <div
+        className={`exitingModal ${exiting === true ? "active" : ""}`}
+        ref={exitingModalRef}
+      >
+        Are you sure you want to exit?
+        <div>
+          <Button
+            className="yes"
+            onClick={() => {
+              room?.disconnect();
+              send("DISCONNECT");
+              setExiting(false);
+            }}
+          >
+            yes
+          </Button>
+          <Button
+            className="no"
+            onClick={() => {
+              setExiting(false);
+            }}
+          >
+            no
+          </Button>
+        </div>
+      </div>
       <div
         className="drawer"
         onClick={() => {

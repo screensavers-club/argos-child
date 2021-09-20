@@ -1,8 +1,21 @@
 import styled from "styled-components";
 
-export default function Button({ style, children, onClick, variant, icon }) {
+export default function Button({
+  style,
+  children,
+  onClick,
+  variant,
+  icon,
+  className,
+}) {
   return (
-    <StyledButton {...style} onClick={onClick} variant={variant} icon={icon}>
+    <StyledButton
+      {...style}
+      onClick={onClick}
+      variant={variant}
+      icon={icon}
+      className={className}
+    >
       <div>
         {icon}
         {children}
@@ -11,7 +24,9 @@ export default function Button({ style, children, onClick, variant, icon }) {
   );
 }
 
-const StyledButton = styled.button`
+const StyledButton = styled.button.attrs((props) => ({
+  className: props.className,
+}))`
   display: inline-flex;
   align-items: center;
   justify-content: center;
