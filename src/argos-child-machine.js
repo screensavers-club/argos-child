@@ -14,7 +14,7 @@ let argosChildMachine = createMachine({
 			type: "A",
 			slots: [{ size: [100, 100], position: [0, 0], track: null }],
 		},
-		cue_mix: {
+		cue_mix_state: {
 			mute: [],
 			source: "peers", // peers || parent
 		},
@@ -97,6 +97,24 @@ let argosChildMachine = createMachine({
 						current_layout: (context, event) => {
 							console.log("updateLayout", event.layout);
 							return event.layout;
+						},
+					}),
+				},
+				TOGGLE_CUE_MIX_TRACK: {
+					actions: assign({
+						cue_mix_state: (context, event) => {
+							console.log(event);
+							let _cue_mix_state = { ...context.cue_mix_state };
+							if (event.mode === "peers") {
+								const i = _cue_mix_state.mute.indexOf(event.target);
+								if (i > -1) {
+									_cue_mix_state.mute.splice(i, 1);
+								} else {
+									_cue_mix_state.mute.push(event.target);
+								}
+							} else if (event.mode === "parent") {
+							}
+							return _cue_mix_state;
 						},
 					}),
 				},

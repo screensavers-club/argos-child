@@ -176,6 +176,7 @@ const VideoGrid = styled.div`
 	width: 100%;
 	padding-top: ${(9 / 16) * 100}%;
 	box-sizing: border-box;
+	background: #111;
 
 	label.participantNumber {
 		position: absolute;
@@ -248,6 +249,19 @@ export default function Stage({ send, context, state, tabs }) {
 		}
 	}
 
+	function sendCueMixState(recipient) {
+		if (room) {
+			const strData = JSON.stringify({
+				cue_mix_state: context.cue_mix_state,
+			});
+			const data = encoder.encode(strData);
+			console.log(room.localParticipant);
+			room.localParticipant.publishData(data, DataPacket_Kind.RELIABLE, [
+				recipient,
+			]);
+		}
+	}
+
 	useEffect(() => {
 		let _tracks = participants.map((p) => {
 			let track = null;
@@ -277,28 +291,57 @@ export default function Stage({ send, context, state, tabs }) {
 				if (payloadObj.action === "UPDATE_LAYOUT") {
 					send("UPDATE_LAYOUT", { layout: payloadObj.layout });
 				}
+
+				if (payloadObj.action === "GET_CUE_MIX_STATE") {
+					sendCueMixState(requesterSid);
+				}
+
+				if (payloadObj.action === "TOGGLE_CUE_MIX_TRACK") {
+					send("TOGGLE_CUE_MIX_TRACK", { ...payloadObj });
+				}
 			});
 		}
 	}, [room, context]);
 
 	useEffect(() => {
+		participants
+			.filter((p) => JSON.parse(p.metadata)?.type === "PARENT")
+			.forEach((p) => {
+				console.log(p);
+				sendCueMixState(p.sid);
+			});
+	}, [context.cue_mix_state]);
+
+	useEffect(() => {
 		Array.from(audioMonitorDomRef.current.children).forEach((elem) => {
 			elem.remove();
 		});
+
 		audioTracks.forEach((track) => {
 			let trackSid = track.sid;
 			let _p = participants.find((participant) => {
-				console.log(participant.getTracks());
 				return participant.getTracks().find((_track) => {
 					return _track.audioTrack && _track.audioTrack.sid === trackSid;
 				});
 			});
+
+			if (_p?.identity === context.identity) {
+				return;
+			}
+
+			if (
+				context.cue_mix_state.source === "peers" &&
+				JSON.parse(_p?.metadata || "{}")?.type === "CHILD" &&
+				context.cue_mix_state.mute.indexOf(_p?.identity) > -1
+			) {
+				return;
+			}
 			let a = track?.attach();
 			a.setAttribute("identity", _p?.identity);
 			a.setAttribute("nickname", JSON.parse(_p?.metadata || "false")?.nickname);
 			audioMonitorDomRef.current.append(a);
 		});
-	}, [audioTracks, participants]);
+	}, [audioTracks, participants, context.cue_mix_state]);
 
 	useEffect(() => {
 		connect(process.env.REACT_APP_LIVEKIT_SERVER, context.token).then(() => {
