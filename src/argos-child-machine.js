@@ -103,17 +103,31 @@ let argosChildMachine = createMachine({
 				TOGGLE_CUE_MIX_TRACK: {
 					actions: assign({
 						cue_mix_state: (context, event) => {
-							console.log(event);
 							let _cue_mix_state = { ...context.cue_mix_state };
+
 							if (event.mode === "peers") {
+								if (context.cue_mix_state.source === "parent") {
+									// if transitioning from parent state, unmute all first
+									_cue_mix_state.mute = [];
+								}
+
 								const i = _cue_mix_state.mute.indexOf(event.target);
 								if (i > -1) {
 									_cue_mix_state.mute.splice(i, 1);
 								} else {
 									_cue_mix_state.mute.push(event.target);
 								}
+								_cue_mix_state.source = "peers";
 							} else if (event.mode === "parent") {
+								if (context.cue_mix_state.source === "parent") {
+									// if already in parent mode, toggle to peers mode
+									_cue_mix_state.mute = [];
+									_cue_mix_state.source = "peers";
+								} else {
+									_cue_mix_state.source = "parent";
+								}
 							}
+
 							return _cue_mix_state;
 						},
 					}),
