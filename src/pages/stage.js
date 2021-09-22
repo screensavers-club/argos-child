@@ -559,7 +559,13 @@ function VideoSlot({ slot, availableVideoTracks }) {
 				left: `${slot.position[0]}%`,
 			}}
 		>
-			<video ref={videoRef} muted autoPlay key={trackSid} />
+			<video
+				ref={videoRef}
+				muted
+				autoPlay
+				style={{ transform: "scaleX(-1)" }}
+				key={trackSid}
+			/>
 		</div>
 	);
 }
