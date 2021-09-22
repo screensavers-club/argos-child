@@ -442,8 +442,8 @@ export default function Stage({ send, context, state, tabs }) {
 								localVideoTrackRef.current = null;
 							} else {
 								localVideoTrackRef.current = await createLocalVideoTrack({
-									width: { min: 640, ideal: 1280, max: 1920 },
-									height: { min: 360, ideal: 720, max: 1080 },
+									width: { min: 1280, ideal: 1280, max: 1920 },
+									height: { min: 720, ideal: 720, max: 1080 },
 									facingMode: "environment",
 								}).catch((err) => {
 									console.log(err);
