@@ -32,7 +32,6 @@ const StyledPage = styled.div`
 		width: 45%;
 		padding: 25px;
 		margin: auto;
-		font-size: 1.5rem;
 	}
 
 	div.roomName ~ h3 {

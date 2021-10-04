@@ -1,14 +1,19 @@
 import styled from "styled-components";
 
-import ArgosSymbol from "../argos-symbol.svg";
 import { useEffect, useState } from "react";
 import moment from "moment";
+import { Calendar, Time, Folder } from "react-ikonate";
 
 export default function StatusBar({ room, version }) {
 	let [time, setTime] = useState(moment());
 
 	function renderTime() {
-		return time.format("ddd hh:mm:ssA");
+		return (
+			<>
+				<Calendar /> {time.format("ddd DD MMM")}
+				<Time /> {time.format("hh:mm:ssA")}
+			</>
+		);
 	}
 
 	useEffect(() => {
@@ -19,26 +24,33 @@ export default function StatusBar({ room, version }) {
 	return (
 		<Bar>
 			<div className="left">
-				<img
-					src={ArgosSymbol}
-					style={{ width: "18px", margin: "5px" }}
-					alt="Argos Symbol"
+				<div
+					style={{
+						background: "#434349",
+						width: "12px",
+						height: "12px",
+						marginRight: "10px",
+						borderRadius: "50%",
+					}}
 				/>
 				{room ? room : "not connected"}
-				{/* <Box scale={0.8} /> */}
 			</div>
 			<div className="right">
-				v{version} {renderTime()}
+				<Folder /> v{version} {renderTime()}
 			</div>
 		</Bar>
 	);
 }
 
 const Bar = styled.div`
+	font-family: "Noto Sans";
+	font-size: 10px;
+	text-transform: uppercase;
+	font-weight: 600;
 	pointer-events: none;
 	user-select: none;
 	display: flex;
-	background: #000;
+	background: #343439;
 	color: white;
 	align-items: center;
 	padding: 4px 8px;
@@ -55,5 +67,11 @@ const Bar = styled.div`
 		display: flex;
 		align-items: center;
 		justify-content: flex-end;
+	}
+
+	svg {
+		stroke-width: 1.5px;
+		margin: 0 10px 0 20px;
+		font-size: 14px;
 	}
 `;
