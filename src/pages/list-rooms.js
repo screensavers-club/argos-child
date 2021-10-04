@@ -19,15 +19,21 @@ const StyledPage = styled.div`
 		display: block;
 		padding: 40px 50px;
 		width: 100%;
-		height: calc(100% - 50px);
-		overflow-y: scroll;
-		overflow-x: hidden;
 		box-sizing: border-box;
 
-		> div {
+		> div.rooms {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			grid-gap: 20px;
+			overflow-y: scroll;
+			overflow-x: hidden;
+			height: calc(100% - 50px);
+		}
+
+		> div.header {
 			display: flex;
-			justify-content: space-between;
 			align-content: center;
+			margin-bottom: 25px;
 
 			h3 {
 				margin: 0;
@@ -38,11 +44,7 @@ const StyledPage = styled.div`
 				line-height: 49px;
 				color: #ffffff;
 				text-align: left;
-			}
-		}
-
-		> button {
-
+				margin-right: 25px;
 			}
 		}
 	}
@@ -93,11 +95,10 @@ export default function ListRooms({ context, send, state }) {
 			setRoomList(result.data);
 		});
 	}, []);
-
 	return (
 		<StyledPage>
 			<div className="availableRooms">
-				<div>
+				<div className="header">
 					<h3>Available Rooms</h3>
 					<Button
 						variant="icon"
@@ -111,18 +112,7 @@ export default function ListRooms({ context, send, state }) {
 						}}
 					/>
 				</div>
-
-				{roomList.map((room) => (
-					<Button
-						key={room.name}
-						variant="full-width"
-						onClick={() => {
-							send("REQUEST_JOIN_ROOM", room);
-						}}
-					>
-						{room.name}
-					</Button>
-				))}
+				<RoomColours roomList={roomList} send={send} />
 			</div>
 
 			<div className="functionPanel">
@@ -493,3 +483,66 @@ const MicTestButton = styled.div`
 	position: absolute;
 	right: 20px;
 `;
+
+function RoomColours({ roomList, send }) {
+	let colors = {
+		"#FD3832": [
+			"apple",
+			"plum",
+			"date",
+			"berry",
+			"wolfberry",
+			"peach",
+			"tomato",
+		],
+		"#C5F321": [
+			"lime",
+			"pear",
+			"watermelon",
+			"kiwi",
+			"melon",
+			"honeydew",
+			"olive",
+		],
+		"#F9EEA0": ["lychee", "guava", "melon", "banana", "quince"],
+		"#FCAB1D": [
+			"orange",
+			"mango",
+			"apricot",
+			"persimmon",
+			"kumquat",
+			"papaya",
+			"loquat",
+			"pineapple",
+			"longan",
+			"jackfruit",
+		],
+		"#5D0AEA": ["grape", "fig", "prune"],
+	};
+
+	return (
+		<div className="rooms">
+			{roomList.map((room) => {
+				const fruits = room.name.split("-");
+				const colorPair = fruits.map((fruit) => {
+					return Object.keys(colors).find((hex) => {
+						return colors[hex].indexOf(fruit) > -1;
+					});
+				});
+				console.log(colorPair);
+				return (
+					<Button
+						gradient={`linear-gradient(135deg, ${colorPair[0]}, ${colorPair[1]})`}
+						key={room.name}
+						variant="block"
+						onClick={() => {
+							send("REQUEST_JOIN_ROOM", room);
+						}}
+					>
+						{room.name}
+					</Button>
+				);
+			})}
+		</div>
+	);
+}

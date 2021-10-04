@@ -55,6 +55,7 @@ const Bar = styled.div`
 	align-items: center;
 	padding: 4px 8px;
 	box-sizing: border-box;
+	height: 35px;
 
 	div.left {
 		width: 50%;
