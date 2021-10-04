@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import moment from "moment";
 import { Calendar, Time, Folder } from "react-ikonate";
 
-export default function StatusBar({ room, version }) {
+export default function StatusBar({ context, room, version }) {
 	let [time, setTime] = useState(moment());
 
 	function renderTime() {
@@ -22,17 +22,9 @@ export default function StatusBar({ room, version }) {
 		}, 1000);
 	}, [time]);
 	return (
-		<Bar>
+		<Bar color={context.color}>
 			<div className="left">
-				<div
-					style={{
-						background: "#434349",
-						width: "12px",
-						height: "12px",
-						marginRight: "10px",
-						borderRadius: "50%",
-					}}
-				/>
+				<div className="roomColour" />
 				{room ? room : "not connected"}
 			</div>
 			<div className="right">
@@ -56,6 +48,17 @@ const Bar = styled.div`
 	padding: 4px 8px;
 	box-sizing: border-box;
 	height: 35px;
+
+	div.roomColour {
+		background: ${(p) =>
+			p.color.length > 0
+				? `linear-gradient(135deg, ${p.color[0]}, ${p.color[1]})`
+				: "#434349"};
+		width: 12px;
+		height: 12px;
+		margin-right: 10px;
+		border-radius: 50%;
+	}
 
 	div.left {
 		width: 50%;

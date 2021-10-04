@@ -112,7 +112,7 @@ export default function ListRooms({ context, send, state }) {
 						}}
 					/>
 				</div>
-				<RoomColours roomList={roomList} send={send} />
+				<Rooms roomList={roomList} send={send} />
 			</div>
 
 			<div className="functionPanel">
@@ -484,7 +484,7 @@ const MicTestButton = styled.div`
 	right: 20px;
 `;
 
-function RoomColours({ roomList, send }) {
+function Rooms({ roomList, send }) {
 	let colors = {
 		"#FD3832": [
 			"apple",
@@ -529,14 +529,13 @@ function RoomColours({ roomList, send }) {
 						return colors[hex].indexOf(fruit) > -1;
 					});
 				});
-				console.log(colorPair);
 				return (
 					<Button
 						gradient={`linear-gradient(135deg, ${colorPair[0]}, ${colorPair[1]})`}
 						key={room.name}
 						variant="block"
 						onClick={() => {
-							send("REQUEST_JOIN_ROOM", room);
+							send("REQUEST_JOIN_ROOM", { room, colorPair });
 						}}
 					>
 						{room.name}
