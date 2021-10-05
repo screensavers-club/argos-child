@@ -1,10 +1,18 @@
 import styled from "styled-components";
 import Button from "../components/button";
+import Card from "../components/cards";
 
 import React, { useEffect, useState, useRef } from "react";
 import Webcam from "react-webcam";
 
-import { Rotate, Camera, Microphone, Maximise } from "react-ikonate";
+import {
+	Rotate,
+	Camera,
+	Microphone,
+	Maximise,
+	Close,
+	User,
+} from "react-ikonate";
 import axios from "axios";
 
 const StyledPage = styled.div`
@@ -80,7 +88,6 @@ const StyledPage = styled.div`
 		box-sizing: border-box;
 
 		> button {
-			display: block;
 			margin: 6px;
 		}
 	}
@@ -89,6 +96,19 @@ const StyledPage = styled.div`
 export default function ListRooms({ context, send, state }) {
 	let [roomList, setRoomList] = useState([]);
 	let [webcam, setWebcam] = useState(false);
+
+	const animateRef = useRef();
+
+	function rotateIcon() {
+		console.log(animateRef.current);
+		animateRef.current.classList.add("animate__animated", "animate__shakeX");
+		window.setTimeout(() => {
+			animateRef.current?.classList?.remove(
+				"animate__animated",
+				"animate__shakeX"
+			);
+		}, 1000);
+	}
 
 	useEffect(() => {
 		axios.get(`${process.env.REACT_APP_PEER_SERVER}/rooms`).then((result) => {
@@ -102,8 +122,10 @@ export default function ListRooms({ context, send, state }) {
 					<h3>Available Rooms</h3>
 					<Button
 						variant="icon"
-						icon={<Rotate />}
+						className="refreshButton"
+						icon={<Rotate ref={animateRef} />}
 						onClick={() => {
+							rotateIcon();
 							axios
 								.get(`${process.env.REACT_APP_PEER_SERVER}/rooms`)
 								.then((result) => {
@@ -170,6 +192,7 @@ export default function ListRooms({ context, send, state }) {
 							onClick={() => {
 								setWebcam(false);
 							}}
+							icon={<Close />}
 						>
 							Close
 						</Button>
@@ -530,16 +553,17 @@ function Rooms({ roomList, send }) {
 					});
 				});
 				return (
-					<Button
+					<Card
+						icon={<User />}
+						participants="5 / 10"
 						gradient={`linear-gradient(135deg, ${colorPair[0]}, ${colorPair[1]})`}
 						key={room.name}
-						variant="block"
 						onClick={() => {
 							send("REQUEST_JOIN_ROOM", { room, colorPair });
 						}}
 					>
 						{room.name}
-					</Button>
+					</Card>
 				);
 			})}
 		</div>

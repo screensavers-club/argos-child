@@ -8,7 +8,6 @@ export default function Button({
 	variant,
 	icon,
 	className,
-	gradient,
 }) {
 	return (
 		<StyledButton
@@ -17,7 +16,6 @@ export default function Button({
 			variant={variant}
 			icon={icon}
 			className={className}
-			gradient={gradient}
 		>
 			<div>
 				{icon}
@@ -30,15 +28,13 @@ export default function Button({
 const StyledButton = styled.button.attrs((props) => ({
 	className: props.className,
 }))`
-	display: inline-flex;
+	display: block;
 	align-items: ${(p) => (p.variant === "icon" ? "center" : "flex-end")};
 	justify-content: flex-start;
 	appearance: none;
 	background: ${(p) => {
 		if (p.variant === "icon") {
 			return "none";
-		} else if (p.variant === "block") {
-			return p.gradient;
 		} else {
 			return "#434349";
 		}
@@ -51,9 +47,6 @@ const StyledButton = styled.button.attrs((props) => ({
 			case "full-width":
 				return "100%";
 
-			case "block":
-				return "200px";
-
 			case "icon":
 				return "auto";
 			default:
@@ -62,18 +55,12 @@ const StyledButton = styled.button.attrs((props) => ({
 	}};
 	height: ${(p) => {
 		switch (p.variant) {
-			case "block":
-				return "140px";
-
 			default:
 				return "50px";
 		}
 	}};
 	border-radius: ${(p) => {
 		switch (p.variant) {
-			case "block":
-				return "15px";
-
 			default:
 				return "50px";
 		}
@@ -83,42 +70,18 @@ const StyledButton = styled.button.attrs((props) => ({
 	font-style: normal;
 	font-weight: ${(p) => {
 		switch (p.variant) {
-			case "block":
-				return "600";
-
 			default:
 				return "500";
 		}
 	}};
 	font-size: ${(p) => {
 		switch (p.variant) {
-			case "block":
-				return "24px";
-
 			default:
 				return "14px";
 		}
 	}};
 
-	&:hover {
-		background: ${(p) => (p.variant === "icon" ? "none" : "#fff")};
-		color: ${(p) => (p.variant === "icon" ? "white" : "#5736fd;")};
 
-		transform: ${(p) => (p.variant === "icon" ? "rotate(45deg)" : "none")};
-	}
-
-	&:focus {
-		animation-duration: ${(p) => (p.variant === "icon" ? "1s" : "0")};
-		animation-name: rotation;
-
-		@keyframes rotation {
-			from {
-				transform: rotate(0deg);
-			}
-			to {
-				transform: rotate(360deg);
-			}
-		}
 	}
 
 	svg {
@@ -134,17 +97,12 @@ const StyledButton = styled.button.attrs((props) => ({
 		align-items: center;
 		width: ${(p) => {
 			switch (p.variant) {
-				case "block":
-					return "50%";
-
 				default:
 					return "100%";
 			}
 		}};
 		margin: ${(p) => {
 			switch (p.variant) {
-				case "block":
-					return "0 0 10px 10px";
 				default:
 					return 0;
 			}
