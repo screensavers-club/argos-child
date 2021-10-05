@@ -29,6 +29,7 @@ const StyledPage = styled.div`
 		margin: 0;
 		background: ${(p) =>
 			`-webkit-linear-gradient(135deg, ${p.color[0]}, ${p.color[1]})`};
+		background-clip: text;
 		-webkit-background-clip: text;
 		-webkit-text-fill-color: transparent;
 	}

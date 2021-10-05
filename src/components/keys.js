@@ -27,7 +27,7 @@ const KeyButton = styled.div`
 			default:
 				return "#434349";
 		}
-	}}};
+	}};
 	svg {
 		stroke-width: 1.5px;
 	}
