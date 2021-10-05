@@ -44,6 +44,36 @@ const StyledPage = styled.div`
 			align-content: center;
 			margin-bottom: 25px;
 
+			svg.refreshButton {
+				margin: auto 0;
+				stroke-width: 1.5px;
+				stroke: white;
+				font-size: 36px;
+			}
+
+			.animate_rotate {
+				-webkit-animation: rotate 0.5s linear infinite;
+				-moz-animation: rotate 0.5s linear infinite;
+				animation: rotate 0.5s linear infinite;
+
+				@-moz-keyframes rotate {
+					100% {
+						-moz-transform: rotate(360deg);
+					}
+				}
+				@-webkit-keyframes rotate {
+					100% {
+						-webkit-transform: rotate(360deg);
+					}
+				}
+				@keyframes rotate {
+					100% {
+						-webkit-transform: rotate(360deg);
+						transform: rotate(360deg);
+					}
+				}
+			}
+
 			h3 {
 				margin: 0;
 				font-family: Noto Sans;
@@ -102,13 +132,10 @@ export default function ListRooms({ send }) {
 
 	function rotateIcon() {
 		console.log(animateRef.current);
-		animateRef.current.classList.add("animate__animated", "animate__rotateOut");
+		animateRef.current.classList.add("animate_rotate");
 		window.setTimeout(() => {
-			animateRef.current?.classList?.remove(
-				"animate__animated",
-				"animate__rotate"
-			);
-		}, 1000);
+			animateRef.current?.classList?.remove("animate_rotate");
+		}, 500);
 	}
 
 	useEffect(() => {
@@ -121,10 +148,9 @@ export default function ListRooms({ send }) {
 			<div className="availableRooms">
 				<div className="header">
 					<h3>Available Rooms</h3>
-					<Button
-						variant="icon"
+					<Rotate
 						className="refreshButton"
-						icon={<Rotate ref={animateRef} />}
+						ref={animateRef}
 						onClick={() => {
 							rotateIcon();
 							axios

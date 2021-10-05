@@ -179,6 +179,7 @@ export default function EnterPassword({ send, context, state, icon }) {
 						return (
 							<Key
 								variant="numpad"
+								type="cancel"
 								className="key"
 								onClick={() => {
 									setPasscode(passcode.slice(0, -5));
@@ -206,6 +207,7 @@ export default function EnterPassword({ send, context, state, icon }) {
 
 			<div className="buttonBox">
 				<Button
+					variant="navigation"
 					icon={<ArrowLeft />}
 					onClick={() => {
 						send("BACK");
@@ -214,6 +216,8 @@ export default function EnterPassword({ send, context, state, icon }) {
 					Back
 				</Button>
 				<Button
+					variant="navigation"
+					type="primary"
 					icon={<ArrowRight />}
 					onClick={() => {
 						tryJoinRoom();

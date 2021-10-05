@@ -6,6 +6,7 @@ export default function Button({
 	children,
 	onClick,
 	variant,
+	type,
 	icon,
 	className,
 }) {
@@ -14,6 +15,7 @@ export default function Button({
 			{...style}
 			onClick={onClick}
 			variant={variant}
+			type={type}
 			icon={icon}
 			className={className}
 		>
@@ -40,20 +42,17 @@ const StyledButton = styled.button.attrs((props) => ({
 	align-items: ${(p) => (p.variant === "icon" ? "center" : "flex-end")};
 
 	background: ${(p) => {
-		if (p.variant === "icon") {
-			return "none";
-		} else {
-			return "#434349";
+		switch (p.type) {
+			case "primary":
+				return "#5736FD";
 		}
+		return "#434349";
 	}};
 
 	width: ${(p) => {
 		switch (p.variant) {
-			case "full-width":
-				return "100%";
-
-			case "icon":
-				return "auto";
+			case "navigation":
+				return "115px";
 			default:
 				return "151px";
 		}
@@ -91,6 +90,7 @@ const StyledButton = styled.button.attrs((props) => ({
 		display: flex;
 		justify-content: flex-start;
 		align-items: center;
+		margin: auto 0;
 
 		width: ${(p) => {
 			switch (p.variant) {
@@ -108,9 +108,16 @@ const StyledButton = styled.button.attrs((props) => ({
 
 		svg {
 			stroke-width: 1.5px;
-			padding-left: ${(p) => (p.variant === "icon" ? "0" : "20px")};
-			padding-right: ${(p) => (p.variant === "icon" ? "0" : "15px")};
-			font-size: ${(p) => (p.variant === "icon" ? "36px" : "20px")};
+			padding-left: ${(p) => (p.variant === "navigation" ? "15px" : "20px")};
+			padding-right: ${(p) => (p.variant === "navigation" ? "10px" : "15px")};
+			font-size: ${(p) => {
+				switch (p.variant) {
+					case "navigation":
+						return "25px";
+					default:
+						return "20px";
+				}
+			}};
 		}
 	}
 `;
