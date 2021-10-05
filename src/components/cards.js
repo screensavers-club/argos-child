@@ -25,13 +25,13 @@ export default function Card({
 const StyledButton = styled.button`
 	position: relative;
 	display: inline-flex;
+	cursor: pointer;
 	align-items: flex-end;
 	justify-content: flex-start;
 	appearance: none;
 	background: ${(p) => p.gradient};
 	border: none;
 	color: #fff;
-	cursor: pointer;
 	width: 200px;
 	height: 140px;
 	border-radius: 15px;
@@ -41,30 +41,27 @@ const StyledButton = styled.button`
 	font-weight: 600;
 	font-size: 24px;
 
-	&:hover {
-	}
-
-	svg {
-		stroke-width: 1.5;
-		font-size: 14px;
-		margin-right: 5px;
-	}
-
-	span {
-		position: absolute;
-		display: flex;
-		justify-content: flex-start;
-		align-items: center;
-		font-size: 10px;
-		top: 10px;
-		right: 10px;
-	}
-
 	> div {
 		display: flex;
 		justify-content: flex-start;
 		align-items: center;
 		width: 50%;
 		margin: 0 0 10px 10px;
+
+		span {
+			position: absolute;
+			display: flex;
+			justify-content: flex-start;
+			align-items: center;
+			font-size: 10px;
+			top: 10px;
+			right: 10px;
+
+			svg {
+				stroke-width: 1.5;
+				font-size: 14px;
+				margin-right: 5px;
+			}
+		}
 	}
 `;

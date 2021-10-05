@@ -14,6 +14,7 @@ import {
 	User,
 } from "react-ikonate";
 import axios from "axios";
+import "../animate.min.css";
 
 const StyledPage = styled.div`
 	display: flex;
@@ -93,7 +94,7 @@ const StyledPage = styled.div`
 	}
 `;
 
-export default function ListRooms({ context, send, state }) {
+export default function ListRooms({ send }) {
 	let [roomList, setRoomList] = useState([]);
 	let [webcam, setWebcam] = useState(false);
 
@@ -101,11 +102,11 @@ export default function ListRooms({ context, send, state }) {
 
 	function rotateIcon() {
 		console.log(animateRef.current);
-		animateRef.current.classList.add("animate__animated", "animate__shakeX");
+		animateRef.current.classList.add("animate__animated", "animate__rotateOut");
 		window.setTimeout(() => {
 			animateRef.current?.classList?.remove(
 				"animate__animated",
-				"animate__shakeX"
+				"animate__rotate"
 			);
 		}, 1000);
 	}
