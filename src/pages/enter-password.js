@@ -5,116 +5,92 @@ import axios from "axios";
 import "../animate.min.css";
 import { set } from "lodash";
 
-import { ArrowRightCircle } from "react-ikonate";
-import { ArrowLeftCircle } from "react-ikonate";
-import { Delete } from "react-ikonate";
-import { Cancel } from "react-ikonate";
+import Key from "../components/keys";
+
+import { ArrowRight, ArrowLeft, Delete, Cancel, Lock } from "react-ikonate";
 
 const StyledPage = styled.div`
-	display: block;
-	margin: auto;
-	padding: auto;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
 	text-align: center;
+	background: #252529;
+	height: calc(100% - 35px);
 
-	div.roomName {
-		display: block;
-		margin-top: 7%;
-	}
-
-	div.nameBox {
-		position: relative;
-		text-align: center;
-		border: 1px solid black;
-		height: 2rem;
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		width: 45%;
-		padding: 25px;
-		margin: auto;
-		font-size: 1.5rem;
-	}
-
-	div.roomName ~ h3 {
-		margin-top: 50px;
-	}
-
-	div.password {
-		display: flex;
-		margin: 25px;
-		align-items: center;
-		justify-content: center;
-	}
-
-	div.passwordBox {
-		border: 1px solid black;
-		padding: 25px;
-		margin: 12.5px;
-		width: 45%;
-	}
-
-	input::-webkit-outer-spin-button,
-	input::-webkit-inner-spin-button {
-		-webkit-appearance: none;
+	h3.header {
+		color: white;
+		font-size: 18px;
+		font-weight: 600;
 		margin: 0;
-		width: 10px;
-		position: absolute;
-		text-align: center;
-		font-size: 1em;
 	}
 
-	input,
-	select {
-		font-size: 3em;
-		border-style: none;
-		width: 45%;
-		height: auto;
-		border: 1px solid black;
-		&::placeholder {
-			color: grey;
+	h3.joiningRoom {
+		margin: 0;
+		background: ${(p) =>
+			`-webkit-linear-gradient(135deg, ${p.color[0]}, ${p.color[1]})`};
+		background-clip: text;
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
+	}
+
+	div.passwordSection {
+		display: flex;
+		justify-content: flex-start;
+		align-items: center;
+		background: #434349;
+		border-radius: 100px;
+		width: 265px;
+		height: 56px;
+		margin: 10px;
+
+		svg {
+			stroke-width: 2.5px;
+			font-size: 36px;
+			stroke: white;
+			margin: 0 20px;
+			stroke-linecap: "round";
+			stroke-linejoin: "round";
+		}
+
+		input::-webkit-outer-spin-button,
+		input::-webkit-inner-spin-button {
+			-webkit-appearance: none;
+			margin: 0;
+			width: 10px;
+			position: absolute;
+			text-align: center;
+		}
+
+		input,
+		select {
+			padding-left: 20px;
+			font-family: Noto Sans;
+			font-style: normal;
+			font-weight: 600;
+			background: none;
+			font-size: 36px;
+			color: white;
+			border-style: none;
+			width: 165px;
+			border-left: 1px solid white;
 		}
 	}
 
 	div.buttonBox {
-		display: block;
-		margin: auto;
-		padding: auto;
-
-		> button {
-			margin: 0 0.8em;
-		}
+		display: flex;
+		width: calc(100% - 120px);
+		top: 110px;
+		position: fixed;
+		justify-content: space-between;
 	}
 
 	div.keyboard {
-		margin: 0 auto 10px auto;
 		display: grid;
+		margin-top: 5px;
 		grid-template-columns: 1fr 1fr 1fr;
-		width: 50%;
-		border: 1px solid black;
-	}
-
-	div.key {
-		width: auto;
-		padding: 15px;
-		text-align: center;
-		font-size: 1.5em;
-		border: 1px solid black;
-
-		&:hover {
-			background: #ddd;
-			cursor: pointer;
-			border: 1px solid black;
-		}
-	}
-
-	p {
-		padding: 0;
-		margin: 0;
-	}
-
-	h3 {
-		padding: 0;
-		margin: 0;
+		grid-row-gap: 10px;
+		grid-column-gap: 30px;
 	}
 `;
 
@@ -155,15 +131,16 @@ export default function EnterPassword({ send, context, state, icon }) {
 	}
 
 	return (
-		<StyledPage>
-			<div className="password">
+		<StyledPage color={context.color}>
+			<h3 className="header">Enter password for</h3>
+			<h3 className="joiningRoom">{context.joining_room}</h3>
+			<div className="passwordSection" ref={inputRef}>
+				<Lock />
 				<input
 					type="password"
 					pattern="[0-9]*"
 					inputMode="numeric"
-					ref={inputRef}
 					value={passcode}
-					placeholder="enter password"
 					onChange={(e) => {
 						setPasscode(e.target.value.slice(0, 5));
 					}}
@@ -188,53 +165,51 @@ export default function EnterPassword({ send, context, state, icon }) {
 					let key = "key_" + i;
 					if (k === "del") {
 						return (
-							<div
+							<Key
 								className="key"
+								variant="numpad"
+								k={<Delete />}
 								key={k}
-								onClick={() => {
+								onClick={(e) => {
 									setPasscode(passcode.slice(0, -1));
 								}}
-							>
-								<Delete />
-							</div>
+							/>
 						);
 					}
 					if (k === "cancel") {
 						return (
-							<div
+							<Key
+								variant="numpad"
+								type="cancel"
 								className="key"
 								onClick={() => {
 									setPasscode(passcode.slice(0, -5));
 								}}
+								k={<Cancel />}
 								key={k}
-							>
-								<Cancel />
-							</div>
+							/>
 						);
 					}
 					return (
-						<div
+						<Key
 							className="key"
+							variant="numpad"
+							k={k}
 							key={k}
 							onClick={() => {
-								if (k === "del") {
-									setPasscode(passcode.slice(0, -1));
-								} else {
-									if (passcode.length < 5) {
-										setPasscode(`${passcode}${k}`);
-									}
+								if (passcode.length < 5) {
+									setPasscode(`${passcode}${k}`);
 								}
 							}}
-						>
-							{k}
-						</div>
+						/>
 					);
 				})}
 			</div>
 
 			<div className="buttonBox">
 				<Button
-					icon={<ArrowLeftCircle />}
+					variant="navigation"
+					icon={<ArrowLeft />}
 					onClick={() => {
 						send("BACK");
 					}}
@@ -242,7 +217,9 @@ export default function EnterPassword({ send, context, state, icon }) {
 					Back
 				</Button>
 				<Button
-					icon={<ArrowRightCircle />}
+					variant="navigation"
+					type="primary"
+					icon={<ArrowRight />}
 					onClick={() => {
 						tryJoinRoom();
 					}}

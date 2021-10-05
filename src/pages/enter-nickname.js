@@ -34,7 +34,6 @@ const Page = styled.div`
 			width: 10px;
 			position: absolute;
 			text-align: center;
-			font-size: 1em;
 		}
 
 		input {

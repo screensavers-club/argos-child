@@ -29,7 +29,11 @@ function App() {
 	return (
 		<div className="App" id="App">
 			<AppFrame>
-				<StatusBar room={_.get(state, "context.room.name")} version="0.2.5" />
+				<StatusBar
+					room={_.get(state, "context.room.name")}
+					version="0.2.5"
+					context={state.context}
+				/>
 				<Screen state={state.value} context={state.context} send={send} />
 			</AppFrame>
 		</div>
