@@ -60,6 +60,7 @@ const StyledPage = styled.div`
 			width: 10px;
 			position: absolute;
 			text-align: center;
+			outline: none;
 		}
 
 		input,
@@ -74,6 +75,7 @@ const StyledPage = styled.div`
 			border-style: none;
 			width: 165px;
 			border-left: 1px solid white;
+			outline: none;
 		}
 	}
 
