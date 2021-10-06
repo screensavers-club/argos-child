@@ -60,7 +60,6 @@ const StyledPage = styled.div`
 			width: 10px;
 			position: absolute;
 			text-align: center;
-			outline: none;
 		}
 
 		input,
