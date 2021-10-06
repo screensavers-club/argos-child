@@ -261,6 +261,18 @@ export default function Stage({ send, context, state, tabs }) {
 		}
 	}
 
+	function sendPong(recipient) {
+		if (room) {
+			const strData = JSON.stringify({
+				type: "PONG",
+			});
+			const data = encoder.encode(strData);
+			room.localParticipant.publishData(data, DataPacket_Kind.RELIABLE, [
+				recipient,
+			]);
+		}
+	}
+
 	useEffect(() => {
 		let _tracks = participants.map((p) => {
 			let track = null;
@@ -297,6 +309,10 @@ export default function Stage({ send, context, state, tabs }) {
 
 				if (payloadObj.action === "TOGGLE_CUE_MIX_TRACK") {
 					send("TOGGLE_CUE_MIX_TRACK", { ...payloadObj });
+				}
+
+				if (payloadObj.action === "PING") {
+					sendPong(requesterSid);
 				}
 			});
 		}
