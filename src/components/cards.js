@@ -32,7 +32,8 @@ const StyledButton = styled.button`
 	background: ${(p) => p.gradient};
 	border: none;
 	color: #fff;
-	width: 200px;
+	min-width: 200px;
+	width: 100%;
 	height: 140px;
 	border-radius: 15px;
 	font-family: Noto Sans;

@@ -3,91 +3,108 @@ import styled from "styled-components";
 import { useRef, useState } from "react";
 import Button from "../components/button";
 import "../animate.min.css";
-import {
-	ArrowLeftCircle,
-	Delete,
-	Cancel,
-	ArrowRightCircle,
-} from "react-ikonate";
+import Key from "../components/keys";
+import { ArrowLeft, Delete, Cancel, ArrowRight, User } from "react-ikonate";
 
 const Page = styled.div`
-	margin-top: 1.7em;
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
 	align-items: center;
+	background: #252529;
+	height: calc(100% - 35px);
+
+	div.buttonBox {
+		display: flex;
+		width: calc(100% - 120px);
+		top: 110px;
+		position: fixed;
+		justify-content: space-between;
+	}
 
 	div.nick_input {
 		display: flex;
 		flex-direction: column;
 		text-align: center;
-		margin-bottom: 1em;
+		margin-bottom: 30px;
 
 		label {
-			margin-bottom: 1em;
+			font-size: 18px;
+			font-weight: 600;
+			color: white;
 		}
 
-		input::-webkit-outer-spin-button,
-		input::-webkit-inner-spin-button {
-			-webkit-appearance: none;
-			margin: 0;
-			width: 10px;
-			position: absolute;
-			text-align: center;
+		span {
+			font-size: 13px;
+			font-weight: normal;
+			color: white;
 		}
 
-		input {
-			font-size: 2em;
-			border-style: none;
-			width: 100%;
-			height: auto;
-			border: 1px solid black;
-			&::placeholder {
-				color: grey;
+		div.nicknameSection {
+			display: flex;
+			justify-content: flex-start;
+			align-items: center;
+			background: #434349;
+			border-radius: 100px;
+			width: 265px;
+			height: 56px;
+			margin: 10px;
+
+			svg {
+				stroke-width: 1.5px;
+				font-size: 36px;
+				stroke: white;
+				margin: 0 15px;
+				stroke-linecap: "round";
+				stroke-linejoin: "round";
+			}
+
+			input::-webkit-outer-spin-button,
+			input::-webkit-inner-spin-button {
+				-webkit-appearance: none;
+				margin: 0;
+				width: 10px;
+				position: absolute;
+				text-align: center;
+			}
+
+			input,
+			select {
+				padding-left: 15px;
+				font-family: Noto Sans;
+				font-style: normal;
+				font-weight: normal;
+				background: none;
+				font-size: 36px;
+				color: white;
+				border-style: none;
+				width: 165px;
+				height: 75%;
+				border-left: 1px solid white;
+				outline: none;
 			}
 		}
 	}
 `;
 
 const Keyboard = styled.div`
-	display: flex;
-	width: 740px;
+	display: grid;
+	grid-template-columns: repeat(10, 1fr);
+	grid-column-gap: 20px;
+	grid-row-gap: 10px;
+	width: 500px;
 	flex-wrap: wrap;
 	justify-content: center;
 	margin-bottom: 1em;
 
-	div.keys {
-		display: flex;
-		font-size: 1.5em;
-		border: 1px solid black;
-		width: 2em;
-		height: 1em;
-		padding: 0.3em;
-		margin: 0.1em;
-		justify-content: center;
-		align-items: center;
-		text-align: center;
-		text-transform: uppercase;
-
-		:hover {
-			cursor: pointer;
-			background: #ddd;
-		}
-
-		~ .clr,
-		~ .ent {
-			width: 3.45em;
-		}
-
-		~ .ent {
-			background: black;
-		}
+	div.bsp {
+		grid-column: 9 / span 2;
 	}
 `;
 
 export default function EnterNickname({ send, context }) {
 	let keys_string =
-		"1 2 3 4 5 6 7 8 9 0 Q W E R T Y U I O P A S D F G H J K L bsp Z X C V B N M clr ent";
+		"1 2 3 4 5 6 7 8 9 0 Q W E R T Y U I O P A S D F G H J K L clr Z X C V B N M bsp";
 
 	const keys = keys_string.split(" ");
 
@@ -107,76 +124,82 @@ export default function EnterNickname({ send, context }) {
 	return (
 		<Page>
 			<div className={`nick_input`}>
-				<label>Enter Your Initials</label>
-				<input
-					id="nickname_box"
-					ref={inputRef}
-					type="text"
-					value={nickname.toUpperCase()}
-					onChange={(e) => {
-						setNickname(e.target.value.slice(0, 5));
-					}}
-					style={{
-						border: `${
-							nickname.length < 1 ? "1px solid red" : "1px solid black"
-						}`,
-					}}
-				/>
+				<label>Enter nickname</label>
+				<span>up to 5 letters</span>
+				<div className="nicknameSection" ref={inputRef}>
+					<User />
+					<input
+						id="nickname_box"
+						ref={inputRef}
+						type="text"
+						value={nickname.toUpperCase()}
+						onChange={(e) => {
+							setNickname(e.target.value.slice(0, 5));
+						}}
+						// style={{
+						// 	borderLeft: `${
+						// 		nickname.length < 1 ? "1px solid red" : "1px solid black"
+						// 	}`,
+						// }}
+					/>
+				</div>
 			</div>
 
 			<Keyboard>
 				{keys.map((key, i) => {
 					let _key = `key_+${i}`;
 					return (
-						<div
+						<Key
+							k={key === "bsp" ? <Delete /> : key === "clr" ? <Cancel /> : key}
+							variant="keyboard"
 							key={_key}
+							type={
+								key === "clr" ? "cancel" : key === "bsp" ? "long" : "default"
+							}
 							className={`keys ${
-								key === "clr" ? "clr" : key === "ent" ? "ent" : ""
+								key === "clr" ? "clr" : key === "bsp" ? "bsp" : ""
 							} `}
 							onClick={() => {
 								if (key === "bsp") {
 									setNickname(nickname.slice(0, -1));
 								} else if (key === "clr") {
 									setNickname(nickname.slice(0, -5));
-								} else if (key === "ent") {
-									if (nickname.length < 1) {
-										shakeNicknameScreen();
-									} else {
-										console.log({
-											nickname: context.nickname,
-											id: context.identity,
-										});
-										send("ENTER_STAGE", {
-											nickname: nickname,
-										});
-									}
 								} else {
 									setNickname((nickname + key).slice(0, 5));
 								}
 							}}
-						>
-							{key === "bsp" ? (
-								<Delete />
-							) : key === "clr" ? (
-								<Cancel style={{ stroke: "red" }} />
-							) : key === "ent" ? (
-								<ArrowRightCircle style={{ stroke: "white" }} />
-							) : (
-								key
-							)}
-						</div>
+						/>
 					);
 				})}
 			</Keyboard>
 
-			<Button
-				icon={<ArrowLeftCircle />}
-				onClick={() => {
-					send("BACK");
-				}}
-			>
-				Back To Rooms
-			</Button>
+			<div className="buttonBox">
+				<Button
+					variant="navigation"
+					icon={<ArrowLeft />}
+					onClick={() => {
+						send("BACK");
+					}}
+				>
+					Back
+				</Button>
+				<Button
+					variant="navigation"
+					type="primary"
+					icon={<ArrowRight />}
+					onClick={() => {
+						if (nickname.length < 1) {
+							shakeNicknameScreen();
+						} else {
+							send("ENTER_STAGE", {
+								nickname: nickname,
+							});
+						}
+					}}
+				>
+					Enter
+				</Button>
+			</div>
 		</Page>
 	);
 }

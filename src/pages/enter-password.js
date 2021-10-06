@@ -45,10 +45,10 @@ const StyledPage = styled.div`
 		margin: 10px;
 
 		svg {
-			stroke-width: 2.5px;
+			stroke-width: 1.5px;
 			font-size: 36px;
 			stroke: white;
-			margin: 0 20px;
+			margin: 0 15px;
 			stroke-linecap: "round";
 			stroke-linejoin: "round";
 		}
@@ -64,7 +64,7 @@ const StyledPage = styled.div`
 
 		input,
 		select {
-			padding-left: 20px;
+			padding-left: 15px;
 			font-family: Noto Sans;
 			font-style: normal;
 			font-weight: 600;
@@ -73,6 +73,7 @@ const StyledPage = styled.div`
 			color: white;
 			border-style: none;
 			width: 165px;
+			height: 75%;
 			border-left: 1px solid white;
 			outline: none;
 		}
@@ -164,41 +165,20 @@ export default function EnterPassword({ send, context, state, icon }) {
 					{ k: "del" },
 				].map(function ({ k }, i) {
 					let key = "key_" + i;
-					if (k === "del") {
-						return (
-							<Key
-								className="key"
-								variant="numpad"
-								k={<Delete />}
-								key={k}
-								onClick={(e) => {
-									setPasscode(passcode.slice(0, -1));
-								}}
-							/>
-						);
-					}
-					if (k === "cancel") {
-						return (
-							<Key
-								variant="numpad"
-								type="cancel"
-								className="key"
-								onClick={() => {
-									setPasscode(passcode.slice(0, -5));
-								}}
-								k={<Cancel />}
-								key={k}
-							/>
-						);
-					}
+
 					return (
 						<Key
 							className="key"
+							type={k === "cancel" ? "cancel" : ""}
 							variant="numpad"
-							k={k}
+							k={k === "del" ? <Delete /> : k === "cancel" ? <Cancel /> : k}
 							key={k}
 							onClick={() => {
-								if (passcode.length < 5) {
+								if (k === "cancel") {
+									setPasscode(passcode.slice(0, -5));
+								} else if (k === "del") {
+									setPasscode(passcode.slice(0, -1));
+								} else if (passcode.length < 5) {
 									setPasscode(`${passcode}${k}`);
 								}
 							}}

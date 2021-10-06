@@ -36,6 +36,7 @@ const StyledPage = styled.div`
 			grid-gap: 20px;
 			overflow-y: scroll;
 			overflow-x: hidden;
+			max-width: 425px;
 			height: calc(100% - 50px);
 		}
 
@@ -116,6 +117,7 @@ const StyledPage = styled.div`
 		flex-direction: column;
 		justify-content: flex-end;
 		width: ${(1 / 3) * 100}%;
+		height: calc(100%-35px);
 		box-sizing: border-box;
 
 		> button {
