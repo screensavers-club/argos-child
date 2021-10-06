@@ -1,5 +1,6 @@
 import styled from "styled-components";
 import { useRoom } from "livekit-react";
+import Key from "../components/keys";
 import {
 	createLocalAudioTrack,
 	createLocalVideoTrack,
@@ -7,7 +8,7 @@ import {
 	DataPacket_Kind,
 } from "livekit-client";
 import { useEffect, useRef, useState } from "react";
-import { Microphone, Exit, Film, ArrowUp, ArrowDown } from "react-ikonate";
+import { Microphone, Exit, Film, Hamburger } from "react-ikonate";
 import Button from "../components/button";
 import axios from "axios";
 
@@ -15,41 +16,47 @@ const StageDiv = styled.div`
 	position: fixed;
 	display: block;
 	width: 100%;
-	height: 100%;
+	height: calc(100%-35px);
+	background: #252529;
 
-	div.streamTabs {
-		display: ${(p) => (p.drawerActive === true ? "none" : "flex")};
-		justify-content: space-around;
-		width: 80%;
-		height: 3em;
+	div.drawer {
+		display: flex;
 		position: absolute;
-		bottom: 5em;
-		left: 50%;
-		transform: translate(-50%, 0);
-		border: 1px solid black;
-		border-radius: 0.5em;
+		right: 0;
+		top: 50%;
+		transform: translate(0, -50%);
 
-		> button {
-			width: 100%;
-			height: 100%;
-			padding: 0.5em 0;
-			appearance: none;
-			border: none;
-			border-right: 1px solid black;
-			font-size: 1.5em;
-			background: #eee;
+		div.hamburger {
+			border-radius: 50px;
+			top: 50%;
+			right: 50px;
+			transform: translate(0, -50%);
+			position: absolute;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			background: #434349;
+			width: 50px;
+			height: 50px;
+			z-index: 5;
 
-			&:hover {
-				background: #fafafa;
-
-				&.active {
-					background: #ccc;
-				}
+			svg {
+				color: white;
 			}
+		}
 
-			&.active {
-				background: #ddd;
-			}
+		div.streamTabs {
+			background: #434349;
+			display: ${(p) => (p.drawerActive === true ? "none" : "flex")};
+			flex-direction: column;
+			justify-content: space-around;
+			width: 100px;
+			position: absolute;
+			right: -20px;
+			top: 50%;
+			transform: translate(0, -50%);
+			border-radius: 50px;
+			z-index: 1;
 
 			svg {
 				stroke-linecap: round;
@@ -95,6 +102,7 @@ const StageDiv = styled.div`
 			}
 		}
 	}
+
 	div.exitingModal {
 		display: none;
 	}
@@ -150,22 +158,6 @@ const StageDiv = styled.div`
 					text-align: center;
 				}
 			}
-		}
-	}
-
-	div.drawer {
-		position: fixed;
-		display: flex;
-		bottom: 0;
-		right: 0;
-		border: 1px solid black;
-		font-size: 1.5em;
-		padding: 0.2em 0.4em;
-		background: white;
-
-		:hover {
-			background: #ddd;
-			cursor: pointer;
 		}
 	}
 `;
@@ -395,115 +387,127 @@ export default function Stage({ send, context, state, tabs }) {
 				})}
 			</VideoGrid>
 			<div ref={audioMonitorDomRef}></div>
-
-			<div className="streamTabs">
-				{(tabs = [
-					{
-						tab: "mic",
-						tabActive: active[0],
-						icon: !localAudioTrackRef.current ? (
-							<Microphone />
-						) : (
-							<>
-								<span></span>
+			<div className="drawer">
+				<div
+					className="hamburger"
+					onClick={() => {
+						drawerActive === false
+							? setDrawerActive(true)
+							: setDrawerActive(false);
+					}}
+				>
+					<Hamburger />
+				</div>
+				<div className="streamTabs">
+					{(tabs = [
+						{
+							tab: "mic",
+							tabActive: active[0],
+							icon: !localAudioTrackRef.current ? (
 								<Microphone />
-							</>
-						),
-						onClick: async () => {
-							let _active = [...active];
-							_active[0] = !active[0];
-							setActive(_active);
+							) : (
+								<>
+									<span></span>
+									<Microphone />
+								</>
+							),
+							onClick: async () => {
+								let _active = [...active];
+								_active[0] = !active[0];
+								setActive(_active);
 
-							if (localAudioTrackRef.current) {
-								room.localParticipant.unpublishTrack(
-									localAudioTrackRef.current
-								);
-								localAudioTrackRef.current = null;
-							} else {
-								localAudioTrackRef.current = await createLocalAudioTrack({
-									echoCancellation: false,
-									noiseSuppression: false,
-								}).catch((err) => {
-									alert(err);
-								});
 								if (localAudioTrackRef.current) {
-									room.localParticipant.publishTrack(
+									room.localParticipant.unpublishTrack(
 										localAudioTrackRef.current
 									);
+									localAudioTrackRef.current = null;
+								} else {
+									localAudioTrackRef.current = await createLocalAudioTrack({
+										echoCancellation: false,
+										noiseSuppression: false,
+									}).catch((err) => {
+										alert(err);
+									});
+									if (localAudioTrackRef.current) {
+										room.localParticipant.publishTrack(
+											localAudioTrackRef.current
+										);
+									}
 								}
-							}
-							setRenderState(renderState + 1);
+								setRenderState(renderState + 1);
+							},
 						},
-					},
-					{
-						tab: "video",
-						tabActive: active[1],
-						icon: !localVideoTrackRef.current ? (
-							<Film />
-						) : (
-							<>
-								<span></span>
+						{
+							tab: "video",
+							tabActive: active[1],
+							icon: !localVideoTrackRef.current ? (
 								<Film />
-							</>
-						),
-						onClick: async () => {
-							let _active = [...active];
-							_active[1] = !active[1];
-							setActive(_active);
+							) : (
+								<>
+									<span></span>
+									<Film />
+								</>
+							),
+							onClick: async () => {
+								let _active = [...active];
+								_active[1] = !active[1];
+								setActive(_active);
 
-							if (localVideoTrackRef.current) {
-								room.localParticipant.unpublishTrack(
-									localVideoTrackRef.current
-								);
-								localVideoTrackRef.current = null;
-							} else {
-								localVideoTrackRef.current = await createLocalVideoTrack({
-									width: { min: 1280, ideal: 1280, max: 1920 },
-									height: { min: 720, ideal: 720, max: 1080 },
-									frameRate: 30,
-									facingMode: "environment",
-								}).catch((err) => {
-									console.log(err);
-									alert("Error");
-								});
 								if (localVideoTrackRef.current) {
-									room.localParticipant
-										.publishTrack(localVideoTrackRef.current)
-										.then((track) => {
-											if (
-												!context.current_layout.slots.reduce((p, c) => {
-													return p || c.track;
-												}, null)
-											) {
-												send("INIT_LAYOUT_WITH_SELF", { sid: track.trackSid });
-											}
-											setRenderState(renderState + 1);
-										});
+									room.localParticipant.unpublishTrack(
+										localVideoTrackRef.current
+									);
+									localVideoTrackRef.current = null;
+								} else {
+									localVideoTrackRef.current = await createLocalVideoTrack({
+										width: { min: 1280, ideal: 1280, max: 1920 },
+										height: { min: 720, ideal: 720, max: 1080 },
+										frameRate: 30,
+										facingMode: "environment",
+									}).catch((err) => {
+										console.log(err);
+										alert("Error");
+									});
+									if (localVideoTrackRef.current) {
+										room.localParticipant
+											.publishTrack(localVideoTrackRef.current)
+											.then((track) => {
+												if (
+													!context.current_layout.slots.reduce((p, c) => {
+														return p || c.track;
+													}, null)
+												) {
+													send("INIT_LAYOUT_WITH_SELF", {
+														sid: track.trackSid,
+													});
+												}
+												setRenderState(renderState + 1);
+											});
+									}
 								}
-							}
+							},
 						},
-					},
-					{
-						tab: "end",
-						icon: <Exit />,
-						onClick: () => {
-							setExiting(true);
+						{
+							tab: "end",
+							icon: <Exit />,
+							onClick: () => {
+								setExiting(true);
+							},
 						},
-					},
-				]).map(function ({ tab, icon, onClick, tabActive }, i) {
-					let key = `key_${i}`;
-					return (
-						<button
-							key={key}
-							onClick={() => {
-								onClick();
-							}}
-							className={`${tab} ${tabActive === true ? "activated" : ""}`}
-						>
-							{icon}
-						</button>
-					);
-				})}
+					]).map(function ({ tab, icon, onClick, tabActive }, i) {
+						let key = `key_${i}`;
+						return (
+							<Key
+								key={key}
+								k={icon}
+								onClick={() => {
+									onClick();
+								}}
+								className={`${tab} ${tabActive === true ? "activated" : ""}`}
+							/>
+						);
+					})}
+				</div>
 			</div>
 
 			<div
@@ -531,16 +535,6 @@ export default function Stage({ send, context, state, tabs }) {
 						yes
 					</Button>
 				</div>
-			</div>
-			<div
-				className="drawer"
-				onClick={() => {
-					drawerActive === false
-						? setDrawerActive(true)
-						: setDrawerActive(false);
-				}}
-			>
-				{drawerActive === false ? <ArrowDown /> : <ArrowUp />}
 			</div>
 		</StageDiv>
 	);
