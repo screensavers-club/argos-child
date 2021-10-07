@@ -7,6 +7,7 @@ export default function Key({
 	type,
 	className,
 	tabActive,
+	indicator,
 }) {
 	return (
 		<KeyButton
@@ -17,6 +18,7 @@ export default function Key({
 			tabActive={tabActive}
 		>
 			{k}
+			<div className="indicator" />
 		</KeyButton>
 	);
 }
@@ -26,6 +28,7 @@ const KeyButton = styled.div.attrs((props) => ({
 }))`
 	border-radius: 50px;
 	display: flex;
+	flex-direction: column;
 	justify-content: center;
 	align-items: center;
 	font-family: "Noto Sans";
@@ -60,26 +63,39 @@ const KeyButton = styled.div.attrs((props) => ({
 			? "#AC4545"
 			: "#434349"};
 
-	svg {
+	box-shadow: ${(p) =>
+		p.variant === "streamTabs" ? "0 4px 4px 0 rgba(0,0,0,0.2)" : "none"};
+
+	> svg {
 		stroke-width: ${(p) => (p.variant === "keyboard" ? "1px" : "1.5px")};
 		stroke-linecap: round;
-		stroke: ${(p) => (p.tabActive === true ? "5736fd" : "white")};
+		color: ${(p) =>
+			p.tabActive === true ? "#5736fd" : p.type === "cancel" ? "#fff" : "#fff"};
 	}
 
 	:hover {
 		cursor: pointer;
 		color: #434349;
-		stroke: #434349;
 		background: #fff;
+		> svg {
+			color: #434349;
+		}
 	}
 	:active {
 		color: #5736fd;
-		stroke: #5736fd;
 		background: #fff;
 	}
 	:focus {
 		color: #5736fd;
-		stroke: #5736fd;
 		background: #fff;
+	}
+
+	div.indicator {
+		width: 10px;
+		height: 10px;
+		background: #5736fd;
+		border-radius: 50px;
+		margin-top: 5px;
+		display: ${(p) => (p.tabActive ? "block" : "none")};
 	}
 `;

@@ -8,7 +8,7 @@ import {
 	DataPacket_Kind,
 } from "livekit-client";
 import { useEffect, useRef, useState } from "react";
-import { Microphone, Exit, Film, Hamburger } from "react-ikonate";
+import { Microphone, Exit, Film, Hamburger, Undo } from "react-ikonate";
 import Button from "../components/button";
 import axios from "axios";
 
@@ -61,6 +61,10 @@ const StageDiv = styled.div`
 			font-size: 28px;
 			z-index: 2;
 
+			:hover {
+				cursor: pointer;
+			}
+
 			svg {
 				color: white;
 				padding-left: 5px;
@@ -89,48 +93,24 @@ const StageDiv = styled.div`
 		background: #333;
 		color: white;
 		position: fixed;
-		width: 50%;
-		height: 30%;
+		width: 300px;
+		height: 150px;
 		left: 50%;
 		top: 50%;
 		transform: translate(-50%, -50%);
 		border-radius: 25px;
+		font-size: 14px;
+		font-weight: 500;
 
-		div {
+		button {
+			margin: 0 10px;
+		}
+
+		> div {
 			width: 100%;
 			margin-top: 25px;
 			display: inline-flex;
 			justify-content: center;
-
-			> button {
-				padding: 5px;
-				display: flex;
-				justify-content: center;
-				align-content: center;
-				margin: 5px;
-
-				:hover {
-					cursor: pointer;
-					background: #ddd;
-				}
-
-				~ .yes {
-					background: #f25555;
-					color: white;
-
-					:hover {
-						cursor: pointer;
-						background: #f22222;
-					}
-				}
-
-				> div {
-					display: flex;
-					justify-content: center;
-					margin: 0;
-					text-align: center;
-				}
-			}
 		}
 	}
 `;
@@ -462,9 +442,11 @@ export default function Stage({ send, context, state, tabs }) {
 					return (
 						<Key
 							key={key}
-							type="streamTabs"
+							variant="streamTabs"
+							type={tab === "end" ? "cancel" : ""}
 							tabActive={tabActive}
 							k={icon}
+							indicator={tab === "end" ? false : true}
 							onClick={() => {
 								onClick();
 							}}
@@ -545,22 +527,27 @@ export default function Stage({ send, context, state, tabs }) {
 				Are you sure you want to exit?
 				<div>
 					<Button
+						icon={<Undo />}
 						className="no"
+						variant="navigation"
 						onClick={() => {
 							setExiting(false);
 						}}
 					>
-						no
+						Back
 					</Button>
 					<Button
+						icon={<Exit />}
 						className="yes"
+						variant="navigation"
+						type="secondary"
 						onClick={() => {
 							room?.disconnect();
 							send("DISCONNECT");
 							setExiting(false);
 						}}
 					>
-						yes
+						Exit
 					</Button>
 				</div>
 			</div>

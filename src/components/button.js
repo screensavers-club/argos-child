@@ -45,8 +45,12 @@ const StyledButton = styled.button.attrs((props) => ({
 		switch (p.type) {
 			case "primary":
 				return "#5736FD";
+
+			case "secondary":
+				return "#AC4545";
+			default:
+				return "#434349";
 		}
-		return "#434349";
 	}};
 
 	width: ${(p) => {
