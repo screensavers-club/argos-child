@@ -25,5 +25,5 @@ export default {
 	letterSpacing: [-0.01, -0.02],
 	// fontSizes: fontScale(1.3, 14),
 
-	font: "whyte, sans-serif",
+	// font: "whyte, sans-serif",
 };

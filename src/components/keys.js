@@ -31,7 +31,7 @@ const KeyButton = styled.div.attrs((props) => ({
 	flex-direction: column;
 	justify-content: center;
 	align-items: center;
-	font-family: "Noto Sans";
+
 	width: ${(p) =>
 		p.variant === "numpad"
 			? "65px"
@@ -52,7 +52,7 @@ const KeyButton = styled.div.attrs((props) => ({
 			: p.variant === "keyboard"
 			? "24px"
 			: "28px"};
-	font-weight: 200;
+	font-weight: 100;
 	text-align: center;
 	color: ${(p) => (p.tabActive === true ? "5736fd" : "white")};
 
@@ -67,8 +67,10 @@ const KeyButton = styled.div.attrs((props) => ({
 		p.variant === "streamTabs" ? "0 4px 4px 0 rgba(0,0,0,0.2)" : "none"};
 
 	> svg {
-		stroke-width: ${(p) => (p.variant === "keyboard" ? "1px" : "1.5px")};
+		stroke-width: ${(p) => (p.variant === "keyboard" ? "1.2px" : "1.5px")};
 		stroke-linecap: round;
+		font-size: ${(p) =>
+			p.type === "long" ? "36px" : p.variant === "keyboard" ? "30px " : ""};
 		color: ${(p) =>
 			p.tabActive === true ? "#5736fd" : p.type === "cancel" ? "#fff" : "#fff"};
 	}
@@ -84,10 +86,16 @@ const KeyButton = styled.div.attrs((props) => ({
 	:active {
 		color: #5736fd;
 		background: #fff;
+		> svg {
+			color: #5736fd;
+		}
 	}
 	:focus {
 		color: #5736fd;
 		background: #fff;
+		> svg {
+			color: #5736fd;
+		}
 	}
 
 	div.indicator {

@@ -39,6 +39,7 @@ const StageDiv = styled.div`
 		justify-content: space-around;
 		width: 150px;
 		position: absolute;
+		transition: right 0.3s;
 		right: ${(p) => (p.drawerActive === true ? "-35px" : "-125px")};
 		padding: 15px;
 		top: 50%;
@@ -121,7 +122,7 @@ const VideoGrid = styled.div`
 	width: 100%;
 	padding-top: ${(9 / 16) * 100}%;
 	box-sizing: border-box;
-	background: #111;
+	background: #252529;
 
 	label.participantNumber {
 		position: absolute;
@@ -132,11 +133,11 @@ const VideoGrid = styled.div`
 	}
 
 	.videoSlot {
-		border: 1px solid #aaa;
 		position: absolute;
+		background: #252529;
 
 		video {
-			background: #fefefe;
+			background: #252529;
 			width: 100%;
 			height: 100%;
 			position: absolute;
