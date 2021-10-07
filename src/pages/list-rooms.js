@@ -31,13 +31,17 @@ const StyledPage = styled.div`
 		box-sizing: border-box;
 
 		> div.rooms {
-			display: grid;
-			grid-template-columns: 1fr 1fr;
-			grid-gap: 20px;
+			display: flex;
 			overflow-y: scroll;
 			overflow-x: hidden;
-			max-width: 425px;
-			height: calc(100% - 50px);
+			width: 100%;
+
+			flex-wrap: wrap;
+			align-items: flex-start;
+
+			> button {
+				margin: 10px;
+			}
 		}
 
 		> div.header {

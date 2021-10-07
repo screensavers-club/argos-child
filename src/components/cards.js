@@ -32,8 +32,8 @@ const StyledButton = styled.button`
 	background: ${(p) => p.gradient};
 	border: none;
 	color: #fff;
-	min-width: 200px;
-	width: 100%;
+	min-width: 190px;
+	width: 25%;
 	height: 140px;
 	border-radius: 15px;
 	font-family: Noto Sans;
@@ -42,6 +42,7 @@ const StyledButton = styled.button`
 	font-weight: 600;
 	font-size: 24px;
 	text-shadow: rgba(0, 0, 0, 0.2) 0 2px 5px;
+	box-shadow: 0 4px 4px #252529;
 
 	> div {
 		display: flex;
