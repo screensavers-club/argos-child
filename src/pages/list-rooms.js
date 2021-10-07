@@ -50,6 +50,10 @@ const StyledPage = styled.div`
 				stroke-width: 1.5px;
 				stroke: white;
 				font-size: 36px;
+
+				:hover {
+					cursor: pointer;
+				}
 			}
 
 			.animate_rotate {

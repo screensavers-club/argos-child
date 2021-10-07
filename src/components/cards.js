@@ -41,6 +41,7 @@ const StyledButton = styled.button`
 	font-style: normal;
 	font-weight: 600;
 	font-size: 24px;
+	text-shadow: rgba(0, 0, 0, 0.2) 0 2px 5px;
 
 	> div {
 		display: flex;

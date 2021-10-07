@@ -19,86 +19,59 @@ const StageDiv = styled.div`
 	height: calc(100%-35px);
 	background: #252529;
 
-	div.drawer {
+	div.streamTabs {
+		> svg {
+			position: absolute;
+			z-index: 0;
+		}
+
+		> div {
+			z-index: 10;
+			position: relative;
+			right: -50px;
+			margin: 10px 0;
+			top: 50%;
+			transform: translate(0, -5%);
+		}
+
 		display: flex;
+		flex-direction: column;
+		justify-content: space-around;
+		width: 150px;
 		position: absolute;
-		right: 0;
+		right: ${(p) => (p.drawerActive === true ? "-35px" : "-125px")};
+		padding: 15px;
 		top: 50%;
 		transform: translate(0, -50%);
+		border-radius: 50px;
+		z-index: 1;
 
-		div.hamburger {
+		span.hamburger {
 			border-radius: 50px;
-			top: 50%;
-			right: 50px;
-			transform: translate(0, -50%);
 			position: absolute;
-			display: flex;
-			justify-content: center;
-			align-items: center;
-			background: #434349;
 			width: 50px;
 			height: 50px;
-			z-index: 5;
+			top: 50%;
+			right: 105px;
+			background: #434349;
+			transform: translate(0, -55%);
+			display: flex;
+			justify-content: flex-start;
+			align-items: center;
+			font-size: 28px;
+			z-index: 2;
 
 			svg {
 				color: white;
-			}
-		}
-
-		div.streamTabs {
-			background: #434349;
-			display: ${(p) => (p.drawerActive === true ? "none" : "flex")};
-			flex-direction: column;
-			justify-content: space-around;
-			width: 100px;
-			position: absolute;
-			right: -20px;
-			top: 50%;
-			transform: translate(0, -50%);
-			border-radius: 50px;
-			z-index: 1;
-
-			svg {
-				stroke-linecap: round;
-				stroke-width: 1.5;
-			}
-
-			&:first-child {
-				border-top-left-radius: 0.3em;
-				border-bottom-left-radius: 0.3em;
-			}
-
-			&:last-child {
-				border: none;
-				border-top-right-radius: 0.3em;
-				border-bottom-right-radius: 0.3em;
+				padding-left: 5px;
 			}
 		}
 
 		button {
+			z-index: 10;
 			:hover {
 				background: white;
 				cursor: pointer;
-			}
-		}
-
-		button.end {
-			svg {
-				stroke: red;
-			}
-		}
-
-		button.activated {
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			> span {
-				width: 15px;
-				height: 15px;
-				background: #3df536;
-				border-radius: 50%;
-				display: block;
-				margin-right: 0.1em;
 			}
 		}
 	}
@@ -387,8 +360,120 @@ export default function Stage({ send, context, state, tabs }) {
 				})}
 			</VideoGrid>
 			<div ref={audioMonitorDomRef}></div>
-			<div className="drawer">
-				<div
+
+			<div className="streamTabs">
+				{(tabs = [
+					{
+						tab: "mic",
+						tabActive: active[0],
+						icon: !localAudioTrackRef.current ? (
+							<Microphone />
+						) : (
+							<>
+								<span></span>
+								<Microphone />
+							</>
+						),
+						onClick: async () => {
+							let _active = [...active];
+							_active[0] = !active[0];
+							setActive(_active);
+
+							if (localAudioTrackRef.current) {
+								room.localParticipant.unpublishTrack(
+									localAudioTrackRef.current
+								);
+								localAudioTrackRef.current = null;
+							} else {
+								localAudioTrackRef.current = await createLocalAudioTrack({
+									echoCancellation: false,
+									noiseSuppression: false,
+								}).catch((err) => {
+									alert(err);
+								});
+								if (localAudioTrackRef.current) {
+									room.localParticipant.publishTrack(
+										localAudioTrackRef.current
+									);
+								}
+							}
+							setRenderState(renderState + 1);
+						},
+					},
+					{
+						tab: "video",
+						tabActive: active[1],
+						icon: !localVideoTrackRef.current ? (
+							<Film />
+						) : (
+							<>
+								<span></span>
+								<Film />
+							</>
+						),
+						onClick: async () => {
+							let _active = [...active];
+							_active[1] = !active[1];
+							setActive(_active);
+
+							if (localVideoTrackRef.current) {
+								room.localParticipant.unpublishTrack(
+									localVideoTrackRef.current
+								);
+								localVideoTrackRef.current = null;
+							} else {
+								localVideoTrackRef.current = await createLocalVideoTrack({
+									width: { min: 1280, ideal: 1280, max: 1920 },
+									height: { min: 720, ideal: 720, max: 1080 },
+									frameRate: 30,
+									facingMode: "environment",
+								}).catch((err) => {
+									console.log(err);
+									alert("Error");
+								});
+								if (localVideoTrackRef.current) {
+									room.localParticipant
+										.publishTrack(localVideoTrackRef.current)
+										.then((track) => {
+											if (
+												!context.current_layout.slots.reduce((p, c) => {
+													return p || c.track;
+												}, null)
+											) {
+												send("INIT_LAYOUT_WITH_SELF", {
+													sid: track.trackSid,
+												});
+											}
+											setRenderState(renderState + 1);
+										});
+								}
+							}
+						},
+					},
+					{
+						tab: "end",
+						icon: <Exit />,
+						onClick: () => {
+							setExiting(true);
+						},
+					},
+				]).map(function ({ tab, icon, onClick, tabActive }, i) {
+					let key = `key_${i}`;
+					return (
+						<Key
+							key={key}
+							type="streamTabs"
+							tabActive={tabActive}
+							k={icon}
+							onClick={() => {
+								onClick();
+							}}
+							className={`${tab} ${tabActive === true ? "activated" : ""}`}
+						/>
+					);
+				})}
+
+				<span
 					className="hamburger"
 					onClick={() => {
 						drawerActive === false
@@ -397,117 +482,60 @@ export default function Stage({ send, context, state, tabs }) {
 					}}
 				>
 					<Hamburger />
-				</div>
-				<div className="streamTabs">
-					{(tabs = [
-						{
-							tab: "mic",
-							tabActive: active[0],
-							icon: !localAudioTrackRef.current ? (
-								<Microphone />
-							) : (
-								<>
-									<span></span>
-									<Microphone />
-								</>
-							),
-							onClick: async () => {
-								let _active = [...active];
-								_active[0] = !active[0];
-								setActive(_active);
-
-								if (localAudioTrackRef.current) {
-									room.localParticipant.unpublishTrack(
-										localAudioTrackRef.current
-									);
-									localAudioTrackRef.current = null;
-								} else {
-									localAudioTrackRef.current = await createLocalAudioTrack({
-										echoCancellation: false,
-										noiseSuppression: false,
-									}).catch((err) => {
-										alert(err);
-									});
-									if (localAudioTrackRef.current) {
-										room.localParticipant.publishTrack(
-											localAudioTrackRef.current
-										);
-									}
-								}
-								setRenderState(renderState + 1);
-							},
-						},
-						{
-							tab: "video",
-							tabActive: active[1],
-							icon: !localVideoTrackRef.current ? (
-								<Film />
-							) : (
-								<>
-									<span></span>
-									<Film />
-								</>
-							),
-							onClick: async () => {
-								let _active = [...active];
-								_active[1] = !active[1];
-								setActive(_active);
-
-								if (localVideoTrackRef.current) {
-									room.localParticipant.unpublishTrack(
-										localVideoTrackRef.current
-									);
-									localVideoTrackRef.current = null;
-								} else {
-									localVideoTrackRef.current = await createLocalVideoTrack({
-										width: { min: 1280, ideal: 1280, max: 1920 },
-										height: { min: 720, ideal: 720, max: 1080 },
-										frameRate: 30,
-										facingMode: "environment",
-									}).catch((err) => {
-										console.log(err);
-										alert("Error");
-									});
-									if (localVideoTrackRef.current) {
-										room.localParticipant
-											.publishTrack(localVideoTrackRef.current)
-											.then((track) => {
-												if (
-													!context.current_layout.slots.reduce((p, c) => {
-														return p || c.track;
-													}, null)
-												) {
-													send("INIT_LAYOUT_WITH_SELF", {
-														sid: track.trackSid,
-													});
-												}
-												setRenderState(renderState + 1);
-											});
-									}
-								}
-							},
-						},
-						{
-							tab: "end",
-							icon: <Exit />,
-							onClick: () => {
-								setExiting(true);
-							},
-						},
-					]).map(function ({ tab, icon, onClick, tabActive }, i) {
-						let key = `key_${i}`;
-						return (
-							<Key
-								key={key}
-								k={icon}
-								onClick={() => {
-									onClick();
-								}}
-								className={`${tab} ${tabActive === true ? "activated" : ""}`}
+				</span>
+				<svg
+					width="203"
+					height="292"
+					viewBox="0 0 203 292"
+					fill="none"
+					xmlns="http://www.w3.org/2000/svg"
+				>
+					<g filter="url(#filter0_d)">
+						<path
+							fill-rule="evenodd"
+							clip-rule="evenodd"
+							d="M91 0C63.3857 0 41 22.3857 41 50V105C20.5654 105 4 121.565 4 142C4 162.435 20.5654 179 41 179V234C41 261.614 63.3857 284 91 284H199V0H91Z"
+							fill="#434349"
+						/>
+					</g>
+					<defs>
+						<filter
+							id="filter0_d"
+							x="0"
+							y="0"
+							width="203"
+							height="292"
+							filterUnits="userSpaceOnUse"
+							color-interpolation-filters="sRGB"
+						>
+							<feFlood flood-opacity="0" result="BackgroundImageFix" />
+							<feColorMatrix
+								in="SourceAlpha"
+								type="matrix"
+								values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+								result="hardAlpha"
 							/>
-						);
-					})}
-				</div>
+							<feOffset dy="4" />
+							<feGaussianBlur stdDeviation="2" />
+							<feComposite in2="hardAlpha" operator="out" />
+							<feColorMatrix
+								type="matrix"
+								values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0"
+							/>
+							<feBlend
+								mode="normal"
+								in2="BackgroundImageFix"
+								result="effect1_dropShadow"
+							/>
+							<feBlend
+								mode="normal"
+								in="SourceGraphic"
+								in2="effect1_dropShadow"
+								result="shape"
+							/>
+						</filter>
+					</defs>
+				</svg>
 			</div>
 
 			<div
