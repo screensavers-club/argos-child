@@ -141,7 +141,6 @@ export default function ListRooms({ send }) {
 	const animateRef = useRef();
 
 	function rotateIcon() {
-		console.log(animateRef.current);
 		animateRef.current.classList.add("animate_rotate");
 		window.setTimeout(() => {
 			animateRef.current?.classList?.remove("animate_rotate");

@@ -36,7 +36,6 @@ const StyledButton = styled.button`
 	width: 25%;
 	height: 140px;
 	border-radius: 15px;
-	font-family: Noto Sans;
 	text-align: left;
 	font-style: normal;
 	font-weight: 600;
