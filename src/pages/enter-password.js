@@ -18,7 +18,7 @@ const StyledPage = styled.div`
 	background: #252529;
 	height: calc(100% - 35px);
 
-	h3.header {
+	label {
 		color: white;
 		font-size: 18px;
 		font-weight: 600;
@@ -42,7 +42,7 @@ const StyledPage = styled.div`
 		border-radius: 100px;
 		width: 265px;
 		height: 56px;
-		margin: 10px;
+		margin: 10px 90px;
 
 		svg {
 			stroke-width: 1.5px;
@@ -79,12 +79,11 @@ const StyledPage = styled.div`
 		}
 	}
 
-	div.buttonBox {
+	div.header {
 		display: flex;
-		width: calc(100% - 120px);
-		top: 110px;
-		position: fixed;
-		justify-content: space-between;
+		justify-content: center;
+		align-items: center;
+		width: 100%;
 	}
 
 	div.keyboard {
@@ -134,19 +133,41 @@ export default function EnterPassword({ send, context, state, icon }) {
 
 	return (
 		<StyledPage color={context.color}>
-			<h3 className="header">Enter password for</h3>
+			<label>Enter password for</label>
 			<h3 className="joiningRoom">{context.joining_room}</h3>
-			<div className="passwordSection" ref={inputRef}>
-				<Lock />
-				<input
-					type="password"
-					pattern="[0-9]*"
-					inputMode="numeric"
-					value={passcode}
-					onChange={(e) => {
-						setPasscode(e.target.value.slice(0, 5));
+			<div className="header">
+				<Button
+					variant="navigation"
+					icon={<ArrowLeft />}
+					onClick={() => {
+						send("BACK");
 					}}
-				/>
+				>
+					Back
+				</Button>
+
+				<div className="passwordSection" ref={inputRef}>
+					<Lock />
+					<input
+						type="password"
+						pattern="[0-9]*"
+						inputMode="numeric"
+						value={passcode}
+						onChange={(e) => {
+							setPasscode(e.target.value.slice(0, 5));
+						}}
+					/>
+				</div>
+				<Button
+					variant="navigation"
+					type="primary"
+					icon={<ArrowRight />}
+					onClick={() => {
+						tryJoinRoom();
+					}}
+				>
+					Enter
+				</Button>
 			</div>
 
 			<div className="keyboard">
@@ -185,28 +206,6 @@ export default function EnterPassword({ send, context, state, icon }) {
 						/>
 					);
 				})}
-			</div>
-
-			<div className="buttonBox">
-				<Button
-					variant="navigation"
-					icon={<ArrowLeft />}
-					onClick={() => {
-						send("BACK");
-					}}
-				>
-					Back
-				</Button>
-				<Button
-					variant="navigation"
-					type="primary"
-					icon={<ArrowRight />}
-					onClick={() => {
-						tryJoinRoom();
-					}}
-				>
-					Enter
-				</Button>
 			</div>
 		</StyledPage>
 	);

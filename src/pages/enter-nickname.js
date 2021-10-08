@@ -40,6 +40,13 @@ const Page = styled.div`
 			color: white;
 		}
 
+		div.header {
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			width: 100%;
+		}
+
 		div.nicknameSection {
 			display: flex;
 			justify-content: flex-start;
@@ -48,7 +55,7 @@ const Page = styled.div`
 			border-radius: 100px;
 			width: 265px;
 			height: 56px;
-			margin: 10px;
+			margin: 10px 90px;
 
 			svg {
 				stroke-width: 1.5px;
@@ -126,22 +133,50 @@ export default function EnterNickname({ send, context }) {
 			<div className={`nick_input`}>
 				<label>Enter nickname</label>
 				<span>up to 5 letters</span>
-				<div className="nicknameSection" ref={inputRef}>
-					<User />
-					<input
-						id="nickname_box"
-						ref={inputRef}
-						type="text"
-						value={nickname.toUpperCase()}
-						onChange={(e) => {
-							setNickname(e.target.value.slice(0, 5));
+				<div className="header">
+					<Button
+						variant="navigation"
+						icon={<ArrowLeft />}
+						onClick={() => {
+							send("BACK");
 						}}
-						// style={{
-						// 	borderLeft: `${
-						// 		nickname.length < 1 ? "1px solid red" : "1px solid black"
-						// 	}`,
-						// }}
-					/>
+					>
+						Back
+					</Button>
+
+					<div className="nicknameSection" ref={inputRef}>
+						<User />
+						<input
+							id="nickname_box"
+							ref={inputRef}
+							type="text"
+							value={nickname.toUpperCase()}
+							onChange={(e) => {
+								setNickname(e.target.value.slice(0, 5));
+							}}
+							// style={{
+							// 	borderLeft: `${
+							// 		nickname.length < 1 ? "1px solid red" : "1px solid black"
+							// 	}`,
+							// }}
+						/>
+					</div>
+					<Button
+						variant="navigation"
+						type="primary"
+						icon={<ArrowRight />}
+						onClick={() => {
+							if (nickname.length < 1) {
+								shakeNicknameScreen();
+							} else {
+								send("ENTER_STAGE", {
+									nickname: nickname,
+								});
+							}
+						}}
+					>
+						Enter
+					</Button>
 				</div>
 			</div>
 
@@ -172,34 +207,6 @@ export default function EnterNickname({ send, context }) {
 					);
 				})}
 			</Keyboard>
-
-			<div className="buttonBox">
-				<Button
-					variant="navigation"
-					icon={<ArrowLeft />}
-					onClick={() => {
-						send("BACK");
-					}}
-				>
-					Back
-				</Button>
-				<Button
-					variant="navigation"
-					type="primary"
-					icon={<ArrowRight />}
-					onClick={() => {
-						if (nickname.length < 1) {
-							shakeNicknameScreen();
-						} else {
-							send("ENTER_STAGE", {
-								nickname: nickname,
-							});
-						}
-					}}
-				>
-					Enter
-				</Button>
-			</div>
 		</Page>
 	);
 }

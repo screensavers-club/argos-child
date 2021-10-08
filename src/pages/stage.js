@@ -90,18 +90,18 @@ const StageDiv = styled.div`
 		flex-direction: column;
 		justify-content: center;
 		align-items: center;
-		border: 1px solid black;
 		background: #333;
 		color: white;
 		position: fixed;
-		width: 300px;
-		height: 150px;
+		width: 350px;
+		height: 170px;
 		left: 50%;
 		top: 50%;
 		transform: translate(-50%, -50%);
 		border-radius: 25px;
 		font-size: 14px;
 		font-weight: 500;
+		box-shadow: 0 4px 4px rgba(0, 0, 0, 0.2);
 
 		button {
 			margin: 0 10px;
