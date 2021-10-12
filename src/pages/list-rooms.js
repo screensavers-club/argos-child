@@ -31,12 +31,17 @@ const StyledPage = styled.div`
 		box-sizing: border-box;
 
 		> div.rooms {
-			display: grid;
-			grid-template-columns: 1fr 1fr;
-			grid-gap: 20px;
+			display: flex;
 			overflow-y: scroll;
 			overflow-x: hidden;
-			height: calc(100% - 50px);
+			width: 100%;
+
+			flex-wrap: wrap;
+			align-items: flex-start;
+
+			> button {
+				margin: 10px;
+			}
 		}
 
 		> div.header {
@@ -49,6 +54,10 @@ const StyledPage = styled.div`
 				stroke-width: 1.5px;
 				stroke: white;
 				font-size: 36px;
+
+				:hover {
+					cursor: pointer;
+				}
 			}
 
 			.animate_rotate {
@@ -116,6 +125,7 @@ const StyledPage = styled.div`
 		flex-direction: column;
 		justify-content: flex-end;
 		width: ${(1 / 3) * 100}%;
+		height: calc(100%-35px);
 		box-sizing: border-box;
 
 		> button {
@@ -131,7 +141,6 @@ export default function ListRooms({ send }) {
 	const animateRef = useRef();
 
 	function rotateIcon() {
-		console.log(animateRef.current);
 		animateRef.current.classList.add("animate_rotate");
 		window.setTimeout(() => {
 			animateRef.current?.classList?.remove("animate_rotate");

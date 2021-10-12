@@ -1,5 +1,6 @@
 import styled from "styled-components";
 import { useRoom } from "livekit-react";
+import Key from "../components/keys";
 import {
 	createLocalAudioTrack,
 	createLocalVideoTrack,
@@ -7,7 +8,7 @@ import {
 	DataPacket_Kind,
 } from "livekit-client";
 import { useEffect, useRef, useState } from "react";
-import { Microphone, Exit, Film, ArrowUp, ArrowDown } from "react-ikonate";
+import { Microphone, Exit, Film, Hamburger, Undo } from "react-ikonate";
 import Button from "../components/button";
 import axios from "axios";
 
@@ -15,86 +16,71 @@ const StageDiv = styled.div`
 	position: fixed;
 	display: block;
 	width: 100%;
-	height: 100%;
+	height: calc(100%-35px);
+	background: #252529;
 
 	div.streamTabs {
-		display: ${(p) => (p.drawerActive === true ? "none" : "flex")};
+		> svg {
+			position: absolute;
+			z-index: 0;
+		}
+
+		> div {
+			z-index: 10;
+			position: relative;
+			right: -50px;
+			margin: 10px 0;
+			top: 50%;
+			transform: translate(0, -5%);
+		}
+
+		display: flex;
+		flex-direction: column;
 		justify-content: space-around;
-		width: 80%;
-		height: 3em;
+		width: 150px;
 		position: absolute;
-		bottom: 5em;
-		left: 50%;
-		transform: translate(-50%, 0);
-		border: 1px solid black;
-		border-radius: 0.5em;
+		transition: right 0.3s;
+		right: ${(p) => (p.drawerActive === true ? "-35px" : "-125px")};
+		padding: 15px;
+		top: 50%;
+		transform: translate(0, -50%);
+		border-radius: 50px;
+		z-index: 1;
 
-		> button {
-			width: 100%;
-			height: 100%;
-			padding: 0.5em 0;
-			appearance: none;
-			border: none;
-			border-right: 1px solid black;
-			font-size: 1.5em;
-			background: #eee;
+		span.hamburger {
+			border-radius: 50px;
+			position: absolute;
+			width: 50px;
+			height: 50px;
+			top: 50%;
+			right: 105px;
+			background: #434349;
+			transform: translate(0, -55%);
+			display: flex;
+			justify-content: flex-start;
+			align-items: center;
+			font-size: 28px;
+			z-index: 2;
 
-			&:hover {
-				background: #fafafa;
-
-				&.active {
-					background: #ccc;
-				}
-			}
-
-			&.active {
-				background: #ddd;
+			:hover {
+				cursor: pointer;
 			}
 
 			svg {
-				stroke-linecap: round;
-				stroke-width: 1.5;
-			}
-
-			&:first-child {
-				border-top-left-radius: 0.3em;
-				border-bottom-left-radius: 0.3em;
-			}
-
-			&:last-child {
-				border: none;
-				border-top-right-radius: 0.3em;
-				border-bottom-right-radius: 0.3em;
+				color: white;
+				padding-left: 5px;
 			}
 		}
 
 		button {
+			z-index: 10;
 			:hover {
 				background: white;
 				cursor: pointer;
 			}
 		}
-
-		button.end {
-			svg {
-				stroke: red;
-			}
-		}
-
-		button.activated {
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			> span {
-				width: 15px;
-				height: 15px;
-				background: #3df536;
-				border-radius: 50%;
-				display: block;
-				margin-right: 0.1em;
-			}
-		}
 	}
+
 	div.exitingModal {
 		display: none;
 	}
@@ -104,68 +90,28 @@ const StageDiv = styled.div`
 		flex-direction: column;
 		justify-content: center;
 		align-items: center;
-		border: 1px solid black;
 		background: #333;
 		color: white;
 		position: fixed;
-		width: 50%;
-		height: 30%;
+		width: 350px;
+		height: 170px;
 		left: 50%;
 		top: 50%;
 		transform: translate(-50%, -50%);
 		border-radius: 25px;
+		font-size: 14px;
+		font-weight: 500;
+		box-shadow: 0 4px 4px rgba(0, 0, 0, 0.2);
 
-		div {
+		button {
+			margin: 0 10px;
+		}
+
+		> div {
 			width: 100%;
 			margin-top: 25px;
 			display: inline-flex;
 			justify-content: center;
-
-			> button {
-				padding: 5px;
-				display: flex;
-				justify-content: center;
-				align-content: center;
-				margin: 5px;
-
-				:hover {
-					cursor: pointer;
-					background: #ddd;
-				}
-
-				~ .yes {
-					background: #f25555;
-					color: white;
-
-					:hover {
-						cursor: pointer;
-						background: #f22222;
-					}
-				}
-
-				> div {
-					display: flex;
-					justify-content: center;
-					margin: 0;
-					text-align: center;
-				}
-			}
-		}
-	}
-
-	div.drawer {
-		position: fixed;
-		display: flex;
-		bottom: 0;
-		right: 0;
-		border: 1px solid black;
-		font-size: 1.5em;
-		padding: 0.2em 0.4em;
-		background: white;
-
-		:hover {
-			background: #ddd;
-			cursor: pointer;
 		}
 	}
 `;
@@ -176,7 +122,7 @@ const VideoGrid = styled.div`
 	width: 100%;
 	padding-top: ${(9 / 16) * 100}%;
 	box-sizing: border-box;
-	background: #111;
+	background: #252529;
 
 	label.participantNumber {
 		position: absolute;
@@ -187,11 +133,11 @@ const VideoGrid = styled.div`
 	}
 
 	.videoSlot {
-		border: 1px solid #aaa;
 		position: absolute;
+		background: #252529;
 
 		video {
-			background: #fefefe;
+			background: #252529;
 			width: 100%;
 			height: 100%;
 			position: absolute;
@@ -475,7 +421,9 @@ export default function Stage({ send, context, state, tabs }) {
 													return p || c.track;
 												}, null)
 											) {
-												send("INIT_LAYOUT_WITH_SELF", { sid: track.trackSid });
+												send("INIT_LAYOUT_WITH_SELF", {
+													sid: track.trackSid,
+												});
 											}
 											setRenderState(renderState + 1);
 										});
@@ -493,17 +441,84 @@ export default function Stage({ send, context, state, tabs }) {
 				]).map(function ({ tab, icon, onClick, tabActive }, i) {
 					let key = `key_${i}`;
 					return (
-						<button
+						<Key
 							key={key}
+							variant="streamTabs"
+							type={tab === "end" ? "cancel" : ""}
+							tabActive={tabActive}
+							k={icon}
+							indicator={tab === "end" ? false : true}
 							onClick={() => {
 								onClick();
 							}}
 							className={`${tab} ${tabActive === true ? "activated" : ""}`}
-						>
-							{icon}
-						</button>
+						/>
 					);
 				})}
+
+				<span
+					className="hamburger"
+					onClick={() => {
+						drawerActive === false
+							? setDrawerActive(true)
+							: setDrawerActive(false);
+					}}
+				>
+					<Hamburger />
+				</span>
+				<svg
+					width="203"
+					height="292"
+					viewBox="0 0 203 292"
+					fill="none"
+					xmlns="http://www.w3.org/2000/svg"
+				>
+					<g filter="url(#filter0_d)">
+						<path
+							fill-rule="evenodd"
+							clip-rule="evenodd"
+							d="M91 0C63.3857 0 41 22.3857 41 50V105C20.5654 105 4 121.565 4 142C4 162.435 20.5654 179 41 179V234C41 261.614 63.3857 284 91 284H199V0H91Z"
+							fill="#434349"
+						/>
+					</g>
+					<defs>
+						<filter
+							id="filter0_d"
+							x="0"
+							y="0"
+							width="203"
+							height="292"
+							filterUnits="userSpaceOnUse"
+							color-interpolation-filters="sRGB"
+						>
+							<feFlood flood-opacity="0" result="BackgroundImageFix" />
+							<feColorMatrix
+								in="SourceAlpha"
+								type="matrix"
+								values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+								result="hardAlpha"
+							/>
+							<feOffset dy="4" />
+							<feGaussianBlur stdDeviation="2" />
+							<feComposite in2="hardAlpha" operator="out" />
+							<feColorMatrix
+								type="matrix"
+								values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0"
+							/>
+							<feBlend
+								mode="normal"
+								in2="BackgroundImageFix"
+								result="effect1_dropShadow"
+							/>
+							<feBlend
+								mode="normal"
+								in="SourceGraphic"
+								in2="effect1_dropShadow"
+								result="shape"
+							/>
+						</filter>
+					</defs>
+				</svg>
 			</div>
 
 			<div
@@ -513,34 +528,29 @@ export default function Stage({ send, context, state, tabs }) {
 				Are you sure you want to exit?
 				<div>
 					<Button
+						icon={<Undo />}
 						className="no"
+						variant="navigation"
 						onClick={() => {
 							setExiting(false);
 						}}
 					>
-						no
+						Back
 					</Button>
 					<Button
+						icon={<Exit />}
 						className="yes"
+						variant="navigation"
+						type="secondary"
 						onClick={() => {
 							room?.disconnect();
 							send("DISCONNECT");
 							setExiting(false);
 						}}
 					>
-						yes
+						Exit
 					</Button>
 				</div>
-			</div>
-			<div
-				className="drawer"
-				onClick={() => {
-					drawerActive === false
-						? setDrawerActive(true)
-						: setDrawerActive(false);
-				}}
-			>
-				{drawerActive === false ? <ArrowDown /> : <ArrowUp />}
 			</div>
 		</StageDiv>
 	);

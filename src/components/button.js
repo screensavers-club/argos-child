@@ -45,8 +45,12 @@ const StyledButton = styled.button.attrs((props) => ({
 		switch (p.type) {
 			case "primary":
 				return "#5736FD";
+
+			case "secondary":
+				return "#AC4545";
+			default:
+				return "#434349";
 		}
-		return "#434349";
 	}};
 
 	width: ${(p) => {
@@ -108,6 +112,7 @@ const StyledButton = styled.button.attrs((props) => ({
 
 		svg {
 			stroke-width: 1.5px;
+			padding-top: ${(p) => (p.variant === "navigation" ? "0" : "1px")};
 			padding-left: ${(p) => (p.variant === "navigation" ? "15px" : "20px")};
 			padding-right: ${(p) => (p.variant === "navigation" ? "10px" : "15px")};
 			font-size: ${(p) => {
@@ -119,5 +124,23 @@ const StyledButton = styled.button.attrs((props) => ({
 				}
 			}};
 		}
+	}
+
+	:hover {
+		stroke: #434349;
+		color: #434349;
+		background: white;
+	}
+
+	:active {
+		stroke: #5736fd;
+		color: #5736fd;
+		background: white;
+	}
+
+	:focus {
+		stroke: #5736fd;
+		color: #5736fd;
+		background: white;
 	}
 `;
