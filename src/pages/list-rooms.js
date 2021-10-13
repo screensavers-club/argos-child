@@ -582,7 +582,7 @@ function Rooms({ roomList, send }) {
 	return (
 		<div className="rooms">
 			{roomList.map((room) => {
-				const fruits = room.name.split("-");
+				const fruits = room.room.split("-");
 				const colorPair = fruits.map((fruit) => {
 					return Object.keys(colors).find((hex) => {
 						return colors[hex].indexOf(fruit) > -1;
@@ -591,14 +591,14 @@ function Rooms({ roomList, send }) {
 				return (
 					<Card
 						icon={<User />}
-						participants="5 / 10"
+						participants={room.children.length}
 						gradient={`linear-gradient(135deg, ${colorPair[0]}, ${colorPair[1]})`}
-						key={room.name}
+						key={room.room}
 						onClick={() => {
 							send("REQUEST_JOIN_ROOM", { room, colorPair });
 						}}
 					>
-						{room.name}
+						{room.room}
 					</Card>
 				);
 			})}
