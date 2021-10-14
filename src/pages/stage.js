@@ -39,6 +39,7 @@ const StageDiv = styled.div`
 			right: 50px;
 			top: 50%;
 			transform: translate(0, -50%);
+			display: ${(p) => (p.onboard == "active" ? "block" : "none")};
 
 			> div {
 				background: #5736fd;
