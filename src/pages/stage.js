@@ -354,7 +354,7 @@ export default function Stage({ send, context, state, tabs }) {
 	}, []);
 
 	return (
-		<StageDiv drawerActive={drawerActive}>
+		<StageDiv drawerActive={drawerActive} onboard={onboard}>
 			<VideoGrid>
 				{context.current_layout.slots.map((slot, i) => {
 					return (
