@@ -36,26 +36,43 @@ const StageDiv = styled.div`
 
 		div.onboard {
 			position: absolute;
-			right: 50px;
+			margin: 0;
+			font-weight: 600;
+			text-align: center;
+			right: 80%;
 			top: 50%;
 			transform: translate(0, -50%);
 			display: ${(p) => (p.onboard == "active" ? "block" : "none")};
 
 			> div {
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				padding: 25px;
 				background: #5736fd;
 				color: white;
 				width: 100%;
 				height: 100%;
+				z-index: 1;
+				border-radius: 50px;
+				width: 190px;
+				height: 90px;
 			}
 
 			div.triangle {
+				padding: 0;
+				background: none;
 				position: absolute;
 				top: 50%;
-				right: 0;
-				transform: translate(0, -50%);
+				right: 0px;
+				transform: translate(80%, -50%);
 				width: 0;
 				height: 0;
-				border-left: 10px solid #5736fd;
+				border-top: 20px solid transparent;
+				border-bottom: 20px solid transparent;
+				border-left: 30px solid #5736fd;
+				border-radius: 0;
+				z-index: 2;
 			}
 		}
 
@@ -173,7 +190,7 @@ const VideoGrid = styled.div`
 
 export default function Stage({ send, context, state, tabs }) {
 	const { connect, room, participants, audioTracks } = useRoom();
-	let [drawerActive, setDrawerActive] = useState(false);
+	let [drawerActive, setDrawerActive] = useState(true);
 
 	const encoder = new TextEncoder();
 	const decoder = new TextDecoder();
