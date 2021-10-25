@@ -595,7 +595,10 @@ function Rooms({ roomList, send }) {
 						gradient={`linear-gradient(135deg, ${colorPair[0]}, ${colorPair[1]})`}
 						key={room.room}
 						onClick={() => {
-							send("REQUEST_JOIN_ROOM", { room, colorPair });
+							send("REQUEST_JOIN_ROOM", {
+								room: { name: room.room },
+								colorPair,
+							});
 						}}
 					>
 						{room.room}

@@ -262,6 +262,7 @@ export default function Stage({ send, context, state, tabs }) {
 		if (room) {
 			room.removeAllListeners(RoomEvent.DataReceived);
 			room.on(RoomEvent.DataReceived, (payload, participant) => {
+				console.log({ event: "DataReceived", payload, participant });
 				const payloadStr = decoder.decode(payload);
 				const payloadObj = JSON.parse(payloadStr);
 
@@ -523,7 +524,7 @@ export default function Stage({ send, context, state, tabs }) {
 							filterUnits="userSpaceOnUse"
 							color-interpolation-filters="sRGB"
 						>
-							<feFlood flood-opacity="0" result="BackgroundImageFix" />
+							<feFlood floodOpacity="0" result="BackgroundImageFix" />
 							<feColorMatrix
 								in="SourceAlpha"
 								type="matrix"
