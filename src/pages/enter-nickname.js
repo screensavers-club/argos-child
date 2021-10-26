@@ -150,9 +150,9 @@ export default function EnterNickname({ send, context }) {
 							id="nickname_box"
 							ref={inputRef}
 							type="text"
-							value={nickname.toUpperCase()}
+							value={nickname}
 							onChange={(e) => {
-								setNickname(e.target.value.slice(0, 5));
+								setNickname(e.target.value.slice(0, 5).toUpperCase());
 							}}
 							// style={{
 							// 	borderLeft: `${
