@@ -41,9 +41,9 @@ export default function StatusBar({ context, room, version }) {
 
 const Bar = styled.div`
 	font-family: "Rubik";
-	font-size: 10px;
+	font-size: 0.75rem;
 	text-transform: uppercase;
-	font-weight: 600;
+	font-weight: normal;
 	pointer-events: none;
 	user-select: none;
 	display: flex;
