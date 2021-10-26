@@ -13,7 +13,7 @@ export default function AudioMix({ mix, participants, context }) {
 			let tracks = Array.from(c.audioTracks, ([key, track]) => {
 				return track;
 			});
-			if (Array.isArray(mix.mute) && mix.mute?.indexOf(_nick) < 0) {
+			if (Array.isArray(mix?.mute) && mix?.mute?.indexOf(_nick) < 0) {
 				tracks.forEach((track) => {
 					if (typeof track.setEnabled === "function") {
 						track.setEnabled(true);
@@ -29,14 +29,14 @@ export default function AudioMix({ mix, participants, context }) {
 				return p;
 			}
 		}, []);
-	console.log(remoteAudioTracks);
+
 	return (
 		<AudioIndicator>
 			<VolumeLoud />
 			{participants
 				.filter((p) => {
 					let _nick = JSON.parse(p.metadata || "{}")?.nickname;
-					let muted = Array.isArray(mix.mute) && mix.mute?.indexOf(_nick) >= 0;
+					let muted = Array.isArray(mix?.mute) && mix.mute?.indexOf(_nick) >= 0;
 					return _nick && _nick !== context.nickname && !muted;
 				})
 				.map((p) => {
@@ -64,6 +64,7 @@ const AudioIndicator = styled.div`
 	position: fixed;
 	bottom: 16px;
 	left: 16px;
+	z-index: 3;
 
 	b {
 		margin-left: 0.5em;
