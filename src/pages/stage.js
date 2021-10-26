@@ -34,6 +34,48 @@ const StageDiv = styled.div`
 			transform: translate(0, -5%);
 		}
 
+		div.onboard {
+			position: absolute;
+			margin: 0;
+			font-weight: 600;
+			text-align: center;
+			right: 80%;
+			top: 50%;
+			transform: translate(0, -50%);
+			display: ${(p) => (p.onboard == "active" ? "block" : "none")};
+
+			> div {
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				padding: 25px;
+				background: #5736fd;
+				color: white;
+				width: 100%;
+				height: 100%;
+				z-index: 1;
+				border-radius: 50px;
+				width: 190px;
+				height: 90px;
+			}
+
+			div.triangle {
+				padding: 0;
+				background: none;
+				position: absolute;
+				top: 50%;
+				right: 0px;
+				transform: translate(80%, -50%);
+				width: 0;
+				height: 0;
+				border-top: 20px solid transparent;
+				border-bottom: 20px solid transparent;
+				border-left: 30px solid #5736fd;
+				border-radius: 0;
+				z-index: 2;
+			}
+		}
+
 		display: flex;
 		flex-direction: column;
 		justify-content: space-around;
@@ -148,12 +190,13 @@ const VideoGrid = styled.div`
 
 export default function Stage({ send, context, state, tabs }) {
 	const { connect, room, participants, audioTracks } = useRoom();
-	let [drawerActive, setDrawerActive] = useState(false);
+	let [drawerActive, setDrawerActive] = useState(true);
 
 	const encoder = new TextEncoder();
 	const decoder = new TextDecoder();
 	const [active, setActive] = useState([false, false]);
 	const [exiting, setExiting] = useState(false);
+	const [onboard, setOnboard] = useState("active");
 	const [renderState, setRenderState] = useState(0);
 	const [availableVideoTracks, setAvailableVideoTracks] = useState([]);
 	const localAudioTrackRef = useRef(null);
@@ -329,7 +372,7 @@ export default function Stage({ send, context, state, tabs }) {
 	}, []);
 
 	return (
-		<StageDiv drawerActive={drawerActive}>
+		<StageDiv drawerActive={drawerActive} onboard={onboard}>
 			<VideoGrid>
 				{context.current_layout.slots.map((slot, i) => {
 					return (
@@ -344,6 +387,10 @@ export default function Stage({ send, context, state, tabs }) {
 			<div ref={audioMonitorDomRef}></div>
 
 			<div className="streamTabs">
+				<div className="onboard">
+					<div>Start by switching your video and audio on</div>
+					<div className="triangle" />
+				</div>
 				{(tabs = [
 					{
 						tab: "mic",
@@ -360,6 +407,7 @@ export default function Stage({ send, context, state, tabs }) {
 							let _active = [...active];
 							_active[0] = !active[0];
 							setActive(_active);
+							setOnboard("inactive");
 
 							if (localAudioTrackRef.current) {
 								room.localParticipant.unpublishTrack(
@@ -397,6 +445,7 @@ export default function Stage({ send, context, state, tabs }) {
 							let _active = [...active];
 							_active[1] = !active[1];
 							setActive(_active);
+							setOnboard("inactive");
 
 							if (localVideoTrackRef.current) {
 								room.localParticipant.unpublishTrack(
