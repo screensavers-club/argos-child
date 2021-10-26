@@ -57,6 +57,7 @@ const StageDiv = styled.div`
 				border-radius: 50px;
 				width: 190px;
 				height: 90px;
+				box-shadow: 0 4px 4px rgba(0, 0, 0, 0.2);
 			}
 
 			div.triangle {
@@ -73,6 +74,7 @@ const StageDiv = styled.div`
 				border-left: 30px solid #5736fd;
 				border-radius: 0;
 				z-index: 2;
+				box-shadow: none;
 			}
 		}
 
@@ -207,11 +209,22 @@ export default function Stage({ send, context, state, tabs }) {
 	useEffect(() => {
 		document.addEventListener("mousedown", handleClick);
 		document.addEventListener("keyup", handleEsc);
+		document.addEventListener("mousedown", handleOnboardClick);
 		return () => {
 			document.removeEventListener("mousedown", handleClick);
+			document.removeEventListener("mousedown", handleOnboardClick);
 			document.removeEventListener("keyup", handleEsc);
 		};
 	}, []);
+
+	const onboardModalRef = useRef();
+
+	const handleOnboardClick = (e) => {
+		if (onboardModalRef.current.contains(e.target)) {
+			return;
+		}
+		setOnboard("inactive");
+	};
 
 	const handleClick = (e) => {
 		if (exitingModalRef.current.contains(e.target)) {
@@ -387,7 +400,7 @@ export default function Stage({ send, context, state, tabs }) {
 			<div ref={audioMonitorDomRef}></div>
 
 			<div className="streamTabs">
-				<div className="onboard">
+				<div className="onboard" ref={onboardModalRef}>
 					<div>Start by switching your video and audio on</div>
 					<div className="triangle" />
 				</div>
