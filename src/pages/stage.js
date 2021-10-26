@@ -13,6 +13,7 @@ import { Microphone, Exit, Film, Hamburger, Undo } from "react-ikonate";
 import Key from "../components/keys";
 import Button from "../components/button";
 import VideoSlot from "../components/video-slot";
+import AudioMix from "../components/audio-mix";
 
 function getLayoutState(room, nickname) {
 	return axios.get(
@@ -32,11 +33,24 @@ export default function Stage({ send, context, state, tabs }) {
 	const [videoLayout, setVideoLayout] = useState([]);
 	const [forceRender, setForceRender] = useState(false);
 
+	const [mix, setMix] = useState({});
+
 	const [publishingAudio, setPublishingAudio] = useState(false);
 	const [publishingVideo, setPublishingVideo] = useState(false);
 
 	const exitingModalRef = useRef();
 	const onboardModalRef = useRef();
+
+	function updateMix() {
+		axios
+			.get(
+				`${process.env.REACT_APP_PEER_SERVER}/${room.name}/${context.nickname}/mix`
+			)
+			.then(({ data }) => {
+				console.log(data.mix);
+				setMix(data.mix);
+			});
+	}
 
 	function updateSubscriptions(participants) {
 		getLayoutState(room?.name, context.nickname).then(({ data }) => {
@@ -69,6 +83,7 @@ export default function Stage({ send, context, state, tabs }) {
 			return;
 		}
 		updateSubscriptions(participants);
+		updateMix(participants);
 	}, [room, participants, context]);
 
 	useEffect(() => {
@@ -151,7 +166,7 @@ export default function Stage({ send, context, state, tabs }) {
 				}
 
 				if (payloadObj.action === "MIX") {
-					// sendPong(requesterSid);
+					updateMix(participants);
 				}
 			});
 
@@ -163,6 +178,7 @@ export default function Stage({ send, context, state, tabs }) {
 
 	return (
 		<StageDiv drawerActive={drawerActive} onboard={onboard}>
+			<AudioMix mix={mix} participants={participants} context={context} />
 			<VideoGrid>
 				{videoLayout?.layout === "Default" ? (
 					<></>
