@@ -1,14 +1,18 @@
 import { useParticipant, VideoRenderer } from "livekit-react";
 
-export default function SlotParticipant({ participant, isLocal }) {
+export default function SlotParticipant({
+	publishingVideo,
+	participant,
+	isLocal,
+}) {
 	let { publications } = useParticipant(participant);
 	let nickname = JSON.parse(participant.metadata || "{}")?.nickname;
 	let videoPub = publications.find((pub) => pub.kind === "video");
-	if (isLocal) {
-		console.log(videoPub, videoPub?.track);
-	}
 
 	if (videoPub && videoPub.track) {
+		if (isLocal && !publishingVideo) {
+			return <></>;
+		}
 		return (
 			<VideoRenderer
 				key={videoPub.trackSid}

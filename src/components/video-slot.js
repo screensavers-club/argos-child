@@ -1,7 +1,12 @@
 import styled from "styled-components";
 import SlotParticipant from "./video-slot-participant";
 
-export default function VideoSlot({ slot, participants, context }) {
+export default function VideoSlot({
+	slot,
+	participants,
+	context,
+	publishingVideo,
+}) {
 	const nickname = slot.participant?.nickname;
 	const isLocal = nickname === context.nickname;
 	const participant = participants.find((p) => {
@@ -18,7 +23,11 @@ export default function VideoSlot({ slot, participants, context }) {
 			}}
 		>
 			{participant && (
-				<SlotParticipant participant={participant} isLocal={isLocal} />
+				<SlotParticipant
+					publishingVideo={publishingVideo}
+					participant={participant}
+					isLocal={isLocal}
+				/>
 			)}
 		</Slot>
 	);

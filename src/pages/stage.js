@@ -39,15 +39,9 @@ export default function Stage({ send, context, state, tabs }) {
 	const onboardModalRef = useRef();
 
 	function updateSubscriptions(participants) {
-		console.log("updating subscriptions");
 		getLayoutState(room?.name, context.nickname).then(({ data }) => {
 			const layout = data.layout;
 			setVideoLayout(layout);
-
-			console.log(
-				"updating subscriptions 1/2",
-				layout?.slots?.map((slot) => slot.participant?.nickname)
-			);
 			participants.forEach((participant) => {
 				let _nickname = JSON.parse(participant.metadata || "{}")?.nickname;
 				participant.videoTracks.forEach((track) => {
@@ -55,7 +49,6 @@ export default function Stage({ send, context, state, tabs }) {
 						let subscribed = !!layout.slots.find(
 							(slot) => slot.participant?.nickname === _nickname
 						);
-						console.log("subscribe: ", subscribed, _nickname);
 						if (typeof track.setEnabled === "function") {
 							track.setEnabled(subscribed);
 						}
@@ -176,6 +169,7 @@ export default function Stage({ send, context, state, tabs }) {
 				) : (
 					videoLayout?.slots?.map((slot, i) => (
 						<VideoSlot
+							publishingVideo={publishingVideo}
 							context={context}
 							slot={slot}
 							participants={participants}
@@ -248,7 +242,6 @@ export default function Stage({ send, context, state, tabs }) {
 									Array.from(
 										room.localParticipant.videoTracks,
 										([name, value]) => {
-											console.log(value);
 											return value.track;
 										}
 									)
