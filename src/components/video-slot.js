@@ -29,6 +29,7 @@ export default function VideoSlot({
 					isLocal={isLocal}
 				/>
 			)}
+			<label className="nickname">{nickname}</label>
 		</Slot>
 	);
 }
@@ -46,6 +47,15 @@ const Slot = styled.div`
 		width: 100%;
 		height: 100%;
 		position: absolute;
+		z-index: 2;
 		object-fit: cover;
+		transform: scaleX(-1);
+	}
+
+	label {
+		position: absolute;
+		z-index: 3;
+		color: #fff;
+		background: rgba(0, 0, 3, 0.2);
 	}
 `;

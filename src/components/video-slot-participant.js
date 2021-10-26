@@ -6,7 +6,6 @@ export default function SlotParticipant({
 	isLocal,
 }) {
 	let { publications } = useParticipant(participant);
-	let nickname = JSON.parse(participant.metadata || "{}")?.nickname;
 	let videoPub = publications.find((pub) => pub.kind === "video");
 
 	if (videoPub && videoPub.track) {
@@ -17,12 +16,12 @@ export default function SlotParticipant({
 			<VideoRenderer
 				key={videoPub.trackSid}
 				track={videoPub.track}
-				isLocal={isLocal}
+				// isLocal={isLocal}
 			/>
 		);
 	} else {
 		return <></>;
 	}
 
-	// return <>{nickname}</>;
+	// return <>{nickname}</>;}
 }

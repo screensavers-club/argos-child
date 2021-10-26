@@ -463,7 +463,7 @@ const StageDiv = styled.div`
 		top: 50%;
 		transform: translate(0, -50%);
 		border-radius: 50px;
-		z-index: 1;
+		z-index: 5;
 
 		span.hamburger {
 			border-radius: 50px;
