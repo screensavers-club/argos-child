@@ -14,7 +14,7 @@ import argosChildMachine from "./argos-child-machine.js";
 
 import _ from "lodash";
 
-if (process.env.NODE_ENV === "development") {
+if (process.env.NODE_ENV === "development" && false) {
 	inspect({
 		iframe: false, // open in new window
 	});

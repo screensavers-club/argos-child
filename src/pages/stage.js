@@ -236,6 +236,7 @@ export default function Stage({ send, context, state, tabs }) {
 	const handleEsc = (e) => {
 		if (e.key === "Escape") {
 			setExiting(false);
+			setOnboard("inactive");
 		} else return;
 	};
 
