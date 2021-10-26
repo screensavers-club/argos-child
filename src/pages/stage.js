@@ -189,7 +189,7 @@ export default function Stage({ send, context, state, tabs }) {
 							context={context}
 							slot={slot}
 							participants={participants}
-							key={`${videoLayout?.layout}_slot-${i}_${slot.participant?.nickname}_${forceRender}`}
+							key={`${videoLayout?.layout}_slot-${i}_${slot.participant?.nickname}`}
 						/>
 					))
 				)}
