@@ -535,6 +535,8 @@ const StageDiv = styled.div`
 			font-size: 14px;
 			font-weight: 500;
 			box-shadow: 0 4px 4px rgba(0, 0, 0, 0.2);
+			z-index: 20;
+
 			button {
 				margin: 0 10px;
 			}
