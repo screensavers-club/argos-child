@@ -1,23 +1,404 @@
+import axios from "axios";
 import styled from "styled-components";
 import { useRoom } from "livekit-react";
-import Key from "../components/keys";
 import {
 	createLocalAudioTrack,
 	createLocalVideoTrack,
 	RoomEvent,
 	DataPacket_Kind,
+	VideoPresets,
 } from "livekit-client";
 import { useEffect, useRef, useState } from "react";
 import { Microphone, Exit, Film, Hamburger, Undo } from "react-ikonate";
+import Key from "../components/keys";
 import Button from "../components/button";
-import axios from "axios";
+import VideoSlot from "../components/video-slot";
+
+function getLayoutState(room, nickname) {
+	return axios.get(
+		`${process.env.REACT_APP_PEER_SERVER}/${room}/${nickname}/layout`
+	);
+}
+
+export default function Stage({ send, context, state, tabs }) {
+	const { connect, room, participants, audioTracks } = useRoom();
+	let [drawerActive, setDrawerActive] = useState(true);
+
+	const encoder = new TextEncoder();
+	const decoder = new TextDecoder();
+
+	const [exiting, setExiting] = useState(false);
+	const [onboard, setOnboard] = useState("active");
+	const [videoLayout, setVideoLayout] = useState([]);
+	const [forceRender, setForceRender] = useState(false);
+
+	const [publishingAudio, setPublishingAudio] = useState(false);
+	const [publishingVideo, setPublishingVideo] = useState(false);
+
+	const exitingModalRef = useRef();
+	const onboardModalRef = useRef();
+
+	function updateSubscriptions(participants) {
+		console.log("updating subscriptions");
+		getLayoutState(room?.name, context.nickname).then(({ data }) => {
+			const layout = data.layout;
+			setVideoLayout(layout);
+
+			console.log(
+				"updating subscriptions 1/2",
+				layout?.slots?.map((slot) => slot.participant?.nickname)
+			);
+			participants.forEach((participant) => {
+				let _nickname = JSON.parse(participant.metadata || "{}")?.nickname;
+				participant.videoTracks.forEach((track) => {
+					if (layout && layout.slots) {
+						let subscribed = !!layout.slots.find(
+							(slot) => slot.participant?.nickname === _nickname
+						);
+						console.log("subscribe: ", subscribed, _nickname);
+						if (typeof track.setEnabled === "function") {
+							track.setEnabled(subscribed);
+						}
+					} else {
+						if (typeof track.setEnabled === "function") {
+							track.setEnabled(false);
+						}
+					}
+				});
+			});
+			setForceRender(!forceRender);
+		});
+	}
+
+	useEffect(() => {
+		// enable or disable participants
+		if (!room || !room.name || !context.nickname) {
+			return;
+		}
+		updateSubscriptions(participants);
+	}, [room, participants, context]);
+
+	useEffect(() => {
+		document.addEventListener("mousedown", handleClick);
+		document.addEventListener("keyup", handleEsc);
+		document.addEventListener("mousedown", handleOnboardClick);
+		return () => {
+			document.removeEventListener("mousedown", handleClick);
+			document.removeEventListener("mousedown", handleOnboardClick);
+			document.removeEventListener("keyup", handleEsc);
+		};
+	}, []);
+
+	const handleOnboardClick = (e) => {
+		if (onboardModalRef.current.contains(e.target)) {
+			return;
+		}
+		setOnboard("inactive");
+	};
+
+	const handleClick = (e) => {
+		if (exitingModalRef.current.contains(e.target)) {
+			return;
+		}
+		setExiting(false);
+	};
+
+	const handleEsc = (e) => {
+		if (e.key === "Escape") {
+			setExiting(false);
+			setOnboard("inactive");
+		} else return;
+	};
+
+	function sendPong(recipient) {
+		if (room) {
+			const strData = JSON.stringify({
+				type: "PONG",
+			});
+			const data = encoder.encode(strData);
+			room.localParticipant.publishData(data, DataPacket_Kind.RELIABLE, [
+				recipient,
+			]);
+		}
+	}
+
+	useEffect(() => {
+		connect(process.env.REACT_APP_LIVEKIT_SERVER, context.token, {
+			// autoSubscribe: false,
+		}).then(() => {
+			axios.post(
+				`${process.env.REACT_APP_PEER_SERVER}/child/participant/set-nickname`,
+				{
+					identity: context.identity,
+					room: context.room.name,
+					nickname: context.nickname,
+				}
+			);
+		});
+		return () => {
+			if (room && typeof room.disconnect === "function") {
+				room.disconnect();
+			}
+		};
+	}, []);
+
+	useEffect(() => {
+		if (room) {
+			room.on(RoomEvent.DataReceived, (payload, participant) => {
+				const payloadStr = decoder.decode(payload);
+				const payloadObj = JSON.parse(payloadStr);
+				const requesterSid = participant.sid;
+
+				if (payloadObj.action === "PING") {
+					sendPong(requesterSid);
+				}
+
+				if (payloadObj.action === "LAYOUT") {
+					updateSubscriptions(participants);
+				}
+
+				if (payloadObj.action === "MIX") {
+					// sendPong(requesterSid);
+				}
+			});
+
+			return () => {
+				room.removeAllListeners(RoomEvent.DataReceived);
+			};
+		}
+	}, [room, context, participants]);
+
+	return (
+		<StageDiv drawerActive={drawerActive} onboard={onboard}>
+			<VideoGrid>
+				{videoLayout?.layout === "Default" ? (
+					<></>
+				) : (
+					videoLayout?.slots?.map((slot, i) => (
+						<VideoSlot
+							context={context}
+							slot={slot}
+							participants={participants}
+							key={`${videoLayout?.layout}_slot-${i}_${slot.participant?.nickname}_${forceRender}`}
+						/>
+					))
+				)}
+			</VideoGrid>
+
+			<div className="streamTabs">
+				<div className="onboard" ref={onboardModalRef}>
+					<div>Start by switching your camera and mic</div>
+					<div className="triangle" />
+				</div>
+
+				{[
+					{
+						tab: "mic",
+						tabActive: publishingAudio,
+						icon: publishingAudio ? (
+							<Microphone />
+						) : (
+							<>
+								<span></span>
+								<Microphone />
+							</>
+						),
+						onClick: async () => {
+							if (publishingAudio) {
+								room.localParticipant.unpublishTracks(
+									Array.from(
+										room.localParticipant.audioTracks,
+										([name, value]) => {
+											return value.track;
+										}
+									)
+								);
+								setPublishingAudio(false);
+							} else {
+								let track = await createLocalAudioTrack({
+									echoCancellation: false,
+									noiseSuppression: false,
+								});
+
+								if (track) {
+									room.localParticipant
+										.publishTrack(track)
+										.then(() => {
+											setPublishingAudio(true);
+										})
+										.catch((err) => console.log(err));
+								}
+							}
+						},
+					},
+					{
+						tab: "video",
+						tabActive: publishingVideo,
+						icon: publishingVideo ? (
+							<Film />
+						) : (
+							<>
+								<span></span>
+								<Film />
+							</>
+						),
+						onClick: async () => {
+							if (publishingVideo) {
+								room.localParticipant.unpublishTracks(
+									Array.from(
+										room.localParticipant.videoTracks,
+										([name, value]) => {
+											console.log(value);
+											return value.track;
+										}
+									)
+								);
+								setPublishingVideo(false);
+							} else {
+								let track = await createLocalVideoTrack({
+									facingMode: { ideal: "user" },
+									resolution: VideoPresets.hd,
+								});
+
+								if (track) {
+									room.localParticipant
+										.publishTrack(track)
+										.then((track) => {
+											setPublishingVideo(true);
+										})
+										.catch((err) => console.log(err));
+								}
+							}
+						},
+					},
+					{
+						tab: "end",
+						icon: <Exit />,
+						onClick: () => {
+							setExiting(true);
+						},
+					},
+				].map(function ({ tab, icon, onClick, tabActive }, i) {
+					return (
+						<Key
+							key={`key_${tab}`}
+							variant="streamTabs"
+							type={tab === "end" ? "cancel" : ""}
+							tabActive={tabActive}
+							k={icon}
+							indicator={tab === "end" ? false : true}
+							onClick={onClick}
+							className={`${tab} ${tabActive === true ? "activated" : ""}`}
+						/>
+					);
+				})}
+
+				<span
+					className="hamburger"
+					onClick={() => {
+						drawerActive === false
+							? setDrawerActive(true)
+							: setDrawerActive(false);
+					}}
+				>
+					<Hamburger />
+				</span>
+				<svg
+					width="203"
+					height="292"
+					viewBox="0 0 203 292"
+					fill="none"
+					xmlns="http://www.w3.org/2000/svg"
+				>
+					<g filter="url(#filter0_d)">
+						<path
+							fill-rule="evenodd"
+							clip-rule="evenodd"
+							d="M91 0C63.3857 0 41 22.3857 41 50V105C20.5654 105 4 121.565 4 142C4 162.435 20.5654 179 41 179V234C41 261.614 63.3857 284 91 284H199V0H91Z"
+							fill="#434349"
+						/>
+					</g>
+					<defs>
+						<filter
+							id="filter0_d"
+							x="0"
+							y="0"
+							width="203"
+							height="292"
+							filterUnits="userSpaceOnUse"
+							colorInterpolationFilters="sRGB"
+						>
+							<feFlood floodOpacity="0" result="BackgroundImageFix" />
+							<feColorMatrix
+								in="SourceAlpha"
+								type="matrix"
+								values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+								result="hardAlpha"
+							/>
+							<feOffset dy="4" />
+							<feGaussianBlur stdDeviation="2" />
+							<feComposite in2="hardAlpha" operator="out" />
+							<feColorMatrix
+								type="matrix"
+								values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0"
+							/>
+							<feBlend
+								mode="normal"
+								in2="BackgroundImageFix"
+								result="effect1_dropShadow"
+							/>
+							<feBlend
+								mode="normal"
+								in="SourceGraphic"
+								in2="effect1_dropShadow"
+								result="shape"
+							/>
+						</filter>
+					</defs>
+				</svg>
+			</div>
+
+			<div
+				className={`exitingModal ${exiting === true ? "active" : ""}`}
+				ref={exitingModalRef}
+			>
+				Are you sure you want to exit?
+				<div>
+					<Button
+						icon={<Undo />}
+						className="no"
+						variant="navigation"
+						onClick={() => {
+							setExiting(false);
+						}}
+					>
+						Back
+					</Button>
+					<Button
+						icon={<Exit />}
+						className="yes"
+						variant="navigation"
+						type="secondary"
+						onClick={() => {
+							room?.disconnect();
+							send("DISCONNECT");
+							setExiting(false);
+						}}
+					>
+						Exit
+					</Button>
+				</div>
+			</div>
+		</StageDiv>
+	);
+}
 
 const StageDiv = styled.div`
 	position: fixed;
 	display: block;
 	width: 100%;
 	height: calc(100%-35px);
-	background: #252529;
+	background: #111119;
 
 	div.streamTabs {
 		> svg {
@@ -127,35 +508,33 @@ const StageDiv = styled.div`
 
 	div.exitingModal {
 		display: none;
-	}
 
-	div.active {
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		align-items: center;
-		background: #333;
-		color: white;
-		position: fixed;
-		width: 350px;
-		height: 170px;
-		left: 50%;
-		top: 50%;
-		transform: translate(-50%, -50%);
-		border-radius: 25px;
-		font-size: 14px;
-		font-weight: 500;
-		box-shadow: 0 4px 4px rgba(0, 0, 0, 0.2);
-
-		button {
-			margin: 0 10px;
-		}
-
-		> div {
-			width: 100%;
-			margin-top: 25px;
-			display: inline-flex;
+		&.active {
+			display: flex;
+			flex-direction: column;
 			justify-content: center;
+			align-items: center;
+			background: #333;
+			color: white;
+			position: fixed;
+			width: 350px;
+			height: 170px;
+			left: 50%;
+			top: 50%;
+			transform: translate(-50%, -50%);
+			border-radius: 25px;
+			font-size: 14px;
+			font-weight: 500;
+			box-shadow: 0 4px 4px rgba(0, 0, 0, 0.2);
+			button {
+				margin: 0 10px;
+			}
+			> div {
+				width: 100%;
+				margin-top: 25px;
+				display: inline-flex;
+				justify-content: center;
+			}
 		}
 	}
 `;
@@ -175,487 +554,4 @@ const VideoGrid = styled.div`
 		left: 50%;
 		transform: translate(-50%, -50%);
 	}
-
-	.videoSlot {
-		position: absolute;
-		background: #252529;
-
-		video {
-			background: #252529;
-			width: 100%;
-			height: 100%;
-			position: absolute;
-			object-fit: cover;
-		}
-	}
 `;
-
-export default function Stage({ send, context, state, tabs }) {
-	const { connect, room, participants, audioTracks } = useRoom();
-	let [drawerActive, setDrawerActive] = useState(true);
-
-	const encoder = new TextEncoder();
-	const decoder = new TextDecoder();
-	const [active, setActive] = useState([false, false]);
-	const [exiting, setExiting] = useState(false);
-	const [onboard, setOnboard] = useState("active");
-	const [renderState, setRenderState] = useState(0);
-	const [availableVideoTracks, setAvailableVideoTracks] = useState([]);
-	const localAudioTrackRef = useRef(null);
-	const localVideoTrackRef = useRef(null);
-	const audioMonitorDomRef = useRef();
-	const exitingModalRef = useRef();
-
-	useEffect(() => {
-		document.addEventListener("mousedown", handleClick);
-		document.addEventListener("keyup", handleEsc);
-		document.addEventListener("mousedown", handleOnboardClick);
-		return () => {
-			document.removeEventListener("mousedown", handleClick);
-			document.removeEventListener("mousedown", handleOnboardClick);
-			document.removeEventListener("keyup", handleEsc);
-		};
-	}, []);
-
-	const onboardModalRef = useRef();
-
-	const handleOnboardClick = (e) => {
-		if (onboardModalRef.current.contains(e.target)) {
-			return;
-		}
-		setOnboard("inactive");
-	};
-
-	const handleClick = (e) => {
-		if (exitingModalRef.current.contains(e.target)) {
-			return;
-		}
-		setExiting(false);
-	};
-
-	const handleEsc = (e) => {
-		if (e.key === "Escape") {
-			setExiting(false);
-			setOnboard("inactive");
-		} else return;
-	};
-
-	function sendCurrentLayout(recipient) {
-		if (room) {
-			const strData = JSON.stringify({
-				current_layout: context.current_layout,
-			});
-			const data = encoder.encode(strData);
-			room.localParticipant.publishData(data, DataPacket_Kind.RELIABLE, [
-				recipient,
-			]);
-		}
-	}
-
-	function sendCueMixState(recipient) {
-		if (room) {
-			const strData = JSON.stringify({
-				cue_mix_state: context.cue_mix_state,
-			});
-			const data = encoder.encode(strData);
-			room.localParticipant.publishData(data, DataPacket_Kind.RELIABLE, [
-				recipient,
-			]);
-		}
-	}
-
-	function sendPong(recipient) {
-		if (room) {
-			const strData = JSON.stringify({
-				type: "PONG",
-			});
-			const data = encoder.encode(strData);
-			room.localParticipant.publishData(data, DataPacket_Kind.RELIABLE, [
-				recipient,
-			]);
-		}
-	}
-
-	useEffect(() => {
-		let _tracks = participants.map((p) => {
-			let track = null;
-			p?.videoTracks.forEach((thisTrack) => {
-				if (!track) {
-					track = thisTrack;
-				}
-			});
-			return track;
-		});
-		setAvailableVideoTracks(_tracks);
-	}, [participants, room, renderState]);
-
-	useEffect(() => {
-		if (room) {
-			room.removeAllListeners(RoomEvent.DataReceived);
-			room.on(RoomEvent.DataReceived, (payload, participant) => {
-				console.log({ event: "DataReceived", payload, participant });
-				const payloadStr = decoder.decode(payload);
-				const payloadObj = JSON.parse(payloadStr);
-
-				const requesterSid = participant.sid;
-
-				if (payloadObj.action === "REQUEST_CURRENT_LAYOUT") {
-					sendCurrentLayout(requesterSid);
-				}
-
-				if (payloadObj.action === "UPDATE_LAYOUT") {
-					send("UPDATE_LAYOUT", { layout: payloadObj.layout });
-				}
-
-				if (payloadObj.action === "GET_CUE_MIX_STATE") {
-					sendCueMixState(requesterSid);
-				}
-
-				if (payloadObj.action === "TOGGLE_CUE_MIX_TRACK") {
-					send("TOGGLE_CUE_MIX_TRACK", { ...payloadObj });
-				}
-
-				if (payloadObj.action === "PING") {
-					sendPong(requesterSid);
-				}
-			});
-		}
-	}, [room, context]);
-
-	useEffect(() => {
-		participants
-			.filter((p) => JSON.parse(p.metadata)?.type === "PARENT")
-			.forEach((p) => {
-				sendCueMixState(p.sid);
-			});
-	}, [context.cue_mix_state]);
-
-	useEffect(() => {
-		Array.from(audioMonitorDomRef.current.children).forEach((elem) => {
-			elem.remove();
-		});
-
-		audioTracks.forEach((track) => {
-			let trackSid = track.sid;
-			let _p = participants.find((participant) => {
-				return participant.getTracks().find((_track) => {
-					return _track.audioTrack && _track.audioTrack.sid === trackSid;
-				});
-			});
-
-			if (_p?.identity === context.identity) {
-				return;
-			}
-
-			if (
-				context.cue_mix_state.source === "peers" &&
-				JSON.parse(_p?.metadata || "{}")?.type === "CHILD" &&
-				context.cue_mix_state.mute.indexOf(_p?.identity) > -1
-			) {
-				return;
-			}
-
-			if (
-				context.cue_mix_state.source === "peers" &&
-				JSON.parse(_p?.metadata || "{}")?.type === "PARENT"
-			) {
-				return;
-			}
-
-			let a = track?.attach();
-			a.setAttribute("identity", _p?.identity);
-			a.setAttribute("nickname", JSON.parse(_p?.metadata || "false")?.nickname);
-			audioMonitorDomRef.current.append(a);
-		});
-	}, [audioTracks, participants, context.cue_mix_state]);
-
-	useEffect(() => {
-		connect(process.env.REACT_APP_LIVEKIT_SERVER, context.token).then(() => {
-			axios.post(
-				`${process.env.REACT_APP_PEER_SERVER}/child/participant/set-nickname`,
-				{
-					identity: context.identity,
-					room: context.room.name,
-					nickname: context.nickname,
-				}
-			);
-		});
-		return () => {
-			room?.disconnect();
-		};
-	}, []);
-
-	return (
-		<StageDiv drawerActive={drawerActive} onboard={onboard}>
-			<VideoGrid>
-				{context.current_layout.slots.map((slot, i) => {
-					return (
-						<VideoSlot
-							key={`slot_${i}_${slot?.track}`}
-							slot={slot}
-							availableVideoTracks={availableVideoTracks}
-						/>
-					);
-				})}
-			</VideoGrid>
-			<div ref={audioMonitorDomRef}></div>
-
-			<div className="streamTabs">
-				<div className="onboard" ref={onboardModalRef}>
-					<div>Start by switching your video and audio on</div>
-					<div className="triangle" />
-				</div>
-				{(tabs = [
-					{
-						tab: "mic",
-						tabActive: active[0],
-						icon: !localAudioTrackRef.current ? (
-							<Microphone />
-						) : (
-							<>
-								<span></span>
-								<Microphone />
-							</>
-						),
-						onClick: async () => {
-							let _active = [...active];
-							_active[0] = !active[0];
-							setActive(_active);
-							setOnboard("inactive");
-
-							if (localAudioTrackRef.current) {
-								room.localParticipant.unpublishTrack(
-									localAudioTrackRef.current
-								);
-								localAudioTrackRef.current = null;
-							} else {
-								localAudioTrackRef.current = await createLocalAudioTrack({
-									echoCancellation: false,
-									noiseSuppression: false,
-								}).catch((err) => {
-									alert(err);
-								});
-								if (localAudioTrackRef.current) {
-									room.localParticipant.publishTrack(
-										localAudioTrackRef.current
-									);
-								}
-							}
-							setRenderState(renderState + 1);
-						},
-					},
-					{
-						tab: "video",
-						tabActive: active[1],
-						icon: !localVideoTrackRef.current ? (
-							<Film />
-						) : (
-							<>
-								<span></span>
-								<Film />
-							</>
-						),
-						onClick: async () => {
-							let _active = [...active];
-							_active[1] = !active[1];
-							setActive(_active);
-							setOnboard("inactive");
-
-							if (localVideoTrackRef.current) {
-								room.localParticipant.unpublishTrack(
-									localVideoTrackRef.current
-								);
-								localVideoTrackRef.current = null;
-							} else {
-								localVideoTrackRef.current = await createLocalVideoTrack({
-									width: { min: 1280, ideal: 1280, max: 1920 },
-									height: { min: 720, ideal: 720, max: 1080 },
-									frameRate: 30,
-									facingMode: "environment",
-								}).catch((err) => {
-									console.log(err);
-									alert("Error");
-								});
-								if (localVideoTrackRef.current) {
-									room.localParticipant
-										.publishTrack(localVideoTrackRef.current)
-										.then((track) => {
-											if (
-												!context.current_layout.slots.reduce((p, c) => {
-													return p || c.track;
-												}, null)
-											) {
-												send("INIT_LAYOUT_WITH_SELF", {
-													sid: track.trackSid,
-												});
-											}
-											setRenderState(renderState + 1);
-										});
-								}
-							}
-						},
-					},
-					{
-						tab: "end",
-						icon: <Exit />,
-						onClick: () => {
-							setExiting(true);
-						},
-					},
-				]).map(function ({ tab, icon, onClick, tabActive }, i) {
-					let key = `key_${i}`;
-					return (
-						<Key
-							key={key}
-							variant="streamTabs"
-							type={tab === "end" ? "cancel" : ""}
-							tabActive={tabActive}
-							k={icon}
-							indicator={tab === "end" ? false : true}
-							onClick={() => {
-								onClick();
-							}}
-							className={`${tab} ${tabActive === true ? "activated" : ""}`}
-						/>
-					);
-				})}
-
-				<span
-					className="hamburger"
-					onClick={() => {
-						drawerActive === false
-							? setDrawerActive(true)
-							: setDrawerActive(false);
-					}}
-				>
-					<Hamburger />
-				</span>
-				<svg
-					width="203"
-					height="292"
-					viewBox="0 0 203 292"
-					fill="none"
-					xmlns="http://www.w3.org/2000/svg"
-				>
-					<g filter="url(#filter0_d)">
-						<path
-							fill-rule="evenodd"
-							clip-rule="evenodd"
-							d="M91 0C63.3857 0 41 22.3857 41 50V105C20.5654 105 4 121.565 4 142C4 162.435 20.5654 179 41 179V234C41 261.614 63.3857 284 91 284H199V0H91Z"
-							fill="#434349"
-						/>
-					</g>
-					<defs>
-						<filter
-							id="filter0_d"
-							x="0"
-							y="0"
-							width="203"
-							height="292"
-							filterUnits="userSpaceOnUse"
-							color-interpolation-filters="sRGB"
-						>
-							<feFlood floodOpacity="0" result="BackgroundImageFix" />
-							<feColorMatrix
-								in="SourceAlpha"
-								type="matrix"
-								values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
-								result="hardAlpha"
-							/>
-							<feOffset dy="4" />
-							<feGaussianBlur stdDeviation="2" />
-							<feComposite in2="hardAlpha" operator="out" />
-							<feColorMatrix
-								type="matrix"
-								values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0"
-							/>
-							<feBlend
-								mode="normal"
-								in2="BackgroundImageFix"
-								result="effect1_dropShadow"
-							/>
-							<feBlend
-								mode="normal"
-								in="SourceGraphic"
-								in2="effect1_dropShadow"
-								result="shape"
-							/>
-						</filter>
-					</defs>
-				</svg>
-			</div>
-
-			<div
-				className={`exitingModal ${exiting === true ? "active" : ""}`}
-				ref={exitingModalRef}
-			>
-				Are you sure you want to exit?
-				<div>
-					<Button
-						icon={<Undo />}
-						className="no"
-						variant="navigation"
-						onClick={() => {
-							setExiting(false);
-						}}
-					>
-						Back
-					</Button>
-					<Button
-						icon={<Exit />}
-						className="yes"
-						variant="navigation"
-						type="secondary"
-						onClick={() => {
-							room?.disconnect();
-							send("DISCONNECT");
-							setExiting(false);
-						}}
-					>
-						Exit
-					</Button>
-				</div>
-			</div>
-		</StageDiv>
-	);
-}
-
-function VideoSlot({ slot, availableVideoTracks }) {
-	const videoRef = useRef(null);
-
-	const trackSid = slot?.track;
-
-	useEffect(() => {
-		let track = availableVideoTracks.find((t) => {
-			return t?.track?.sid === trackSid;
-		});
-		if (videoRef.current && track?.track) {
-			let el = videoRef.current;
-			if (typeof track.track.attach === "function") {
-				track.track.attach(el);
-				console.log("x");
-			}
-			el.muted = true;
-			el.play();
-		}
-	}, [trackSid, availableVideoTracks]);
-	return (
-		<div
-			className="videoSlot"
-			style={{
-				width: `${slot.size[0]}%`,
-				height: `${slot.size[1]}%`,
-				top: `${slot.position[1]}%`,
-				left: `${slot.position[0]}%`,
-			}}
-		>
-			<video
-				ref={videoRef}
-				muted
-				autoPlay
-				style={{ transform: "scaleX(-1)" }}
-				key={trackSid}
-			/>
-		</div>
-	);
-}

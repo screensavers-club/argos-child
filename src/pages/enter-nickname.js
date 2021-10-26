@@ -78,7 +78,7 @@ const Page = styled.div`
 			input,
 			select {
 				padding-left: 15px;
-				font-family: "Noto Sans", sans-serif;
+				font-family: "Rubik", sans-serif;
 				font-style: normal;
 				font-weight: normal;
 				background: none;

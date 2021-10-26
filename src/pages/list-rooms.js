@@ -85,7 +85,7 @@ const StyledPage = styled.div`
 
 			h3 {
 				margin: 0;
-				font-family: Noto Sans;
+				font-family: Rubik;
 				font-style: normal;
 				font-weight: normal;
 				font-size: 36px;

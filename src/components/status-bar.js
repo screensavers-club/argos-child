@@ -35,7 +35,7 @@ export default function StatusBar({ context, room, version }) {
 }
 
 const Bar = styled.div`
-	font-family: "Noto Sans";
+	font-family: "Rubik";
 	font-size: 10px;
 	text-transform: uppercase;
 	font-weight: 600;
