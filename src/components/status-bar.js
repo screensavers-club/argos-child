@@ -27,6 +27,11 @@ export default function StatusBar({ context, room, version }) {
 				<div className="roomColour" />
 				{room ? room : "not connected"}
 			</div>
+
+			<div className="center">
+				<img src="/ximi-logo.svg" alt="XIMI logo" />
+			</div>
+
 			<div className="right">
 				<Folder /> v{version} {renderTime()}
 			</div>
@@ -48,6 +53,7 @@ const Bar = styled.div`
 	padding: 4px 8px;
 	box-sizing: border-box;
 	height: 35px;
+	position: relative;
 
 	div.roomColour {
 		background: ${(p) =>
@@ -71,6 +77,17 @@ const Bar = styled.div`
 		display: flex;
 		align-items: center;
 		justify-content: flex-end;
+	}
+
+	div.center {
+		position: absolute;
+		left: 50%;
+		top: 55%;
+		transform: translate(-50%, -50%);
+
+		img {
+			width: 50px;
+		}
 	}
 
 	svg {
