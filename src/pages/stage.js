@@ -265,7 +265,7 @@ export default function Stage({ send, context, state, tabs }) {
 								setPublishingVideo(false);
 							} else {
 								let track = await createLocalVideoTrack({
-									facingMode: { ideal: "user" },
+									// facingMode: { ideal: "user" },
 									resolution: VideoPresets.hd,
 								});
 
