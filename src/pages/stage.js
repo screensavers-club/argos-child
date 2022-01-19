@@ -47,7 +47,6 @@ export default function Stage({ send, context, state, tabs }) {
 				`${process.env.REACT_APP_PEER_SERVER}/${room.name}/${context.nickname}/mix`
 			)
 			.then(({ data }) => {
-				console.log(data.mix);
 				setMix(data.mix);
 			});
 	}
@@ -176,12 +175,44 @@ export default function Stage({ send, context, state, tabs }) {
 		}
 	}, [room, context, participants]);
 
+	console.log(videoLayout);
+
 	return (
 		<StageDiv drawerActive={drawerActive} onboard={onboard}>
 			<AudioMix mix={mix} participants={participants} context={context} />
 			<VideoGrid>
-				{videoLayout?.layout === "Default" ? (
-					<></>
+				{videoLayout?.layout === "Default" ||
+				videoLayout?.layout === undefined ? (
+					<VideoDefaultGrid
+						gridSize={Math.ceil(
+							Math.sqrt(
+								participants.filter(
+									(p) => JSON.parse(p.metadata)?.type === "CHILD"
+								).length
+							)
+						)}
+					>
+						{participants
+							.filter((p) => JSON.parse(p.metadata)?.type === "CHILD")
+							.map((participant) => ({
+								participant: {
+									nickname: JSON.parse(participant.metadata || "{}")?.nickname,
+								},
+							}))
+							.map((slot, i) => {
+								return (
+									<VideoSlot
+										publishingVideo={publishingVideo}
+										context={context}
+										slot={slot}
+										participants={participants}
+										key={`${videoLayout?.layout || "default"}_slot-${i}_${
+											slot.participant?.nickname
+										}`}
+									/>
+								);
+							})}
+					</VideoDefaultGrid>
 				) : (
 					videoLayout?.slots?.map((slot, i) => (
 						<VideoSlot
@@ -564,5 +595,21 @@ const VideoGrid = styled.div`
 		top: 50%;
 		left: 50%;
 		transform: translate(-50%, -50%);
+	}
+`;
+
+const VideoDefaultGrid = styled.div`
+	display: flex;
+	flex-wrap: wrap;
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	align-items: stretch;
+
+	> div {
+		width: ${(p) => `${100 / Math.ceil(Math.sqrt(p.gridSize))}`}%;
+		position: relative;
 	}
 `;

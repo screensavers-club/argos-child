@@ -15,12 +15,16 @@ export default function VideoSlot({
 
 	return (
 		<Slot
-			style={{
-				width: `${slot.size[0]}%`,
-				height: `${slot.size[1]}%`,
-				top: `${slot.position[1]}%`,
-				left: `${slot.position[0]}%`,
-			}}
+			style={
+				slot.size && slot.position
+					? {
+							width: `${slot.size[0]}%`,
+							height: `${slot.size[1]}%`,
+							top: `${slot.position[1]}%`,
+							left: `${slot.position[0]}%`,
+					  }
+					: {}
+			}
 		>
 			{participant && (
 				<SlotParticipant
