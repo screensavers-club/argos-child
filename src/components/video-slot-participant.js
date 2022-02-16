@@ -1,3 +1,4 @@
+import { VideoQuality } from "livekit-client";
 import { useParticipant, VideoRenderer } from "livekit-react";
 
 export default function SlotParticipant({
@@ -11,6 +12,9 @@ export default function SlotParticipant({
 	if (videoPub && videoPub.track) {
 		if (isLocal && !publishingVideo) {
 			return <></>;
+		}
+		if (typeof videoPub.setVideoQuality === "function") {
+			videoPub.setVideoQuality(VideoQuality.LOW);
 		}
 		return (
 			<VideoRenderer

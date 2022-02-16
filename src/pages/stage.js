@@ -184,8 +184,6 @@ export default function Stage({ send, context, state, tabs }) {
 		}
 	}, [room, context, participants]);
 
-	console.log(videoLayout);
-
 	return (
 		<StageDiv drawerActive={drawerActive} onboard={onboard}>
 			<AudioMix mix={mix} participants={participants} context={context} />
@@ -305,8 +303,7 @@ export default function Stage({ send, context, state, tabs }) {
 								setPublishingVideo(false);
 							} else {
 								let track = await createLocalVideoTrack({
-									// facingMode: { ideal: "user" },
-									resolution: VideoPresets.hd,
+									resolution: VideoPresets.vga,
 								});
 
 								if (track) {
