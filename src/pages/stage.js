@@ -7,6 +7,8 @@ import {
 	RoomEvent,
 	DataPacket_Kind,
 	VideoPresets,
+	Track,
+	VideoQuality,
 } from "livekit-client";
 import { useEffect, useRef, useState } from "react";
 import { Microphone, Exit, Film, Hamburger, Undo } from "react-ikonate";
@@ -40,6 +42,12 @@ export default function Stage({ send, context, state, tabs }) {
 
 	const exitingModalRef = useRef();
 	const onboardModalRef = useRef();
+
+	function handleTrackSubscribed(track, publication, participant) {
+		if (track.kind === Track.Kind.Video) {
+			publication.setVideoQuality(VideoQuality.LOW);
+		}
+	}
 
 	function updateMix() {
 		axios
@@ -132,7 +140,8 @@ export default function Stage({ send, context, state, tabs }) {
 	useEffect(() => {
 		connect(process.env.REACT_APP_LIVEKIT_SERVER, context.token, {
 			// autoSubscribe: false,
-		}).then(() => {
+		}).then((room) => {
+			room.on(RoomEvent.TrackSubscribed, handleTrackSubscribed);
 			axios.post(
 				`${process.env.REACT_APP_PEER_SERVER}/child/participant/set-nickname`,
 				{
@@ -302,7 +311,7 @@ export default function Stage({ send, context, state, tabs }) {
 
 								if (track) {
 									room.localParticipant
-										.publishTrack(track)
+										.publishTrack(track, { simulcast: true })
 										.then((track) => {
 											setPublishingVideo(true);
 										})
