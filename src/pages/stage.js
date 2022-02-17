@@ -44,9 +44,17 @@ export default function Stage({ send, context, state, tabs }) {
 	const onboardModalRef = useRef();
 
 	function handleTrackSubscribed(track, publication) {
+		console.log("handling track subscribe");
 		if (track.kind === Track.Kind.Video) {
-			publication.setVideoDimensions({ width: 480, height: 270 });
-			publication.setVideoQuality(VideoQuality.LOW);
+			if (typeof publication.setVideoDimensions === "function") {
+				console.log("set video dimensions");
+				publication.setVideoDimensions({ width: 480, height: 270 });
+			}
+
+			if (typeof publication.setVideoQuality === "function") {
+				console.log("set video quality");
+				publication.setVideoQuality(VideoQuality.LOW);
+			}
 		}
 	}
 

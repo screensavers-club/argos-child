@@ -12,6 +12,12 @@ export default function SlotParticipant({
 		if (isLocal && !publishingVideo) {
 			return <></>;
 		}
+		console.log({
+			sid: videoPub.trackSid,
+			track: videoPub.track,
+			isLocal,
+			nick: JSON.parse(participant.metadata || "{}")?.nickname,
+		});
 		return (
 			<VideoRenderer
 				key={videoPub.trackSid}
