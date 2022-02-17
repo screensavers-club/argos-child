@@ -53,7 +53,7 @@ export default function Stage({ send, context, state, tabs }) {
 
 			if (typeof publication.setVideoQuality === "function") {
 				console.log("set video quality");
-				publication.setVideoQuality(VideoQuality.LOW);
+				// publication.setVideoQuality(VideoQuality.LOW);
 			}
 		}
 	}
