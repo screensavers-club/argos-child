@@ -303,7 +303,7 @@ export default function Stage({ send, context, state, tabs }) {
 								setPublishingVideo(false);
 							} else {
 								let track = await createLocalVideoTrack({
-									resolution: VideoPresets.vga,
+									resolution: VideoPresets.hd,
 								});
 
 								if (track) {
