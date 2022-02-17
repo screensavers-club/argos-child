@@ -1,3 +1,4 @@
+import { useState } from "react";
 import styled from "styled-components";
 import SlotParticipant from "./video-slot-participant";
 
@@ -12,6 +13,7 @@ export default function VideoSlot({
 	const participant = participants.find((p) => {
 		return nickname === JSON.parse(p.metadata || "{}")?.nickname;
 	});
+	const [flip, setFlip] = useState(false);
 
 	return (
 		<Slot
@@ -25,6 +27,10 @@ export default function VideoSlot({
 					  }
 					: {}
 			}
+			flip={flip}
+			onClick={() => {
+				setFlip(!flip);
+			}}
 		>
 			{participant && (
 				<SlotParticipant
@@ -53,7 +59,7 @@ const Slot = styled.div`
 		position: absolute;
 		z-index: 2;
 		object-fit: cover;
-		transform: scaleX(-1);
+		transform: ${(p) => (p.flip ? "scaleX(1)" : "scaleX(-1)")};
 	}
 
 	label {
