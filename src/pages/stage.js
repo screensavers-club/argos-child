@@ -45,6 +45,7 @@ export default function Stage({ send, context, state, tabs }) {
 
 	function handleTrackSubscribed(track, publication) {
 		if (track.kind === Track.Kind.Video) {
+			publication.setVideoDimensions({ width: 480, height: 270 });
 			publication.setVideoQuality(VideoQuality.LOW);
 		}
 	}
