@@ -11,7 +11,7 @@ import {
 	VideoQuality,
 } from "livekit-client";
 import { useEffect, useRef, useState } from "react";
-import { Microphone, Exit, Film, Hamburger, Undo } from "react-ikonate";
+import { Microphone, Exit, Film, Hamburger, Undo, Chat } from "react-ikonate";
 import Key from "../components/keys";
 import Button from "../components/button";
 import VideoSlot from "../components/video-slot";
@@ -24,7 +24,7 @@ function getLayoutState(room, nickname) {
 }
 
 export default function Stage({ send, context, state, tabs }) {
-	const { connect, room, participants, audioTracks } = useRoom();
+	const { connect, room, participants } = useRoom();
 	let [drawerActive, setDrawerActive] = useState(true);
 
 	const encoder = new TextEncoder();
@@ -43,7 +43,7 @@ export default function Stage({ send, context, state, tabs }) {
 	const exitingModalRef = useRef();
 	const onboardModalRef = useRef();
 
-	function handleTrackSubscribed(track, publication, participant) {
+	function handleTrackSubscribed(track, publication) {
 		if (track.kind === Track.Kind.Video) {
 			publication.setVideoQuality(VideoQuality.LOW);
 		}
@@ -141,15 +141,18 @@ export default function Stage({ send, context, state, tabs }) {
 		connect(process.env.REACT_APP_LIVEKIT_SERVER, context.token, {
 			// autoSubscribe: false,
 		}).then((room) => {
-			room.on(RoomEvent.TrackSubscribed, handleTrackSubscribed);
-			axios.post(
-				`${process.env.REACT_APP_PEER_SERVER}/child/participant/set-nickname`,
-				{
-					identity: context.identity,
-					room: context.room.name,
-					nickname: context.nickname,
-				}
-			);
+			axios
+				.post(
+					`${process.env.REACT_APP_PEER_SERVER}/child/participant/set-nickname`,
+					{
+						identity: context.identity,
+						room: context.room.name,
+						nickname: context.nickname,
+					}
+				)
+				.then(() => {
+					room.on(RoomEvent.TrackSubscribed, handleTrackSubscribed);
+				});
 		});
 		return () => {
 			if (room && typeof room.disconnect === "function") {
@@ -317,6 +320,14 @@ export default function Stage({ send, context, state, tabs }) {
 							}
 						},
 					},
+
+					// {
+					// 	tab: "message",
+					// 	icon: <Chat />,
+					// 	onClick: () => {
+					// 		setExiting(true);
+					// 	},
+					// },
 					{
 						tab: "end",
 						icon: <Exit />,
