@@ -72,7 +72,11 @@ export default function Stage({ send, context, state, tabs }) {
 		const payload = encoder.encode(JSON.stringify(messageObj));
 
 		if (typeof room?.localParticipant?.publishData === "function") {
-			room.localParticipant.publishData(payload, DataPacket_Kind.RELIABLE);
+			room.localParticipant
+				.publishData(payload, DataPacket_Kind.RELIABLE)
+				.then(() => {
+					flashMessage({ sender: context.nickname, message: msg });
+				});
 		}
 
 		setMessage("");
@@ -203,7 +207,9 @@ export default function Stage({ send, context, state, tabs }) {
 	}
 
 	function flashMessage({ message, sender }) {
-		setMessageFlash({ message, sender });
+		if (message?.length > 0) {
+			setMessageFlash({ message, sender });
+		}
 	}
 
 	useEffect(() => {
