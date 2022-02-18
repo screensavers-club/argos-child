@@ -51,13 +51,44 @@ export default function Stage({ send, context, state, tabs }) {
 
 	const exitingModalRef = useRef();
 	const onboardModalRef = useRef();
+	const msgInputModalRef = useRef();
 
-	const [enteringMessage, setEnteringMessage] = useState(true);
+	const [enteringMessage, setEnteringMessage] = useState(false);
 	const [message, setMessage] = useState("");
 
+	const [messageFlash, setMessageFlash] = useState(null);
+	const messageFlashTimeout = useRef();
+
 	function handleMessageInput(msg) {
-		setMessage(msg.slice(0, 50));
+		setMessage(msg.slice(0, 50).toUpperCase());
 	}
+
+	function sendMessage(msg) {
+		const messageObj = {
+			message: msg,
+			sender: context.nickname,
+			action: "MESSAGE",
+		};
+		const payload = encoder.encode(JSON.stringify(messageObj));
+
+		if (typeof room?.localParticipant?.publishData === "function") {
+			room.localParticipant.publishData(payload, DataPacket_Kind.RELIABLE);
+		}
+
+		setMessage("");
+	}
+
+	useEffect(() => {
+		if (messageFlash === null) {
+			return;
+		}
+		if (messageFlashTimeout.current) {
+			window.clearTimeout(messageFlashTimeout.current);
+		}
+		messageFlashTimeout.current = window.setTimeout(() => {
+			setMessageFlash(null);
+		}, 5000);
+	}, [messageFlash]);
 
 	function handleTrackSubscribed(track, publication) {
 		console.log("handling track subscribe");
@@ -120,11 +151,13 @@ export default function Stage({ send, context, state, tabs }) {
 
 	useEffect(() => {
 		document.addEventListener("mousedown", handleClick);
-		document.addEventListener("keyup", handleEsc);
 		document.addEventListener("mousedown", handleOnboardClick);
+		document.addEventListener("mousedown", handleMessageInputClick);
+		document.addEventListener("keyup", handleEsc);
 		return () => {
 			document.removeEventListener("mousedown", handleClick);
 			document.removeEventListener("mousedown", handleOnboardClick);
+			document.removeEventListener("mousedown", handleMessageInputClick);
 			document.removeEventListener("keyup", handleEsc);
 		};
 	}, []);
@@ -141,6 +174,13 @@ export default function Stage({ send, context, state, tabs }) {
 			return;
 		}
 		setExiting(false);
+	};
+
+	const handleMessageInputClick = (e) => {
+		if (msgInputModalRef.current.contains(e.target)) {
+			return;
+		}
+		setEnteringMessage(false);
 	};
 
 	const handleEsc = (e) => {
@@ -160,6 +200,10 @@ export default function Stage({ send, context, state, tabs }) {
 				recipient,
 			]);
 		}
+	}
+
+	function flashMessage({ message, sender }) {
+		setMessageFlash({ message, sender });
 	}
 
 	useEffect(() => {
@@ -203,6 +247,10 @@ export default function Stage({ send, context, state, tabs }) {
 
 				if (payloadObj.action === "MIX") {
 					updateMix(participants);
+				}
+
+				if (payloadObj.action === "MESSAGE") {
+					flashMessage(payloadObj);
 				}
 			});
 
@@ -350,7 +398,7 @@ export default function Stage({ send, context, state, tabs }) {
 						tab: "message",
 						icon: <Chat />,
 						onClick: () => {
-							setExiting(true);
+							setEnteringMessage(true);
 						},
 					},
 					{
@@ -387,10 +435,11 @@ export default function Stage({ send, context, state, tabs }) {
 				</span>
 			</div>
 
-			<MessageInput visible={enteringMessage}>
+			<MessageInput visible={enteringMessage} ref={msgInputModalRef}>
 				<div>
 					<input
 						type="text"
+						placeholder="type your message"
 						className="message"
 						value={message}
 						onChange={(e) => {
@@ -399,7 +448,7 @@ export default function Stage({ send, context, state, tabs }) {
 					/>
 				</div>
 				<Keyboard>
-					{"1 2 3 4 5 6 7 8 9 0 Q W E R T Y U I O P A S D F G H J K L clr Z X C V B N M bsp send"
+					{"1 2 3 4 5 6 7 8 9 0 Q W E R T Y U I O P A S D F G H J K L clr Z X C V B N M space bsp send"
 						.split(" ")
 						.map((key, i) => {
 							return (
@@ -409,6 +458,8 @@ export default function Stage({ send, context, state, tabs }) {
 											<Delete />
 										) : key === "clr" ? (
 											<Cancel />
+										) : key === "space" ? (
+											" "
 										) : key === "send" ? (
 											<Send />
 										) : (
@@ -430,12 +481,15 @@ export default function Stage({ send, context, state, tabs }) {
 									onClick={() => {
 										let _msg = message;
 										if (key === "send") {
+											sendMessage(message);
 											return;
 										}
 										if (key === "bsp") {
 											_msg = _msg.slice(0, _msg.length - 1);
 										} else if (key === "clr") {
 											_msg = "";
+										} else if (key === "space") {
+											_msg = `${message} `;
 										} else {
 											_msg = `${message}${key}`;
 										}
@@ -446,6 +500,11 @@ export default function Stage({ send, context, state, tabs }) {
 						})}
 				</Keyboard>
 			</MessageInput>
+
+			<MessageFlash flashing={messageFlash !== null}>
+				<div className="sender">{messageFlash?.sender}</div>
+				<div className="message">{messageFlash?.message}</div>
+			</MessageFlash>
 
 			<div
 				className={`exitingModal ${exiting === true ? "active" : ""}`}
@@ -673,8 +732,8 @@ const VideoDefaultGrid = styled.div`
 
 const MessageInput = styled.div`
 	position: fixed;
-	z-index: 20;
-	top: 50%;
+	z-index: ${(p) => (p.visible ? 20 : -2)};
+	top: ${(p) => (p.visible ? "50%" : "-200%")};
 	left: 50%;
 	transform: translate(-50%, -50%);
 	background: #e5e5ea;
@@ -705,6 +764,28 @@ const Keyboard = styled.div`
 	margin-bottom: 1em;
 
 	div.bsp {
-		grid-column: 8 / span 2;
+		/* grid-column: 8 / span 2; */
+	}
+`;
+
+const MessageFlash = styled.div`
+	padding: 20px;
+	position: fixed;
+	display: ${(p) => (p.flashing ? "block" : "none")};
+	bottom: 0;
+	left: 0;
+	box-sizing: border-box;
+	width: 100%;
+	color: black;
+	background: rgba(255, 255, 255, 0.7);
+	z-index: 30;
+	text-align: center;
+
+	.sender {
+		font-size: 15px;
+	}
+
+	.message {
+		font-size: 30px;
 	}
 `;
