@@ -8,10 +8,19 @@ import {
 	DataPacket_Kind,
 	VideoPresets,
 	Track,
-	VideoQuality,
 } from "livekit-client";
 import { useEffect, useRef, useState } from "react";
-import { Microphone, Exit, Film, Hamburger, Undo, Chat } from "react-ikonate";
+import {
+	Microphone,
+	Exit,
+	Film,
+	Hamburger,
+	Undo,
+	Chat,
+	Delete,
+	Cancel,
+	Send,
+} from "react-ikonate";
 import Key from "../components/keys";
 import Button from "../components/button";
 import VideoSlot from "../components/video-slot";
@@ -42,6 +51,13 @@ export default function Stage({ send, context, state, tabs }) {
 
 	const exitingModalRef = useRef();
 	const onboardModalRef = useRef();
+
+	const [enteringMessage, setEnteringMessage] = useState(true);
+	const [message, setMessage] = useState("");
+
+	function handleMessageInput(msg) {
+		setMessage(msg.slice(0, 50));
+	}
 
 	function handleTrackSubscribed(track, publication) {
 		console.log("handling track subscribe");
@@ -330,13 +346,13 @@ export default function Stage({ send, context, state, tabs }) {
 						},
 					},
 
-					// {
-					// 	tab: "message",
-					// 	icon: <Chat />,
-					// 	onClick: () => {
-					// 		setExiting(true);
-					// 	},
-					// },
+					{
+						tab: "message",
+						icon: <Chat />,
+						onClick: () => {
+							setExiting(true);
+						},
+					},
 					{
 						tab: "end",
 						icon: <Exit />,
@@ -369,60 +385,67 @@ export default function Stage({ send, context, state, tabs }) {
 				>
 					<Hamburger />
 				</span>
-				<svg
-					width="203"
-					height="292"
-					viewBox="0 0 203 292"
-					fill="none"
-					xmlns="http://www.w3.org/2000/svg"
-				>
-					<g filter="url(#filter0_d)">
-						<path
-							fill-rule="evenodd"
-							clip-rule="evenodd"
-							d="M91 0C63.3857 0 41 22.3857 41 50V105C20.5654 105 4 121.565 4 142C4 162.435 20.5654 179 41 179V234C41 261.614 63.3857 284 91 284H199V0H91Z"
-							fill="#434349"
-						/>
-					</g>
-					<defs>
-						<filter
-							id="filter0_d"
-							x="0"
-							y="0"
-							width="203"
-							height="292"
-							filterUnits="userSpaceOnUse"
-							colorInterpolationFilters="sRGB"
-						>
-							<feFlood floodOpacity="0" result="BackgroundImageFix" />
-							<feColorMatrix
-								in="SourceAlpha"
-								type="matrix"
-								values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
-								result="hardAlpha"
-							/>
-							<feOffset dy="4" />
-							<feGaussianBlur stdDeviation="2" />
-							<feComposite in2="hardAlpha" operator="out" />
-							<feColorMatrix
-								type="matrix"
-								values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0"
-							/>
-							<feBlend
-								mode="normal"
-								in2="BackgroundImageFix"
-								result="effect1_dropShadow"
-							/>
-							<feBlend
-								mode="normal"
-								in="SourceGraphic"
-								in2="effect1_dropShadow"
-								result="shape"
-							/>
-						</filter>
-					</defs>
-				</svg>
 			</div>
+
+			<MessageInput visible={enteringMessage}>
+				<div>
+					<input
+						type="text"
+						className="message"
+						value={message}
+						onChange={(e) => {
+							handleMessageInput(e.target.value);
+						}}
+					/>
+				</div>
+				<Keyboard>
+					{"1 2 3 4 5 6 7 8 9 0 Q W E R T Y U I O P A S D F G H J K L clr Z X C V B N M bsp send"
+						.split(" ")
+						.map((key, i) => {
+							return (
+								<Key
+									k={
+										key === "bsp" ? (
+											<Delete />
+										) : key === "clr" ? (
+											<Cancel />
+										) : key === "send" ? (
+											<Send />
+										) : (
+											key
+										)
+									}
+									variant="keyboard"
+									key={key}
+									type={
+										key === "clr"
+											? "cancel"
+											: key === "send"
+											? "primary"
+											: key === "bsp"
+											? "long"
+											: "default"
+									}
+									className={`keys ${key} `}
+									onClick={() => {
+										let _msg = message;
+										if (key === "send") {
+											return;
+										}
+										if (key === "bsp") {
+											_msg = _msg.slice(0, _msg.length - 1);
+										} else if (key === "clr") {
+											_msg = "";
+										} else {
+											_msg = `${message}${key}`;
+										}
+										handleMessageInput(_msg);
+									}}
+								/>
+							);
+						})}
+				</Keyboard>
+			</MessageInput>
 
 			<div
 				className={`exitingModal ${exiting === true ? "active" : ""}`}
@@ -467,9 +490,17 @@ const StageDiv = styled.div`
 	background: #111119;
 
 	div.streamTabs {
-		> svg {
+		&::before {
+			content: " ";
 			position: absolute;
 			z-index: 0;
+			height: 100%;
+			left: 55px;
+			right: 0;
+			top: 0;
+			display: block;
+			background: #434349;
+			border-radius: 50px 0 0 50px;
 		}
 
 		> div {
@@ -489,7 +520,7 @@ const StageDiv = styled.div`
 			right: 80%;
 			top: 50%;
 			transform: translate(0, -50%);
-			display: ${(p) => (p.onboard == "active" ? "block" : "none")};
+			display: ${(p) => (p.onboard === "active" ? "block" : "none")};
 
 			> div {
 				display: flex;
@@ -637,5 +668,43 @@ const VideoDefaultGrid = styled.div`
 	> div {
 		width: ${(p) => `${100 / Math.ceil(Math.sqrt(p.gridSize))}`}%;
 		position: relative;
+	}
+`;
+
+const MessageInput = styled.div`
+	position: fixed;
+	z-index: 20;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	background: #e5e5ea;
+	padding: 20px;
+	border-radius: 25px;
+
+	input.message {
+		font-size: 20px;
+		width: 100%;
+		text-align: center;
+		margin: 0 0 20px 0;
+		outline: none;
+		appearance: none;
+		border: 1px solid #111119;
+		padding: 8px 0;
+		background: transparent;
+		border-radius: 5px;
+	}
+`;
+
+const Keyboard = styled.div`
+	display: grid;
+	grid-template-columns: repeat(10, 1fr);
+	grid-column-gap: 20px;
+	grid-row-gap: 10px;
+	flex-wrap: wrap;
+	justify-content: center;
+	margin-bottom: 1em;
+
+	div.bsp {
+		grid-column: 8 / span 2;
 	}
 `;

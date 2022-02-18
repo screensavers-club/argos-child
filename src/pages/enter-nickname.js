@@ -1,4 +1,3 @@
-import axios from "axios";
 import styled from "styled-components";
 import { useRef, useState } from "react";
 import Button from "../components/button";
@@ -154,11 +153,6 @@ export default function EnterNickname({ send, context }) {
 							onChange={(e) => {
 								setNickname(e.target.value.slice(0, 5).toUpperCase());
 							}}
-							// style={{
-							// 	borderLeft: `${
-							// 		nickname.length < 1 ? "1px solid red" : "1px solid black"
-							// 	}`,
-							// }}
 						/>
 					</div>
 					<Button

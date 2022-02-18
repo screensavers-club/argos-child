@@ -59,6 +59,8 @@ const KeyButton = styled.div.attrs((props) => ({
 	background: ${(p) =>
 		p.tabActive === true
 			? "white"
+			: p.type === "primary"
+			? "#5736FD"
 			: p.type === "cancel"
 			? "#AC4545"
 			: "#434349"};
@@ -77,10 +79,11 @@ const KeyButton = styled.div.attrs((props) => ({
 
 	:hover {
 		cursor: pointer;
-		color: #434349;
+		color: ${(p) => (p.type === "primary" ? "#5736FD" : "#434349")};
 		background: #fff;
 		> svg {
 			color: #434349;
+			color: ${(p) => (p.type === "primary" ? "#5736FD" : "#434349")};
 		}
 	}
 	:active {
