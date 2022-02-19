@@ -1,4 +1,5 @@
 import { AudioRenderer } from "livekit-react";
+import { Fragment } from "react";
 import { VolumeLoud } from "react-ikonate";
 import styled from "styled-components";
 
@@ -11,7 +12,7 @@ export default function AudioMix({ mix, participants, context }) {
 		.reduce((p, c) => {
 			let _nick = JSON.parse(c.metadata || "{}")?.nickname;
 			let tracks = Array.from(c.audioTracks, ([key, track]) => {
-				return track;
+				return { ...track, nickname: _nick };
 			});
 			if (Array.isArray(mix?.mute) && mix?.mute?.indexOf(_nick) < 0) {
 				tracks.forEach((track) => {
@@ -32,24 +33,42 @@ export default function AudioMix({ mix, participants, context }) {
 
 	return (
 		<AudioIndicator>
-			<VolumeLoud />
-			{participants
-				.filter((p) => {
-					let _nick = JSON.parse(p.metadata || "{}")?.nickname;
-					let muted = Array.isArray(mix?.mute) && mix.mute?.indexOf(_nick) >= 0;
-					return _nick && _nick !== context.nickname && !muted;
-				})
-				.map((p) => {
-					let _nick = JSON.parse(p.metadata || "{}")?.nickname;
-					return <b>{_nick}</b>;
+			<div style={{ width: "100%" }}>
+				<VolumeLoud />
+				{participants
+					.filter((p) => {
+						let _nick = JSON.parse(p.metadata || "{}")?.nickname;
+						let muted =
+							Array.isArray(mix?.mute) && mix.mute?.indexOf(_nick) >= 0;
+						let publishingAudio = p.audioTracks.size > 0;
+						return (
+							_nick && _nick !== context.nickname && !muted && publishingAudio
+						);
+					})
+					.map((p) => {
+						let _nick = JSON.parse(p.metadata || "{}")?.nickname;
+						return <b>{_nick}</b>;
+					})}
+			</div>
+
+			<div style={{ fontSize: "10px" }}>
+				[A.R]{" "}
+				{remoteAudioTracks.map((pub) => {
+					if (pub.track) {
+						return (
+							<Fragment key={pub.trackSid}>
+								<span>
+									/ {pub.nickname} {pub.track.isMuted ? "[M]" : "[ ]"}{" "}
+									{pub.track.streamState ? "[S]" : "[ ]"}
+								</span>
+								<AudioRenderer key={pub.trackSid} track={pub.track} />
+							</Fragment>
+						);
+					} else {
+						return false;
+					}
 				})}
-			{remoteAudioTracks.map((pub) => {
-				if (pub.track) {
-					return <AudioRenderer key={pub.trackSid} track={pub.track} />;
-				} else {
-					return false;
-				}
-			})}
+			</div>
 		</AudioIndicator>
 	);
 }
@@ -60,7 +79,8 @@ const AudioIndicator = styled.div`
 	font-size: 1rem;
 	display: flex;
 	align-items: center;
-	justify-content: center;
+	justify-content: flex-start;
+	flex-wrap: wrap;
 	position: fixed;
 	bottom: 16px;
 	left: 16px;
