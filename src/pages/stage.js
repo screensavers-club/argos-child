@@ -753,7 +753,7 @@ const VideoDefaultGrid = styled.div`
 	align-items: stretch;
 
 	> div {
-		width: ${(p) => `${100 / Math.ceil(Math.sqrt(p.gridSize))}`}%;
+		width: ${(p) => `${100 / Math.ceil(p.gridSize)}`}%;
 		position: relative;
 	}
 `;

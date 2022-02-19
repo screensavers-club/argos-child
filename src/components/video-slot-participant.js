@@ -30,6 +30,9 @@ export default function SlotParticipant({
 					<br />
 					simulcasted: {videoPub.simulcasted ? "yes" : "no"}
 					<br />
+					dimensions: {videoPub.dimensions?.width} x{" "}
+					{videoPub.dimensions?.height}
+					<br />
 				</span>
 				<VideoRenderer
 					key={`${videoPub.trackSid}_${videoPub.track.streamState}_${
