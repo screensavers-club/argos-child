@@ -37,6 +37,7 @@ export default function VideoSlot({
 					publishingVideo={publishingVideo}
 					participant={participant}
 					isLocal={isLocal}
+					flip={flip}
 				/>
 			)}
 			<label className="nickname">{nickname}</label>

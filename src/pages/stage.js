@@ -543,6 +543,20 @@ export default function Stage({ send, context, state, tabs }) {
 					</Button>
 				</div>
 			</div>
+			{room && (
+				<div className={`debug`}>
+					vol: {room.localParticipant.audioLevel}
+					<br />
+					simulcast:{" "}
+					{Array.from(room.localParticipant.videoTracks.values())
+						.map((t) => {
+							return t.simulcasted ? "√" : "x";
+						})
+						.join(" ")}
+					<br />
+					conn: {room.localParticipant.connectionQuality}
+				</div>
+			)}
 		</StageDiv>
 	);
 }
@@ -553,6 +567,14 @@ const StageDiv = styled.div`
 	width: 100%;
 	height: calc(100%-35px);
 	background: #111119;
+
+	div.debug {
+		position: fixed;
+		color: white;
+		right: 20px;
+		bottom: 20px;
+		font-size: 10px;
+	}
 
 	div.streamTabs {
 		&::before {

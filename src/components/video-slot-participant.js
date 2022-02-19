@@ -1,9 +1,11 @@
 import { useParticipant, VideoRenderer } from "livekit-react";
+import { Fragment } from "react";
 
 export default function SlotParticipant({
 	publishingVideo,
 	participant,
 	isLocal,
+	flip,
 }) {
 	let { publications } = useParticipant(participant);
 	let videoPub = publications.find((pub) => pub.kind === "video");
@@ -12,18 +14,31 @@ export default function SlotParticipant({
 		if (isLocal && !publishingVideo) {
 			return <></>;
 		}
-		console.log({
-			sid: videoPub.trackSid,
-			track: videoPub.track,
-			isLocal,
-			nick: JSON.parse(participant.metadata || "{}")?.nickname,
-		});
 		return (
-			<VideoRenderer
-				key={videoPub.trackSid}
-				track={videoPub.track}
-				isLocal={isLocal}
-			/>
+			<Fragment key={videoPub.trackSid}>
+				<span
+					style={{
+						color: "white",
+						position: "absolute",
+						bottom: 0,
+						right: 0,
+						zIndex: "3",
+						fontSize: "10px",
+					}}
+				>
+					streamstate: {videoPub.track.streamState}
+					<br />
+					simulcasted: {videoPub.simulcasted ? "yes" : "no"}
+					<br />
+				</span>
+				<VideoRenderer
+					key={`${videoPub.trackSid}_${videoPub.track.streamState}_${
+						flip ? "f" : "n"
+					}`}
+					track={videoPub.track}
+					isLocal={isLocal}
+				/>
+			</Fragment>
 		);
 	} else {
 		return <></>;
