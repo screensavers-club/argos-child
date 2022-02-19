@@ -33,6 +33,7 @@ export default function SlotParticipant({
 					dimensions: {videoPub.dimensions?.width} x{" "}
 					{videoPub.dimensions?.height}
 					<br />
+					subscribed: {videoPub.isEnabled ? "yes" : "no"}
 				</span>
 				<VideoRenderer
 					key={`${videoPub.trackSid}_${videoPub.track.streamState}_${

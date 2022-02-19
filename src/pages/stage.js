@@ -135,7 +135,7 @@ export default function Stage({ send, context, state, tabs }) {
 						}
 					} else {
 						if (typeof track.setEnabled === "function") {
-							track.setEnabled(false);
+							track.setEnabled(true);
 						}
 					}
 				});
@@ -283,11 +283,19 @@ export default function Stage({ send, context, state, tabs }) {
 					>
 						{participants
 							.filter((p) => JSON.parse(p.metadata)?.type === "CHILD")
-							.map((participant) => ({
-								participant: {
-									nickname: JSON.parse(participant.metadata || "{}")?.nickname,
-								},
-							}))
+							.map((participant) => {
+								const meta = JSON.parse(participant.metadata);
+								console.log(meta);
+
+								return {
+									participant: {
+										nickname: meta.nickname,
+									},
+								};
+							})
+							.sort((a, b) =>
+								a.participant.nickname > b.participant.nickname ? 1 : -1
+							)
 							.map((slot, i) => {
 								return (
 									<VideoSlot
@@ -296,22 +304,28 @@ export default function Stage({ send, context, state, tabs }) {
 										slot={slot}
 										participants={participants}
 										key={`${videoLayout?.layout || "default"}_slot-${i}_${
-											slot.participant?.nickname
+											slot.participant.nickname
+										}`}
+										data-key={`${videoLayout?.layout || "default"}_slot-${i}_${
+											slot.participant.nickname
 										}`}
 									/>
 								);
 							})}
 					</VideoDefaultGrid>
 				) : (
-					videoLayout?.slots?.map((slot, i) => (
-						<VideoSlot
-							publishingVideo={publishingVideo}
-							context={context}
-							slot={slot}
-							participants={participants}
-							key={`${videoLayout?.layout}_slot-${i}_${slot.participant?.nickname}`}
-						/>
-					))
+					videoLayout?.slots?.map((slot, i) => {
+						console.log(slot);
+						return (
+							<VideoSlot
+								publishingVideo={publishingVideo}
+								context={context}
+								slot={slot}
+								participants={participants}
+								key={`${videoLayout?.layout}_slot-${i}_${slot.participant?.nickname}`}
+							/>
+						);
+					})
 				)}
 			</VideoGrid>
 
