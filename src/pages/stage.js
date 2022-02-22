@@ -8,6 +8,7 @@ import {
 	DataPacket_Kind,
 	VideoPresets,
 	Track,
+	VideoQuality,
 } from "livekit-client";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -99,12 +100,12 @@ export default function Stage({ send, context, state, tabs }) {
 		if (track.kind === Track.Kind.Video) {
 			if (typeof publication.setVideoDimensions === "function") {
 				console.log("set video dimensions");
-				publication.setVideoDimensions({ width: 480, height: 270 });
+				publication.setVideoDimensions({ width: 320, height: 240 });
 			}
 
 			if (typeof publication.setVideoQuality === "function") {
 				console.log("set video quality");
-				// publication.setVideoQuality(VideoQuality.LOW);
+				publication.setVideoQuality(VideoQuality.LOW);
 			}
 		}
 	}
@@ -315,7 +316,6 @@ export default function Stage({ send, context, state, tabs }) {
 					</VideoDefaultGrid>
 				) : (
 					videoLayout?.slots?.map((slot, i) => {
-						console.log(slot);
 						return (
 							<VideoSlot
 								publishingVideo={publishingVideo}
