@@ -56,12 +56,16 @@ export default function AudioMix({ mix, participants, context }) {
 				{remoteAudioTracks.map((pub) => {
 					if (pub.track) {
 						return (
-							<Fragment key={pub.trackSid}>
+							<Fragment key={`${pub.trackSid}_${pub.nickname}`}>
 								<span>
-									/ {pub.nickname} {pub.track.isMuted ? "[M]" : "[ ]"}{" "}
+									/ {pub.nickname} {pub.trackSid}{" "}
+									{pub.track.isMuted ? "[M]" : "[ ]"}{" "}
 									{pub.track.streamState ? "[S]" : "[ ]"}
 								</span>
-								<AudioRenderer key={pub.trackSid} track={pub.track} />
+								<AudioRenderer
+									key={`${pub.trackSid}_${pub.nickname}`}
+									track={pub.track}
+								/>
 							</Fragment>
 						);
 					} else {
