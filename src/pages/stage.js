@@ -8,7 +8,6 @@ import {
 	DataPacket_Kind,
 	VideoPresets,
 	Track,
-	VideoQuality,
 } from "livekit-client";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -34,7 +33,7 @@ function getLayoutState(room, nickname) {
 }
 
 export default function Stage({ send, context, state, tabs }) {
-	const { connect, room, participants } = useRoom();
+	const { connect, room, participants, audioTracks } = useRoom();
 	let [drawerActive, setDrawerActive] = useState(true);
 
 	const encoder = new TextEncoder();
@@ -132,11 +131,11 @@ export default function Stage({ send, context, state, tabs }) {
 							(slot) => slot.participant?.nickname === _nickname
 						);
 						if (typeof track.setEnabled === "function") {
-							track.setEnabled(subscribed);
+							// track.setEnabled(subscribed);
 						}
 					} else {
 						if (typeof track.setEnabled === "function") {
-							track.setEnabled(true);
+							// track.setEnabled(true);
 						}
 					}
 				});
@@ -270,7 +269,13 @@ export default function Stage({ send, context, state, tabs }) {
 
 	return (
 		<StageDiv drawerActive={drawerActive} onboard={onboard}>
-			<AudioMix mix={mix} participants={participants} context={context} />
+			<AudioMix
+				mix={mix}
+				participants={participants}
+				context={context}
+				audioTracks={audioTracks}
+			/>
+
 			<VideoGrid>
 				{videoLayout?.layout === "Default" ||
 				videoLayout?.layout === undefined ? (
@@ -287,8 +292,6 @@ export default function Stage({ send, context, state, tabs }) {
 							.filter((p) => JSON.parse(p.metadata)?.type === "CHILD")
 							.map((participant) => {
 								const meta = JSON.parse(participant.metadata);
-								console.log(meta);
-
 								return {
 									participant: {
 										nickname: meta.nickname,
@@ -587,7 +590,7 @@ const StageDiv = styled.div`
 		position: fixed;
 		color: white;
 		right: 20px;
-		bottom: 20px;
+		top: 40px;
 		font-size: 10px;
 	}
 

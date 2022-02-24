@@ -1,3 +1,4 @@
+import { VideoQuality } from "livekit-client";
 import { useParticipant, VideoRenderer } from "livekit-react";
 import { Fragment } from "react";
 
@@ -28,12 +29,15 @@ export default function SlotParticipant({
 				>
 					streamstate: {videoPub.track.streamState}
 					<br />
-					simulcasted: {videoPub.simulcasted ? "yes" : "no"}
+					adaptive: {videoPub.track.isAdaptiveStream ? "yes" : "no"}
 					<br />
-					dimensions: {videoPub.dimensions?.width} x{" "}
-					{videoPub.dimensions?.height}
+					bitRate:{" "}
+					{(videoPub.track.currentBitrate / (8 * 1024 * 1024)).toFixed(2)} mbps
 					<br />
-					subscribed: {videoPub.isEnabled ? "yes" : "no"}
+					q:{" "}
+					{Object.keys(VideoQuality).find(
+						(k) => VideoQuality[k] === videoPub.currentVideoQuality
+					)}
 				</span>
 				<VideoRenderer
 					key={`${videoPub.trackSid}_${videoPub.track.streamState}_${
