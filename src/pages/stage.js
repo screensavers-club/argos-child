@@ -115,7 +115,6 @@ export default function Stage({ send, context, state, tabs }) {
 				`${process.env.REACT_APP_PEER_SERVER}/${room.name}/${context.nickname}/mix`
 			)
 			.then(({ data }) => {
-				console.log("setmix118");
 				setMix(data.mix);
 			});
 	}

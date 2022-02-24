@@ -35,10 +35,12 @@ export default function AudioMix({
 		setMutedTracks(mutedTrackSids);
 
 		audioTracks.forEach((track) => {
-			if (mutedTrackSids.indexOf(track.sid) > -1) {
+			const currentlyEnabled = track.mediaStreamTrack.enabled;
+			console.log({ currentlyEnabled });
+			if (mutedTrackSids.indexOf(track.sid) > -1 && currentlyEnabled) {
 				console.log(`disabling ${track.sid}`);
 				track.stop();
-			} else {
+			} else if (mutedTrackSids.indexOf(track.sid) < 0 && !currentlyEnabled) {
 				console.log(`enabling ${track.sid}`);
 				track.start();
 			}
@@ -67,80 +69,6 @@ export default function AudioMix({
 		</div>
 	);
 }
-
-// export default function AudioMix({ mix, participants, context,  }) {
-// 	const remoteAudioTracks = participants
-// 		.filter((p) => {
-// 			let _nick = JSON.parse(p.metadata || "{}")?.nickname;
-// 			return _nick && _nick !== context.nickname;
-// 		})
-// 		.reduce((p, c) => {
-// 			let _nick = JSON.parse(c.metadata || "{}")?.nickname;
-// 			let tracks = Array.from(c.audioTracks, ([key, track]) => {
-// 				return { ...track, nickname: _nick };
-// 			});
-// 			if (Array.isArray(mix?.mute) && mix?.mute?.indexOf(_nick) < 0) {
-// 				tracks.forEach((track) => {
-// 					if (typeof track.setEnabled === "function") {
-// 						track.setEnabled(true);
-// 					}
-// 				});
-// 				return [...p, ...tracks];
-// 			} else {
-// 				tracks.forEach((track) => {
-// 					if (typeof track.setEnabled === "function") {
-// 						track.setEnabled(false);
-// 					}
-// 				});
-// 				return p;
-// 			}
-// 		}, []);
-
-// 	return (
-// 		<AudioIndicator>
-// 			<div style={{ width: "100%" }}>
-// 				<VolumeLoud />
-// 				{participants
-// 					.filter((p) => {
-// 						let _nick = JSON.parse(p.metadata || "{}")?.nickname;
-// 						let muted =
-// 							Array.isArray(mix?.mute) && mix.mute?.indexOf(_nick) >= 0;
-// 						let publishingAudio = p.audioTracks.size > 0;
-// 						return (
-// 							_nick && _nick !== context.nickname && !muted && publishingAudio
-// 						);
-// 					})
-// 					.map((p) => {
-// 						let _nick = JSON.parse(p.metadata || "{}")?.nickname;
-// 						return <b>{_nick}</b>;
-// 					})}
-// 			</div>
-
-// 			<div style={{ fontSize: "10px" }}>
-// 				[A.R]{" "}
-// 				{remoteAudioTracks.map((pub) => {
-// 					if (pub.track) {
-// 						return (
-// 							<Fragment key={`${pub.trackSid}_${pub.nickname}`}>
-// 								<span>
-// 									/ {pub.nickname} {pub.trackSid}{" "}
-// 									{pub.track.isMuted ? "[M]" : "[ ]"}{" "}
-// 									{pub.track.streamState ? "[S]" : "[ ]"}
-// 								</span>
-// 								<AudioRenderer
-// 									key={`${pub.trackSid}_${pub.nickname}`}
-// 									track={pub.track}
-// 								/>
-// 							</Fragment>
-// 						);
-// 					} else {
-// 						return false;
-// 					}
-// 				})}
-// 			</div>
-// 		</AudioIndicator>
-// 	);
-// }
 
 const AudioIndicator = styled.div`
 	color: white;
