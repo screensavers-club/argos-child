@@ -100,12 +100,12 @@ export default function Stage({ send, context, state, tabs }) {
 		if (track.kind === Track.Kind.Video) {
 			if (typeof publication.setVideoDimensions === "function") {
 				console.log("set video dimensions");
-				publication.setVideoDimensions({ width: 320, height: 240 });
+				// publication.setVideoDimensions({ width: 320, height: 240 });
 			}
 
 			if (typeof publication.setVideoQuality === "function") {
 				console.log("set video quality");
-				publication.setVideoQuality(VideoQuality.LOW);
+				// publication.setVideoQuality(VideoQuality.LOW);
 			}
 		}
 	}
@@ -216,6 +216,7 @@ export default function Stage({ send, context, state, tabs }) {
 	useEffect(() => {
 		connect(process.env.REACT_APP_LIVEKIT_SERVER, context.token, {
 			// autoSubscribe: false,
+			adaptiveStream: true,
 		}).then((room) => {
 			axios
 				.post(
