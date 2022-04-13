@@ -364,8 +364,8 @@ export default function Stage({ send, context, state, tabs }) {
 								setPublishingAudio(false);
 							} else {
 								let track = await createLocalAudioTrack({
-									echoCancellation: false,
-									noiseSuppression: false,
+									echoCancellation: true,
+									noiseSuppression: true,
 								});
 
 								if (track) {
