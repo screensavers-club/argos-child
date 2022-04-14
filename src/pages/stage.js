@@ -370,7 +370,7 @@ export default function Stage({ send, context, state, tabs }) {
 									echoCancellation: false,
 									noiseSuppression: false,
 									sampleRate: 48000,
-									sampleSize: 16,
+									// sampleSize: 16,
 									autoGainControl: false,
 									channelCount: 2,
 									latency: 0,
@@ -380,7 +380,7 @@ export default function Stage({ send, context, state, tabs }) {
 									room.localParticipant
 										.publishTrack(track, {
 											dtx: false,
-											audioBitrate: AudioPresets.music,
+											audioBitrate: 48_000,
 										})
 										.then(() => {
 											setPublishingAudio(true);
