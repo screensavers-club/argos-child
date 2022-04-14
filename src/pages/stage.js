@@ -369,6 +369,51 @@ export default function Stage({ send, context, state, tabs }) {
 									echoCancellation: false,
 									noiseSuppression: false,
 									sampleRate: 48000,
+									sampleSize: 16,
+									autoGainControl: false,
+									channelCount: 2,
+									latency: 0,
+								});
+
+								if (track) {
+									room.localParticipant
+										.publishTrack(track)
+										.then(() => {
+											setPublishingAudio(true);
+										})
+										.catch((err) => console.log(err));
+								}
+							}
+						},
+					},
+
+					{
+						tab: "mic",
+						tabActive: publishingAudio,
+						icon: publishingAudio ? (
+							<Microphone />
+						) : (
+							<>
+								<span></span>
+								<Microphone />
+							</>
+						),
+						onClick: async () => {
+							if (publishingAudio) {
+								room.localParticipant.unpublishTracks(
+									Array.from(
+										room.localParticipant.audioTracks,
+										([name, value]) => {
+											return value.track;
+										}
+									)
+								);
+								setPublishingAudio(false);
+							} else {
+								let track = await createLocalAudioTrack({
+									echoCancellation: false,
+									noiseSuppression: false,
+									sampleRate: 48000,
 									// autoGainControl: false,
 								});
 
