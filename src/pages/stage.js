@@ -20,6 +20,7 @@ import {
 	Delete,
 	Cancel,
 	Send,
+	Mute,
 } from "react-ikonate";
 import Key from "../components/keys";
 import Button from "../components/button";
@@ -48,6 +49,7 @@ export default function Stage({ send, context, state, tabs }) {
 
 	const [publishingAudio, setPublishingAudio] = useState(false);
 	const [publishingVideo, setPublishingVideo] = useState(false);
+	const [muted, setMuted] = useState(false);
 
 	const exitingModalRef = useRef();
 	const onboardModalRef = useRef();
@@ -418,13 +420,26 @@ export default function Stage({ send, context, state, tabs }) {
 							}
 						},
 					},
-					// {
-					// 	tab: "mute",
-					// 	icon: <>Mute</>,
-					// 	onClick: () => {
-					// 		console.log(audioTracks);
-					// 	},
-					// },
+					{
+						tab: "mute",
+						icon: (() => {
+							if (!room) {
+								return "-";
+							}
+							return muted ? <Mute fill="#AC4545" /> : <Mute />;
+						})(),
+						onClick: () => {
+							Array.from(room.localParticipant.audioTracks, ([name, value]) => {
+								if (muted) {
+									value.unmute();
+									setMuted(false);
+								} else {
+									setMuted(true);
+									value.mute();
+								}
+							});
+						},
+					},
 
 					{
 						tab: "message",
