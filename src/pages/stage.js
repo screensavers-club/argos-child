@@ -373,7 +373,7 @@ export default function Stage({ send, context, state, tabs }) {
 									// sampleSize: 16,
 									autoGainControl: false,
 									channelCount: 2,
-									latency: 0,
+									// latency: 0,
 								});
 
 								if (track) {
