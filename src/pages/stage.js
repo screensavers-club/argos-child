@@ -368,8 +368,7 @@ export default function Stage({ send, context, state, tabs }) {
 								let track = await createLocalAudioTrack({
 									echoCancellation: false,
 									noiseSuppression: true,
-									sampleRate: 44100,
-									sampleSize: 16,
+									sampleRate: 48000,
 									// autoGainControl: false,
 								});
 
