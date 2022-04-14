@@ -8,6 +8,7 @@ import {
 	DataPacket_Kind,
 	VideoPresets,
 	Track,
+	AudioPresets,
 } from "livekit-client";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -377,7 +378,10 @@ export default function Stage({ send, context, state, tabs }) {
 
 								if (track) {
 									room.localParticipant
-										.publishTrack(track)
+										.publishTrack(track, {
+											dtx: false,
+											audioBitrate: AudioPresets.music,
+										})
 										.then(() => {
 											setPublishingAudio(true);
 										})
