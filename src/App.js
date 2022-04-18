@@ -31,7 +31,7 @@ function App() {
 			<AppFrame>
 				<StatusBar
 					room={_.get(state, "context.room.name")}
-					version="0.72"
+					version="0.73"
 					context={state.context}
 				/>
 				<Screen state={state.value} context={state.context} send={send} />
