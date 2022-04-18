@@ -22,6 +22,7 @@ import {
 	Cancel,
 	Send,
 	Mute,
+	RadioButtonSelected,
 } from "react-ikonate";
 import Key from "../components/keys";
 import Button from "../components/button";
@@ -350,8 +351,56 @@ export default function Stage({ send, context, state, tabs }) {
 							<Microphone />
 						) : (
 							<>
-								<span></span>
+								{<span></span>}
 								<Microphone />
+							</>
+						),
+						onClick: async () => {
+							if (publishingAudio) {
+								room.localParticipant.unpublishTracks(
+									Array.from(
+										room.localParticipant.audioTracks,
+										([name, value]) => {
+											return value.track;
+										}
+									)
+								);
+								setPublishingAudio(false);
+							} else {
+								let track = await createLocalAudioTrack({
+									echoCancellation: true,
+									noiseSuppression: true,
+									sampleRate: 48000,
+									// sampleSize: 16,
+									autoGainControl: false,
+									channelCount: 2,
+									// latency: 0,
+								});
+
+								if (track) {
+									room.localParticipant
+										.publishTrack(track, {
+											dtx: false,
+											audioBitrate: 48_000,
+										})
+										.then(() => {
+											setPublishingAudio(true);
+										})
+										.catch((err) => console.log(err));
+								}
+							}
+						},
+					},
+
+					{
+						tab: "line-in",
+						tabActive: publishingAudio,
+						icon: publishingAudio ? (
+							<RadioButtonSelected />
+						) : (
+							<>
+								<span></span>
+								<RadioButtonSelected />
 							</>
 						),
 						onClick: async () => {
@@ -615,7 +664,7 @@ const StageDiv = styled.div`
 	position: fixed;
 	display: block;
 	width: 100%;
-	height: calc(100%-35px);
+	height: calc(100% - 35px);
 	background: #111119;
 
 	div.debug {

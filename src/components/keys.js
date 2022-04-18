@@ -39,13 +39,13 @@ const KeyButton = styled.div.attrs((props) => ({
 			? "100%"
 			: p.variant === "keyboard"
 			? "50px"
-			: "74px"};
+			: "54px"};
 	height: ${(p) =>
 		p.variant === "numpad"
 			? "65px"
 			: p.variant === "keyboard"
 			? "50px"
-			: "74px"};
+			: "54px"};
 	font-size: ${(p) =>
 		p.variant === "numpad"
 			? "32px"
