@@ -51,6 +51,7 @@ export default function Stage({ send, context, state, tabs }) {
 
 	const [publishingAudio, setPublishingAudio] = useState(false);
 	const [publishingVideo, setPublishingVideo] = useState(false);
+	const [audioMode, setAudioMode] = useState();
 	const [muted, setMuted] = useState(false);
 
 	const exitingModalRef = useRef();
@@ -346,7 +347,7 @@ export default function Stage({ send, context, state, tabs }) {
 				{[
 					{
 						tab: "mic",
-						tabActive: publishingAudio,
+						tabActive: publishingAudio && audioMode === "voice",
 						icon: publishingAudio ? (
 							<Microphone />
 						) : (
@@ -385,6 +386,7 @@ export default function Stage({ send, context, state, tabs }) {
 										})
 										.then(() => {
 											setPublishingAudio(true);
+											setAudioMode("voice");
 										})
 										.catch((err) => console.log(err));
 								}
@@ -394,7 +396,7 @@ export default function Stage({ send, context, state, tabs }) {
 
 					{
 						tab: "line-in",
-						tabActive: publishingAudio,
+						tabActive: publishingAudio && audioMode === "line",
 						icon: publishingAudio ? (
 							<RadioButtonSelected />
 						) : (
@@ -433,6 +435,7 @@ export default function Stage({ send, context, state, tabs }) {
 										})
 										.then(() => {
 											setPublishingAudio(true);
+											setAudioMode("line");
 										})
 										.catch((err) => console.log(err));
 								}
